@@ -1,0 +1,12 @@
+<map id="ultrachip/uc8156_controller.c" name="ultrachip/uc8156_controller.c">
+<area shape="rect" id="node5" href="$parser_8h.html" title="pl/parser.h" alt="" coords="97,80,180,107"/>
+<area shape="rect" id="node7" href="$gpio_8h.html" title="pl/gpio.h" alt="" coords="209,155,279,181"/>
+<area shape="rect" id="node13" href="$assert_8h.html" title="pl/assert.h" alt="" coords="255,80,337,107"/>
+<area shape="rect" id="node15" href="$scramble_8h.html" title="pl/scramble.h" alt="" coords="362,80,461,107"/>
+<area shape="rect" id="node17" href="$hv_8h.html" title="pl/hv.h" alt="" coords="487,80,545,107"/>
+<area shape="rect" id="node19" href="$utils_8h.html" title="pl/utils.h" alt="" coords="459,155,529,181"/>
+<area shape="rect" id="node30" href="$uc8156__controller_8h.html" title="uc8156_controller.h" alt="" coords="621,80,755,107"/>
+<area shape="rect" id="node27" href="$types_8h.html" title="types.h" alt="" coords="662,229,727,256"/>
+<area shape="rect" id="node32" href="$generic__controller_8h.html" title="pl/generic_controller.h" alt="" coords="600,155,749,181"/>
+<area shape="rect" id="node35" href="$uc8156_8h.html" title="uc8156.h" alt="" coords="773,155,848,181"/>
+</map>

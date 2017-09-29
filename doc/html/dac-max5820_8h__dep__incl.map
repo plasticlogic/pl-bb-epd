@@ -1,0 +1,6 @@
+<map id="hardware/dac&#45;max5820.h" name="hardware/dac&#45;max5820.h">
+<area shape="rect" id="node3" href="$dac-max5820-hv_8h.html" title="hardware/dac&#45;max5820&#45;hv.h" alt="" coords="90,80,272,107"/>
+<area shape="rect" id="node9" href="$dac-max5820_8c.html" title="hardware/dac&#45;max5820.c" alt="" coords="297,80,463,107"/>
+<area shape="rect" id="node5" href="$dac-max5820-hv_8c.html" title="hardware/dac&#45;max5820&#45;hv.c" alt="" coords="5,155,187,181"/>
+<area shape="rect" id="node7" href="$hw__setup_8c.html" title="src/hw_setup.c" alt="" coords="211,155,321,181"/>
+</map>

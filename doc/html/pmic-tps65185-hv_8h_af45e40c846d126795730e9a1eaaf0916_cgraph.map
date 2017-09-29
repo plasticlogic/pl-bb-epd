@@ -1,0 +1,7 @@
+<map id="tps65185_get_vcom_driver" name="tps65185_get_vcom_driver">
+<area shape="rect" id="node3" href="$hv_8c.html#acb4452d73439a4e5d0d6fc5f5d443dfb" title="vcom_driver_new" alt="" coords="230,5,349,32"/>
+<area shape="rect" id="node7" href="$pmic-tps65185-hv_8c.html#aeeee5cc2d321a3f95b4c7c2d15609eab" title="vcom_driver_on" alt="" coords="234,56,345,83"/>
+<area shape="rect" id="node9" href="$pmic-tps65185-hv_8c.html#a58a43ef5e35ba2572e912839de342333" title="vcom_driver_off" alt="" coords="235,107,344,133"/>
+<area shape="rect" id="node11" href="$pmic-tps65185-hv_8c.html#a47dcd5dbb57e41925750ebf6d3cc8630" title="vcom_driver_init" alt="" coords="233,157,346,184"/>
+<area shape="rect" id="node5" href="$hv_8c.html#af971af7ceb21a562f1d6cdd1d744f61e" title="vcom_driver_delete" alt="" coords="397,5,528,32"/>
+</map>

@@ -1,0 +1,51 @@
+<map id="initialize_vcom_driver" name="initialize_vcom_driver">
+<area shape="rect" id="node3" href="$pmic-max17135-hv_8c.html#a9d9708424b2b4b0b2e113504bc774261" title="max17135_get_vcom_driver" alt="" coords="197,360,379,387"/>
+<area shape="rect" id="node15" href="$hw__setup_8c.html#a3162799dfde910c1edd3e993dd18ad95" title="get_max17135_instance" alt="" coords="207,563,369,589"/>
+<area shape="rect" id="node49" href="$uc8156__hv_8c.html#a8dccb62cdaae780ba9bb61df25846698" title="uc8156_get_vcom_driver" alt="" coords="207,107,369,133"/>
+<area shape="rect" id="node56" href="$hw__setup_8c.html#a5db5629e8db80e0fc6fb952cdff27d95" title="get_uc8156_instance" alt="" coords="215,636,361,663"/>
+<area shape="rect" id="node76" href="$pmic-tps65185-hv_8c.html#af45e40c846d126795730e9a1eaaf0916" title="tps65185_get_vcom_driver" alt="" coords="201,208,375,235"/>
+<area shape="rect" id="node85" href="$hw__setup_8c.html#ada2d1f5c036790f28b33c2ce8e1fc74d" title="get_tps65185_instance" alt="" coords="210,733,366,760"/>
+<area shape="rect" id="node89" href="$s1d135xx__hv_8c.html#a49a29b84b6503ec5be076cfe5aa224b3" title="s1d135xx_get_vcom_driver" alt="" coords="199,487,377,513"/>
+<area shape="rect" id="node96" href="$hw__setup_8c.html#af61d5ec0aee9fe07212b6e46c9a6d97b" title="get_s1d13524_instance" alt="" coords="209,876,367,903"/>
+<area shape="rect" id="node100" href="$hw__setup_8c.html#a70fcab54e248978e08545ef7c4f1fd63" title="get_s1d13541_instance" alt="" coords="209,1112,367,1139"/>
+<area shape="rect" id="node5" href="$hv_8c.html#acb4452d73439a4e5d0d6fc5f5d443dfb" title="vcom_driver_new" alt="" coords="454,259,573,285"/>
+<area shape="rect" id="node9" href="$pmic-max17135-hv_8c.html#aeeee5cc2d321a3f95b4c7c2d15609eab" title="vcom_driver_on" alt="" coords="458,309,569,336"/>
+<area shape="rect" id="node11" href="$pmic-max17135-hv_8c.html#a58a43ef5e35ba2572e912839de342333" title="vcom_driver_off" alt="" coords="459,360,568,387"/>
+<area shape="rect" id="node13" href="$pmic-max17135-hv_8c.html#a47dcd5dbb57e41925750ebf6d3cc8630" title="vcom_driver_init" alt="" coords="457,411,570,437"/>
+<area shape="rect" id="node7" href="$hv_8c.html#af971af7ceb21a562f1d6cdd1d744f61e" title="vcom_driver_delete" alt="" coords="680,81,811,108"/>
+<area shape="rect" id="node17" href="$pmic-max17135_8c.html#af1b5fd1b24723198cdb4657adf9a7e47" title="max17135_new" alt="" coords="457,563,569,589"/>
+<area shape="rect" id="node19" href="$pmic-max17135_8c.html#a11667c11b9d5ada4a63ba7b8a9550e83" title="max17135_delete" alt="" coords="683,756,807,783"/>
+<area shape="rect" id="node21" href="$pmic-max17135_8c.html#a9fff4cf0f31b2231617a5e55b107a8c8" title="max17135_init" alt="" coords="692,807,799,833"/>
+<area shape="rect" id="node23" href="$pmic-max17135_8c.html#a01355f24714686ec6639f26985d98ad5" title="max17135_check_revision" alt="" coords="658,857,833,884"/>
+<area shape="rect" id="node25" href="$pmic-max17135_8c.html#a276e4881ded86b26041df2e25b563fd0" title="max17135_configure" alt="" coords="675,132,816,159"/>
+<area shape="rect" id="node27" href="$pmic-max17135_8c.html#a465123d4ab5a3ef4c4f7029abfb53e96" title="max17135_hv_disable" alt="" coords="671,183,820,209"/>
+<area shape="rect" id="node29" href="$pmic-max17135_8c.html#adaf4b05c4c449933e944467d9e8fd402" title="max17135_hv_enable" alt="" coords="672,233,819,260"/>
+<area shape="rect" id="node31" href="$pmic-max17135_8c.html#a4335942fbeb54d7f09abe08cb91f4c72" title="max17135_vcom_disable" alt="" coords="662,284,829,311"/>
+<area shape="rect" id="node33" href="$pmic-max17135_8c.html#a8bb431cad044c1a5e9173338ba72808f" title="max17135_vcom_enable" alt="" coords="663,335,827,361"/>
+<area shape="rect" id="node35" href="$pmic-max17135_8c.html#a058cf9ad49f7cb88fdcf04b9fcbf582c" title="max17135_load_timings" alt="" coords="664,385,827,412"/>
+<area shape="rect" id="node37" href="$pmic-max17135_8c.html#a8993541423435776bf5c9cf74df9cd41" title="max17135_set_vcom_register" alt="" coords="648,436,843,463"/>
+<area shape="rect" id="node39" href="$pmic-max17135_8c.html#a3cf1545b9bbc98d271da87ff80ad87e5" title="max17135_set_vcom_voltage" alt="" coords="650,487,841,513"/>
+<area shape="rect" id="node41" href="$pmic-max17135_8c.html#a8ee84bdcbd5c331eeb2b4c793980d02a" title="max17135_temp_disable" alt="" coords="662,537,829,564"/>
+<area shape="rect" id="node43" href="$pmic-max17135_8c.html#afeeb8a5035372f323c0d3742196690ab" title="max17135_temp_enable" alt="" coords="664,588,827,615"/>
+<area shape="rect" id="node45" href="$pmic-max17135_8c.html#a7301a664db0adf57588014972c32704f" title="max17135_temperature\l_measure" alt="" coords="666,639,825,681"/>
+<area shape="rect" id="node47" href="$pmic-max17135_8c.html#a8fd83866a0feae571290cdd05c312ff6" title="max17135_wait_pok" alt="" coords="675,705,815,732"/>
+<area shape="rect" id="node52" href="$uc8156__hv_8c.html#aeeee5cc2d321a3f95b4c7c2d15609eab" title="vcom_driver_on" alt="" coords="458,5,569,32"/>
+<area shape="rect" id="node54" href="$uc8156__hv_8c.html#a58a43ef5e35ba2572e912839de342333" title="vcom_driver_off" alt="" coords="459,56,568,83"/>
+<area shape="rect" id="node58" href="$uc8156_8c.html#afeec645661532373cfe1f6518b454cfc" title="uc8156_new" alt="" coords="466,997,561,1024"/>
+<area shape="rect" id="node60" href="$uc8156_8c.html#afe686cdd4b35b77f11dca86dd294ebb2" title="hard_reset" alt="" coords="704,908,787,935"/>
+<area shape="rect" id="node62" href="$uc8156_8c.html#a72958313237c3cf4988f12dd961e49fd" title="soft_reset" alt="" coords="706,959,785,985"/>
+<area shape="rect" id="node64" href="$uc8156_8c.html#a652e9eb8ba42d7af8f5d864c901c2fde" title="set_data" alt="" coords="709,1009,781,1036"/>
+<area shape="rect" id="node66" href="$uc8156_8c.html#a176086e2491772da320bdacb64229741" title="update_data" alt="" coords="699,1060,792,1087"/>
+<area shape="rect" id="node68" href="$uc8156_8c.html#a56449b9df7e41923a921bfb67016b8e3" title="get_data" alt="" coords="709,1111,781,1137"/>
+<area shape="rect" id="node70" href="$uc8156_8c.html#af00191873764920069e3ca7239cfb8a1" title="trigger_update" alt="" coords="693,1161,797,1188"/>
+<area shape="rect" id="node72" href="$uc8156_8c.html#ab0d6793a4b0e0114cb0ceec37fd22c4c" title="send_waveform_to_lut" alt="" coords="671,1212,820,1239"/>
+<area shape="rect" id="node74" href="$uc8156_8c.html#ab5373da6365447bf17cacefc663a683b" title="send_image_data" alt="" coords="683,1263,807,1289"/>
+<area shape="rect" id="node79" href="$pmic-tps65185-hv_8c.html#aeeee5cc2d321a3f95b4c7c2d15609eab" title="vcom_driver_on" alt="" coords="458,107,569,133"/>
+<area shape="rect" id="node81" href="$pmic-tps65185-hv_8c.html#a58a43ef5e35ba2572e912839de342333" title="vcom_driver_off" alt="" coords="459,157,568,184"/>
+<area shape="rect" id="node83" href="$pmic-tps65185-hv_8c.html#a47dcd5dbb57e41925750ebf6d3cc8630" title="vcom_driver_init" alt="" coords="457,208,570,235"/>
+<area shape="rect" id="node87" href="$pmic-tps65185_8c.html#ab0c738fff8b9f78dfd898d3a54422381" title="tps65185_new" alt="" coords="461,1048,566,1075"/>
+<area shape="rect" id="node92" href="$s1d135xx__hv_8c.html#a23fce399dc3bc5d6a09099b62d4728c6" title="triggers power&#45;on cycle of EPSON controller " alt="" coords="427,461,600,488"/>
+<area shape="rect" id="node94" href="$s1d135xx__hv_8c.html#a40ec46718c66d0d11757eb62dbfa2de7" title="triggers power&#45;off cycle of EPSON controller " alt="" coords="427,512,599,539"/>
+<area shape="rect" id="node98" href="$epson-s1d135xx_8c.html#acb92e8a678595749d0c149998196f6d9" title="s1d13524_new" alt="" coords="459,1099,567,1125"/>
+<area shape="rect" id="node102" href="$epson-s1d135xx_8c.html#a8edbeef84e8c6de980d24d7d8f60d80e" title="s1d13541_new" alt="" coords="459,1149,567,1176"/>
+</map>

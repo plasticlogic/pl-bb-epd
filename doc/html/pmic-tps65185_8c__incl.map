@@ -1,0 +1,10 @@
+<map id="hardware/pmic&#45;tps65185.c" name="hardware/pmic&#45;tps65185.c">
+<area shape="rect" id="node3" href="$i2c_8h.html" title="pl/i2c.h" alt="" coords="5,80,69,107"/>
+<area shape="rect" id="node9" href="$assert_8h.html" title="pl/assert.h" alt="" coords="144,80,227,107"/>
+<area shape="rect" id="node11" href="$vcom_8h.html" title="pl/vcom.h" alt="" coords="521,80,599,107"/>
+<area shape="rect" id="node17" href="$pmic-tps65185_8h.html" title="pmic&#45;tps65185.h" alt="" coords="682,80,800,107"/>
+<area shape="rect" id="node22" href="$utils_8h.html" title="pl/utils.h" alt="" coords="251,80,321,107"/>
+<area shape="rect" id="node14" href="$hwinfo_8h.html" title="pl/hwinfo.h" alt="" coords="597,155,680,181"/>
+<area shape="rect" id="node20" href="$pmic_8h.html" title="pl/pmic.h" alt="" coords="704,155,779,181"/>
+<area shape="rect" id="node30" href="$types_8h.html" title="types.h" alt="" coords="163,155,228,181"/>
+</map>

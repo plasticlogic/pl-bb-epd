@@ -1,0 +1,20 @@
+<map id="xstrdup" name="xstrdup">
+<area shape="rect" id="node3" href="$dictionary_8h.html#aab65a95ad09062716b24a129d8529b76" title="Set a value in a dictionary. " alt="" coords="133,56,235,83"/>
+<area shape="rect" id="node5" href="$iniparser_8h.html#ad526324b54dbfe04d636360883f4f874" title="Set an entry in a dictionary. " alt="" coords="320,5,416,32"/>
+<area shape="rect" id="node7" href="$iniparser_8h.html#ab0be559bfb769224b3f1b75e26242a67" title="Parse an ini file and return an allocated dictionary object. " alt="" coords="317,56,419,83"/>
+<area shape="rect" id="node17" href="$iniparser_8h.html#a7894f8480e1f254d4a1b4a31bdc51b46" title="Get the string associated to a key. " alt="" coords="120,183,248,209"/>
+<area shape="rect" id="node41" href="$iniparser_8h.html#a2ecced40f104f8d629748bb12c1f6b6b" title="Delete an entry in a dictionary. " alt="" coords="129,233,239,260"/>
+<area shape="rect" id="node9" href="$configparser_8h.html#a4fa0a5658df789ff4f7c017a8b4d15de" title="parse_config" alt="" coords="527,107,622,133"/>
+<area shape="rect" id="node11" href="$hw__setup_8h.html#a3cf870d949262036fb5aae7514612b90" title="hw_setup_new" alt="" coords="729,107,836,133"/>
+<area shape="rect" id="node13" href="$_b_bepdc_u_l_d_8c.html#afa2a6dcbbe532b5d46e5b4e8fd9161fe" title="initialize_environment" alt="" coords="905,107,1050,133"/>
+<area shape="rect" id="node15" href="$_b_bepdc_u_l_d_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="main" alt="" coords="1099,107,1149,133"/>
+<area shape="rect" id="node20" href="$configparser_8c.html#a06812fd1e720b6108cff19bc515c533e" title="setTemperatureMode" alt="" coords="296,157,440,184"/>
+<area shape="rect" id="node23" href="$iniparser_8h.html#a694eb1110f4200db8648820a0bb405fa" title="Get the string associated to a key, convert to an int. " alt="" coords="313,208,423,235"/>
+<area shape="rect" id="node25" href="$iniparser_8h.html#a804f414936e4ba4524a358a8d898880e" title="Get the string associated to a key, convert to a double. " alt="" coords="301,259,435,285"/>
+<area shape="rect" id="node27" href="$iniparser_8h.html#aeb93c13fcbb75efaa396f53bfd73ff4d" title="Get the string associated to a key, convert to a boolean. " alt="" coords="297,309,439,336"/>
+<area shape="rect" id="node29" href="$iniparser_8h.html#ab7607c8fe708cfe16b4fb1debce529fb" title="Finds out if a given entry exists in a dictionary. " alt="" coords="301,360,435,387"/>
+<area shape="rect" id="node31" href="$iniparser_8h.html#ae037bbf0b0b93119d3aef53b00b12fd4" title="Save a dictionary section to a loadable ini file. " alt="" coords="489,309,661,336"/>
+<area shape="rect" id="node35" href="$iniparser_8h.html#a609be63b67a93e1cd3b558c3de28ddae" title="Get the number of keys in a section of a dictionary. " alt="" coords="499,360,651,387"/>
+<area shape="rect" id="node37" href="$iniparser_8h.html#afa12556355442c567c4b123446f3b309" title="Get the number of keys in a section of a dictionary. " alt="" coords="710,385,855,412"/>
+<area shape="rect" id="node33" href="$iniparser_8h.html#aece0e32de371c9e9592d8333f816dfac" title="Save a dictionary to a loadable ini file. " alt="" coords="717,309,848,336"/>
+</map>

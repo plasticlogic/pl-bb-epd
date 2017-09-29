@@ -1,0 +1,5 @@
+<map id="s1d135xx_i2c_send_addr" name="s1d135xx_i2c_send_addr">
+<area shape="rect" id="node3" href="$epson-i2c_8c.html#a5243c9f40fba4c603b5ee065ad0f0762" title="epson_s1d135xx_i2c_read" alt="" coords="224,5,400,32"/>
+<area shape="rect" id="node7" href="$epson-i2c_8c.html#aebea1b43fc80da04aa586ad3927aa722" title="epson_s1d135xx_i2c\l_write" alt="" coords="240,57,384,98"/>
+<area shape="rect" id="node5" href="$epson-i2c_8h.html#a8c9821d92181224f13e07f788617d369" title="epson_i2c_init" alt="" coords="449,35,554,61"/>
+</map>

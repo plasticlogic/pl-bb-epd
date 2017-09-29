@@ -1,0 +1,19 @@
+<map id="uc8156_controller_setup" name="uc8156_controller_setup">
+<area shape="rect" id="node3" href="$uc8156__controller_8c.html#a1f49f0e97867ec31087e161e51b08a8a" title="wait_update_end" alt="" coords="217,5,335,32"/>
+<area shape="rect" id="node5" href="$uc8156__controller_8c.html#a96c53cd8e483f1c6b49355e9736bbcfa" title="load_wflib" alt="" coords="237,56,315,83"/>
+<area shape="rect" id="node7" href="$uc8156__controller_8c.html#a63acecc3fad92cda959d14e54e9841a4" title="fill" alt="" coords="257,107,295,133"/>
+<area shape="rect" id="node9" href="$uc8156__controller_8c.html#abc898b66b07cdeb58a1c059940084206" title="load_png_image" alt="" coords="218,157,334,184"/>
+<area shape="rect" id="node20" href="$uc8156__controller_8c.html#acce52c4de1e68bf6f7c5d9505cf6af17" title="configure_update" alt="" coords="216,208,336,235"/>
+<area shape="rect" id="node22" href="$uc8156__controller_8c.html#a53d67254e723041b31b9b68a5a9f268e" title="trigger_update" alt="" coords="224,259,328,285"/>
+<area shape="rect" id="node24" href="$uc8156__controller_8c.html#a5a02f9b9e2ac53487113099ed0c77d20" title="clear_update" alt="" coords="228,309,324,336"/>
+<area shape="rect" id="node26" href="$uc8156__controller_8c.html#a2008d95f3b804135666332b4b653f516" title="read_register" alt="" coords="227,360,325,387"/>
+<area shape="rect" id="node28" href="$uc8156__controller_8c.html#a5363aaff5607b6a0ef84b18bc644b170" title="write_register" alt="" coords="564,436,663,463"/>
+<area shape="rect" id="node30" href="$uc8156__controller_8c.html#a394d078cfc2e24c65cd006b08a67baaf" title="init_controller" alt="" coords="227,461,325,488"/>
+<area shape="rect" id="node35" href="$uc8156__controller_8c.html#a51fd87a2e5a1c5b0fb04fb10fc159613" title="set_temp_mode" alt="" coords="219,512,333,539"/>
+<area shape="rect" id="node37" href="$uc8156__controller_8c.html#a5a13aa3bf0bc83b39687d9316e9bc67d" title="update_temp" alt="" coords="227,563,325,589"/>
+<area shape="rect" id="node11" href="$utils_8c.html#a9b5f859ba07dd1e86283bb2255aec16b" title="read_png" alt="" coords="403,132,477,159"/>
+<area shape="rect" id="node13" href="$scramble_8c.html#a89c94eeb376aaece7344d388a164d8f6" title="scramble_array" alt="" coords="385,183,495,209"/>
+<area shape="rect" id="node15" href="$scramble_8c.html#a92c987e529bce74ff5fe02fa12e50a49" title="calcScrambledIndex" alt="" coords="544,157,683,184"/>
+<area shape="rect" id="node17" href="$scramble_8c.html#aefb5df9b184c0cd4c7cc02895b5696d3" title="calcPixelIndex" alt="" coords="731,183,837,209"/>
+<area shape="rect" id="node32" href="$uc8156__controller_8c.html#a2c9002b2789fa707e35be637054c7e4d" title="set_registers" alt="" coords="391,461,489,488"/>
+</map>

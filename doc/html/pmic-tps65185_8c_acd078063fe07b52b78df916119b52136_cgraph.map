@@ -1,0 +1,4 @@
+<map id="tps65185_temperature_measure" name="tps65185_temperature_measure">
+<area shape="rect" id="node3" href="$i2c_8c.html#ae9768ad345d05bd5837d75e8ad096f8a" title="pl_i2c_reg_write_8" alt="" coords="206,5,335,32"/>
+<area shape="rect" id="node5" href="$i2c_8c.html#af8143afb92c7b098bce27de8894b17ef" title="pl_i2c_reg_read_8" alt="" coords="207,56,334,83"/>
+</map>

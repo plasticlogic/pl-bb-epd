@@ -1,0 +1,22 @@
+<map id="max17135_new" name="max17135_new">
+<area shape="rect" id="node3" href="$pmic-max17135_8c.html#a11667c11b9d5ada4a63ba7b8a9550e83" title="max17135_delete" alt="" coords="201,5,325,32"/>
+<area shape="rect" id="node5" href="$pmic-max17135_8c.html#a9fff4cf0f31b2231617a5e55b107a8c8" title="max17135_init" alt="" coords="209,56,316,83"/>
+<area shape="rect" id="node7" href="$pmic-max17135_8c.html#a01355f24714686ec6639f26985d98ad5" title="max17135_check_revision" alt="" coords="175,224,350,251"/>
+<area shape="rect" id="node11" href="$pmic-max17135_8c.html#a276e4881ded86b26041df2e25b563fd0" title="max17135_configure" alt="" coords="192,731,333,757"/>
+<area shape="rect" id="node13" href="$pmic-max17135_8c.html#a465123d4ab5a3ef4c4f7029abfb53e96" title="max17135_hv_disable" alt="" coords="188,427,337,453"/>
+<area shape="rect" id="node18" href="$pmic-max17135_8c.html#adaf4b05c4c449933e944467d9e8fd402" title="max17135_hv_enable" alt="" coords="189,275,336,301"/>
+<area shape="rect" id="node22" href="$pmic-max17135_8c.html#a4335942fbeb54d7f09abe08cb91f4c72" title="max17135_vcom_disable" alt="" coords="179,325,346,352"/>
+<area shape="rect" id="node26" href="$pmic-max17135_8c.html#a8bb431cad044c1a5e9173338ba72808f" title="max17135_vcom_enable" alt="" coords="181,376,345,403"/>
+<area shape="rect" id="node30" href="$pmic-max17135_8c.html#a058cf9ad49f7cb88fdcf04b9fcbf582c" title="max17135_load_timings" alt="" coords="181,528,344,555"/>
+<area shape="rect" id="node33" href="$pmic-max17135_8c.html#a8993541423435776bf5c9cf74df9cd41" title="max17135_set_vcom_register" alt="" coords="165,579,360,605"/>
+<area shape="rect" id="node36" href="$pmic-max17135_8c.html#a3cf1545b9bbc98d271da87ff80ad87e5" title="max17135_set_vcom_voltage" alt="" coords="167,680,358,707"/>
+<area shape="rect" id="node41" href="$pmic-max17135_8c.html#a8ee84bdcbd5c331eeb2b4c793980d02a" title="max17135_temp_disable" alt="" coords="179,629,346,656"/>
+<area shape="rect" id="node44" href="$pmic-max17135_8c.html#afeeb8a5035372f323c0d3742196690ab" title="max17135_temp_enable" alt="" coords="181,477,344,504"/>
+<area shape="rect" id="node47" href="$pmic-max17135_8c.html#a7301a664db0adf57588014972c32704f" title="max17135_temperature\l_measure" alt="" coords="183,107,342,149"/>
+<area shape="rect" id="node54" href="$pmic-max17135_8c.html#a8fd83866a0feae571290cdd05c312ff6" title="max17135_wait_pok" alt="" coords="193,173,333,200"/>
+<area shape="rect" id="node9" href="$i2c_8c.html#af8143afb92c7b098bce27de8894b17ef" title="pl_i2c_reg_read_8" alt="" coords="419,275,546,301"/>
+<area shape="rect" id="node16" href="$i2c_8c.html#ae9768ad345d05bd5837d75e8ad096f8a" title="pl_i2c_reg_write_8" alt="" coords="418,477,547,504"/>
+<area shape="rect" id="node38" href="$vcom_8c.html#a7606738f1549e70418afc133120e167c" title="vcom_calculate" alt="" coords="427,680,538,707"/>
+<area shape="rect" id="node50" href="$i2c_8c.html#a3cabd3f9948db459bc6efaeeb2bd72c4" title="pl_i2c_reg_read_16be" alt="" coords="409,115,557,141"/>
+<area shape="rect" id="node52" href="$utils_8c.html#a2865e8c8b911bf1f0ab49f2d30183131" title="swap16" alt="" coords="605,115,672,141"/>
+</map>

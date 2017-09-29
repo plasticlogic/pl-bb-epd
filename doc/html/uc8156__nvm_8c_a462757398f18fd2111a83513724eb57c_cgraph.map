@@ -1,0 +1,14 @@
+<map id="uc8156_get_nvm" name="uc8156_get_nvm">
+<area shape="rect" id="node3" href="$nvm_8c.html#a30a51e739e199d61fb5a019e57776b77" title="pl_nvm_new" alt="" coords="195,71,287,97"/>
+<area shape="rect" id="node15" href="$uc8156__nvm_8c.html#a88dcc6a9dc9a3bc34b171b328e2c1d9f" title="nvm_pgm_bytewise" alt="" coords="174,121,309,148"/>
+<area shape="rect" id="node17" href="$uc8156__nvm_8c.html#ad5fce24e0002dbd72ebe37136508f4e4" title="nvm_read_bytewise" alt="" coords="371,197,506,224"/>
+<area shape="rect" id="node21" href="$uc8156__nvm_8c.html#a4ecde97ac43785fdec9ed780e101c254" title="pgm_complete_mtp" alt="" coords="173,273,309,300"/>
+<area shape="rect" id="node25" href="$uc8156__nvm_8c.html#a912a1e6c854a3bb4b74d179072d716fa" title="read_complete_mtp" alt="" coords="173,223,309,249"/>
+<area shape="rect" id="node5" href="$nvm_8c.html#a195843270d42af3c7c1fa0f06fff0309" title="read_wfdata" alt="" coords="393,71,484,97"/>
+<area shape="rect" id="node7" href="$nvm_8c.html#ad86b689c489532afefedd091395c1959" title="read_wfdata_UC8156\l_format" alt="" coords="581,5,725,46"/>
+<area shape="rect" id="node9" href="$nvm_8c.html#af1127ee728df9b3c1733521dff3a77fe" title="read_wfdata_S040_format" alt="" coords="568,71,739,97"/>
+<area shape="rect" id="node13" href="$nvm_8c.html#aae5265c892d52aca5d813e5f37d7c7e7" title="read_wfdata_plain_format" alt="" coords="569,121,737,148"/>
+<area shape="rect" id="node11" href="$utils_8c.html#a1718ba92fb27b2fdf5d441b4b7c3f091" title="swap32" alt="" coords="787,71,853,97"/>
+<area shape="rect" id="node19" href="$uc8156__nvm_8c.html#a25d24df2fd34202d9af6653eb9730629" title="set_start_addr" alt="" coords="601,197,706,224"/>
+<area shape="rect" id="node23" href="$uc8156__nvm_8c.html#a394b14507873208a30900eefd1018b75" title="write_waveform_to_MTP" alt="" coords="358,273,519,300"/>
+</map>

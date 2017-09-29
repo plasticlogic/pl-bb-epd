@@ -1,0 +1,17 @@
+<map id="pl/vcom.h" name="pl/vcom.h">
+<area shape="rect" id="node3" href="$dac-max5820_8h.html" title="hardware/dac&#45;max5820.h" alt="" coords="190,80,356,107"/>
+<area shape="rect" id="node11" href="$dac-max5820_8c.html" title="hardware/dac&#45;max5820.c" alt="" coords="211,155,377,181"/>
+<area shape="rect" id="node14" href="$pmic-max17135_8h.html" title="hardware/pmic&#45;max17135.h" alt="" coords="432,80,613,107"/>
+<area shape="rect" id="node21" href="$pmic-max17135_8c.html" title="hardware/pmic&#45;max17135.c" alt="" coords="675,155,856,181"/>
+<area shape="rect" id="node25" href="$pmic-tps65185_8c.html" title="hardware/pmic&#45;tps65185.c" alt="" coords="689,80,863,107"/>
+<area shape="rect" id="node27" href="$vcom_8c.html" title="pl/vcom.c" alt="" coords="888,80,965,107"/>
+<area shape="rect" id="node29" href="$_b_bepdc_u_l_d_8c.html" title="src/BBepdcULD.c" alt="" coords="881,155,1007,181"/>
+<area shape="rect" id="node31" href="$hw__setup_8h.html" title="src/hw_setup.h" alt="" coords="1041,80,1151,107"/>
+<area shape="rect" id="node5" href="$dac-max5820-hv_8h.html" title="hardware/dac&#45;max5820&#45;hv.h" alt="" coords="5,155,187,181"/>
+<area shape="rect" id="node7" href="$dac-max5820-hv_8c.html" title="hardware/dac&#45;max5820&#45;hv.c" alt="" coords="5,229,187,256"/>
+<area shape="rect" id="node9" href="$hw__setup_8c.html" title="src/hw_setup.c" alt="" coords="603,229,713,256"/>
+<area shape="rect" id="node16" href="$pmic-max17135-hv_8h.html" title="hardware/pmic&#45;max17135&#45;hv.h" alt="" coords="403,155,600,181"/>
+<area shape="rect" id="node18" href="$pmic-max17135-hv_8c.html" title="hardware/pmic&#45;max17135&#45;hv.c" alt="" coords="381,229,579,256"/>
+<area shape="rect" id="node34" href="$configparser_8h.html" title="src/configparser.h" alt="" coords="1083,155,1208,181"/>
+<area shape="rect" id="node36" href="$configparser_8c.html" title="src/configparser.c" alt="" coords="1132,229,1257,256"/>
+</map>

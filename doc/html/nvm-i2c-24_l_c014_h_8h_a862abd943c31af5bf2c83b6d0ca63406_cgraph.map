@@ -1,0 +1,6 @@
+<map id="nvm_24LC014H_i2c_init" name="nvm_24LC014H_i2c_init">
+<area shape="rect" id="node3" href="$nvm-i2c-24_l_c014_h_8c.html#a193d351fd74c84a53b62ca36791516af" title="nvm_24LC014H_i2c_pgm" alt="" coords="213,5,381,32"/>
+<area shape="rect" id="node9" href="$nvm-i2c-24_l_c014_h_8c.html#a07a637b02605d5b90756f05336a79107" title="nvm_24LC014H_i2c_read" alt="" coords="213,56,381,83"/>
+<area shape="rect" id="node5" href="$i2c_8c.html#ae9768ad345d05bd5837d75e8ad096f8a" title="pl_i2c_reg_write_8" alt="" coords="430,5,559,32"/>
+<area shape="rect" id="node7" href="$i2c_8c.html#af8143afb92c7b098bce27de8894b17ef" title="pl_i2c_reg_read_8" alt="" coords="431,56,558,83"/>
+</map>

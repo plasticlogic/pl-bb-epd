@@ -1,0 +1,6 @@
+<map id="beaglebone_spi_new" name="beaglebone_spi_new">
+<area shape="rect" id="node3" href="$beaglebone-spi_8c.html#a008ff8785f11122ba7bd50ebdbab9330" title="spi_init" alt="" coords="222,5,285,32"/>
+<area shape="rect" id="node5" href="$beaglebone-spi_8c.html#aaa166916e0c01850678bf998a6690d76" title="spi_close" alt="" coords="215,56,292,83"/>
+<area shape="rect" id="node7" href="$beaglebone-spi_8c.html#a48047e93318927e23f34ac92c56f8edb" title="spi_read_bytes" alt="" coords="198,107,309,133"/>
+<area shape="rect" id="node9" href="$beaglebone-spi_8c.html#ae4d9a50853376c26de3e1e0edb16253c" title="spi_write_bytes" alt="" coords="197,157,309,184"/>
+</map>

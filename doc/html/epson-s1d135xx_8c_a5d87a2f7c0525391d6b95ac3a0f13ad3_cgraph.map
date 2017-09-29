@@ -1,0 +1,10 @@
+<map id="s1d135xx_pattern_check" name="s1d135xx_pattern_check">
+<area shape="rect" id="node3" href="$epson-s1d135xx_8c.html#a0bce8f70bbbe6f5b1fde9e2db61c1a4c" title="set_cs" alt="" coords="725,30,787,57"/>
+<area shape="rect" id="node5" href="$epson-s1d135xx_8c.html#acab0062282d73c56d643a2774a0f3af3" title="send_cmd" alt="" coords="715,81,797,108"/>
+<area shape="rect" id="node9" href="$epson-s1d135xx_8c.html#ae7c5a76a0d20a9603eac69953d3fca25" title="send_param" alt="" coords="709,157,803,184"/>
+<area shape="rect" id="node11" href="$epson-s1d135xx_8c.html#a02648a6804e2371d0c0bfd311960292b" title="s1d135xx_wait_idle" alt="" coords="222,132,357,158"/>
+<area shape="rect" id="node20" href="$epson-s1d135xx_8c.html#a0056f184a899af97ba559f377804f368" title="send_cmd_cs" alt="" coords="542,30,645,57"/>
+<area shape="rect" id="node7" href="$epson-s1d135xx_8c.html#a14d6581f865306c044959e41c5cca496" title="set_hdc" alt="" coords="851,81,919,108"/>
+<area shape="rect" id="node13" href="$epson-s1d135xx_8c.html#ac64e25e78f0fc7aec93df0412dfd9211" title="get_hrdy" alt="" coords="405,132,477,158"/>
+<area shape="rect" id="node15" href="$epson-s1d135xx_8c.html#a573610ffabdafb9c1e7fd086285575cd" title="s1d135xx_read_reg" alt="" coords="526,132,661,158"/>
+</map>

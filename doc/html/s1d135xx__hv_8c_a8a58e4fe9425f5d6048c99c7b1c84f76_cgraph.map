@@ -1,0 +1,6 @@
+<map id="s1d135xx_get_hv_driver" name="s1d135xx_get_hv_driver">
+<area shape="rect" id="node3" href="$hv_8c.html#a3215574d2019ed4229c3333c0d36e268" title="hv_driver_new" alt="" coords="240,5,341,32"/>
+<area shape="rect" id="node7" href="$s1d135xx__hv_8c.html#a9978c8f64b125bd677689e0b4faf6c9f" title="triggers power&#45;on cycle of EPSON controller " alt="" coords="213,56,368,83"/>
+<area shape="rect" id="node9" href="$s1d135xx__hv_8c.html#a0b50af3c4abfefa2d52d922772bb0689" title="triggers power&#45;off cycle of EPSON controller " alt="" coords="213,107,368,133"/>
+<area shape="rect" id="node5" href="$hv_8c.html#a6cf5cb51ecac43e1e6142b572d7ded1a" title="hv_driver_delete" alt="" coords="417,5,530,32"/>
+</map>

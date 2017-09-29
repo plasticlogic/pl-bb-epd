@@ -1,0 +1,8 @@
+<map id="s1d135xx_load_init_code" name="s1d135xx_load_init_code">
+<area shape="rect" id="node3" href="$epson-s1d135xx_8c.html#a0bce8f70bbbe6f5b1fde9e2db61c1a4c" title="set_cs" alt="" coords="237,5,299,32"/>
+<area shape="rect" id="node5" href="$epson-s1d135xx_8c.html#acab0062282d73c56d643a2774a0f3af3" title="send_cmd" alt="" coords="227,56,309,83"/>
+<area shape="rect" id="node9" href="$epson-s1d135xx_8c.html#ab7336fe60a0a859177d44e61f352e2a9" title="transfer_file" alt="" coords="224,107,312,133"/>
+<area shape="rect" id="node13" href="$epson-s1d135xx_8c.html#ae7c5a76a0d20a9603eac69953d3fca25" title="send_param" alt="" coords="221,157,315,184"/>
+<area shape="rect" id="node7" href="$epson-s1d135xx_8c.html#a14d6581f865306c044959e41c5cca496" title="set_hdc" alt="" coords="378,56,446,83"/>
+<area shape="rect" id="node11" href="$epson-s1d135xx_8c.html#a446a582a1eddb3d4437892cb5eeb6a0a" title="transfer_data" alt="" coords="363,107,461,133"/>
+</map>

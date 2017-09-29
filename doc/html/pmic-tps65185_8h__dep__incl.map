@@ -1,0 +1,6 @@
+<map id="hardware/pmic&#45;tps65185.h" name="hardware/pmic&#45;tps65185.h">
+<area shape="rect" id="node3" href="$pmic-tps65185-hv_8h.html" title="hardware/pmic&#45;tps65185&#45;hv.h" alt="" coords="46,80,236,107"/>
+<area shape="rect" id="node7" href="$hw__setup_8c.html" title="src/hw_setup.c" alt="" coords="219,155,329,181"/>
+<area shape="rect" id="node9" href="$pmic-tps65185_8c.html" title="hardware/pmic&#45;tps65185.c" alt="" coords="313,80,487,107"/>
+<area shape="rect" id="node5" href="$pmic-tps65185-hv_8c.html" title="hardware/pmic&#45;tps65185&#45;hv.c" alt="" coords="5,155,195,181"/>
+</map>

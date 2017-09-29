@@ -1,0 +1,16 @@
+<map id="src/configparser.h" name="src/configparser.h">
+<area shape="rect" id="node3" href="$config__defs_8h.html" title="config_defs.h" alt="" coords="5,155,104,181"/>
+<area shape="rect" id="node9" href="$hw__setup_8h.html" title="hw_setup.h" alt="" coords="631,80,719,107"/>
+<area shape="rect" id="node5" href="$types_8h.html" title="pl/types.h" alt="" coords="217,229,295,256"/>
+<area shape="rect" id="node12" href="$gpio_8h.html" title="pl/gpio.h" alt="" coords="493,155,563,181"/>
+<area shape="rect" id="node17" href="$i2c_8h.html" title="pl/i2c.h" alt="" coords="553,229,617,256"/>
+<area shape="rect" id="node20" href="$spi_8h.html" title="pl/spi.h" alt="" coords="937,155,1001,181"/>
+<area shape="rect" id="node22" href="$uc8156_8h.html" title="ultrachip/uc8156.h" alt="" coords="692,229,820,256"/>
+<area shape="rect" id="node25" href="$epson-s1d135xx_8h.html" title="epson/epson&#45;s1d135xx.h" alt="" coords="302,155,468,181"/>
+<area shape="rect" id="node30" href="$pmic_8h.html" title="pl/pmic.h" alt="" coords="1025,155,1100,181"/>
+<area shape="rect" id="node32" href="$vcom_8h.html" title="pl/vcom.h" alt="" coords="785,155,863,181"/>
+<area shape="rect" id="node35" href="$hwinfo_8h.html" title="pl/hwinfo.h" alt="" coords="895,229,977,256"/>
+<area shape="rect" id="node38" href="$nvm_8h.html" title="pl/nvm.h" alt="" coords="639,155,709,181"/>
+<area shape="rect" id="node43" href="$hv_8h.html" title="pl/hv.h" alt="" coords="1124,155,1183,181"/>
+<area shape="rect" id="node45" href="$generic__controller_8h.html" title="pl/generic_controller.h" alt="" coords="128,155,277,181"/>
+</map>

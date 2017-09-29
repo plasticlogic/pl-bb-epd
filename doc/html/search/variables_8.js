@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['i2c',['i2c',['../structdac__max5820.html#af7bcc35b5f119bfd8d80f928a74a3244',1,'dac_max5820::i2c()'],['../structpl__pmic.html#af7bcc35b5f119bfd8d80f928a74a3244',1,'pl_pmic::i2c()']]],
+  ['i2c_5faddr',['i2c_addr',['../structdac__max5820.html#a3590df8c0f943a671fd63d696a55a50c',1,'dac_max5820::i2c_addr()'],['../structpl__pmic.html#a3590df8c0f943a671fd63d696a55a50c',1,'pl_pmic::i2c_addr()']]],
+  ['i2c_5fport',['i2c_port',['../structhw__setup.html#ab93ae6c854941177d8f21bdeb257844c',1,'hw_setup']]],
+  ['id',['id',['../structpl__wfid.html#a7441ef0865bcb3db9b8064dd7375c1ea',1,'pl_wfid']]],
+  ['init',['init',['../structs1d135xx.html#a84207c0e811a1bdc0eb03e576b8ba24f',1,'s1d135xx::init()'],['../structpl__generic__controller.html#aa0db04bc07b2cb5d9635748551f5b3d7',1,'pl_generic_controller::init()'],['../structpl__generic__epdc.html#afbc911d551d1f66f0cb57255b65d77d8',1,'pl_generic_epdc::init()'],['../structpl__vcom__switch.html#ae5494215533192d1b401b1e5b8237e3e',1,'pl_vcom_switch::init()'],['../structpl__vcom__config.html#ab48e7a4a243f0c41857054626eedea27',1,'pl_vcom_config::init()'],['../structpl__vcom__driver.html#a9c1de00d08fdf3dd44cca27c01c51e67',1,'pl_vcom_driver::init()'],['../structpl__hv__config.html#a9adf0a7e3c96ba23c18bea2d4f68e60e',1,'pl_hv_config::init()'],['../structpl__hv__driver.html#a1877cf047e2787cb6f68e3faabfffd34',1,'pl_hv_driver::init()'],['../structpl__hv__timing.html#a9d557af467d130a4cc67358b7eea2bb0',1,'pl_hv_timing::init()'],['../structpl__hv.html#a92dfc1ec42a59629af439d8692ed37d8',1,'pl_hv::init()'],['../structpl__pmic.html#ae7af387e2d8058ce7f83dd5bbe9d0cb1',1,'pl_pmic::init()'],['../structuc8156.html#a9f4fdd91aa6b9fa54269b1434cf507d8',1,'uc8156::init()']]],
+  ['init_5fclocks',['init_clocks',['../structs1d135xx.html#ad16e68c168e15789fe396aef717027ff',1,'s1d135xx']]],
+  ['init_5fdata',['init_data',['../pmic-tps65185_8c.html#a2ed80147b3525c6a89340b514a50ad10',1,'pmic-tps65185.c']]],
+  ['init_5ffrom_5fconfigfile',['init_from_configfile',['../structhw__setup.html#a4c30f76f1df034934a1ddc8777f4f705',1,'hw_setup']]],
+  ['init_5fgate_5fdrv',['init_gate_drv',['../structs1d135xx.html#aee4723ab058eebbe80aa048676d20f75',1,'s1d135xx']]],
+  ['initialize_5fcontrol_5fsystem',['initialize_control_system',['../structhw__setup.html#a4ffae22404ba6caf94a661e1e135639e',1,'hw_setup']]],
+  ['initialize_5fcontroller',['initialize_controller',['../structhw__setup.html#a9bdd3b1f0e5b020a7e17b0e46d074026',1,'hw_setup']]],
+  ['initialize_5fdriver_5fboard',['initialize_driver_board',['../structhw__setup.html#a77f0b988a8c49c87167803a9a8e2595a',1,'hw_setup']]],
+  ['initialize_5fhv_5fconfig',['initialize_hv_config',['../structhw__setup.html#afea28e54d056310e61af7b767e7d74fb',1,'hw_setup']]],
+  ['initialize_5fhv_5fdriver',['initialize_hv_driver',['../structhw__setup.html#a4b44e29eca9596eb44b312cc8e1ac8e0',1,'hw_setup']]],
+  ['initialize_5fhv_5ftiming',['initialize_hv_timing',['../structhw__setup.html#af20f7b81e9cc837288873d599e28c075',1,'hw_setup']]],
+  ['initialize_5fnvm',['initialize_nvm',['../structhw__setup.html#ac2ba4426aa23ff17199073617757ed7b',1,'hw_setup']]],
+  ['initialize_5fvcom_5fconfig',['initialize_vcom_config',['../structhw__setup.html#a0e0aefcbb74c9bd6a95db7b990ee27a7',1,'hw_setup']]],
+  ['initialize_5fvcom_5fdriver',['initialize_vcom_driver',['../structhw__setup.html#a0ea12ebafcde16292d32db369aa0a66f',1,'hw_setup']]],
+  ['initialize_5fvcom_5fswitch',['initialize_vcom_switch',['../structhw__setup.html#a9eacf0a104c15df4c790cbb3c55066e7',1,'hw_setup']]],
+  ['instruction_5fcode_5fpath',['instruction_code_path',['../structpl__generic__controller.html#a9df874197fc435a1764f3971382eda38',1,'pl_generic_controller']]],
+  ['is_5fbypass',['is_bypass',['../structpl__vcom__switch.html#af58dedda984b0fe3c2e66221762c9e75',1,'pl_vcom_switch']]],
+  ['is_5finitialized',['is_initialized',['../structpl__pmic.html#a744d9706c873299c528f99016ace9201',1,'pl_pmic']]],
+  ['isbusy',['isbusy',['../unionmax17135__temp__status.html#a09e2610b2a164a8470f57e9634ca389e',1,'max17135_temp_status']]],
+  ['isopen',['isopen',['../unionmax17135__temp__status.html#a644aa3f20952645472a9d5dfb25a8209',1,'max17135_temp_status']]],
+  ['isshort',['isshort',['../unionmax17135__temp__status.html#ad7b00d4a5b5d787e698413f802908ba9',1,'max17135_temp_status']]]
+];

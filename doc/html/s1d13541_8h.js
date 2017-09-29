@@ -1,0 +1,35 @@
+var s1d13541_8h =
+[
+    [ "S1D13541_AUTO_TEMP_JUDGE_EN", "s1d13541_8h.html#a6b6b3e11419338e5c100d1a47b6e3bac", null ],
+    [ "S1D13541_GENERIC_TEMP_EN", "s1d13541_8h.html#adca824993c3ee366106e08916dfc925d", null ],
+    [ "S1D13541_GENERIC_TEMP_JUDGE_EN", "s1d13541_8h.html#a9e64782152ac92dbb7d34c5d78ab5e0e", null ],
+    [ "S1D13541_GENERIC_TEMP_MASK", "s1d13541_8h.html#aa9b0929da4209773e5ae669cbee21e86", null ],
+    [ "S1D13541_I2C_CLOCK_DIV", "s1d13541_8h.html#a7bcef07a12d12903f28e508b37e17879", null ],
+    [ "S1D13541_INT_RAW_OUT_OF_RANGE", "s1d13541_8h.html#ab7159711f5f0e243ed8bc4f8fba42394", null ],
+    [ "S1D13541_INT_RAW_WF_UPDATE", "s1d13541_8h.html#a2fe0e74d8bd985052950ff8ab9e83ffb", null ],
+    [ "S1D13541_INTERNAL_CLOCK_ENABLE", "s1d13541_8h.html#a1524d66844c35d6295a72bc114b39621", null ],
+    [ "S1D13541_LD_IMG_1BPP", "s1d13541_8h.html#ac4c0d97e0c00fcb420a179276819fc20", null ],
+    [ "S1D13541_LD_IMG_2BPP", "s1d13541_8h.html#ad651818213e0d0e73557fb3e464cc630", null ],
+    [ "S1D13541_LD_IMG_4BPP", "s1d13541_8h.html#a61b3e05f1a8ed6e455692fa41cbc2fa8", null ],
+    [ "S1D13541_LD_IMG_8BPP", "s1d13541_8h.html#abac1eab5f0d3a51b21c42be502d4728e", null ],
+    [ "S1D13541_PROD_CODE", "s1d13541_8h.html#ad2a8b128198f5e423f7fa1b60cd57da9", null ],
+    [ "S1D13541_PROT_KEY_1", "s1d13541_8h.html#adbd5e8f6eed18ddcd44bf05cc4e4c334", null ],
+    [ "S1D13541_PROT_KEY_2", "s1d13541_8h.html#a5e9a7bbf118ffc215c9a6695444ee9e9", null ],
+    [ "S1D13541_STATUS_HRDY", "s1d13541_8h.html#a5537594c3e42f930e12adde40bbc0596", null ],
+    [ "S1D13541_TEMP_SENSOR_CONTROL", "s1d13541_8h.html#af86d07517f98be021aa26391788dc422", null ],
+    [ "S1D13541_TEMP_SENSOR_EXTERNAL", "s1d13541_8h.html#ac41d53da87c094d0490f527ecedc45f0", null ],
+    [ "S1D13541_WF_ADDR", "s1d13541_8h.html#a5556b01f917417f53fe88d616ff2a824", null ],
+    [ "s1d13541_cmd", "s1d13541_8h.html#a06deac152c1250a018b78d8c9582692d", [
+      [ "S1D13541_CMD_RD_TEMP", "s1d13541_8h.html#a06deac152c1250a018b78d8c9582692dac7ac145d0d0c4c7d647930c22cb8f8f8", null ]
+    ] ],
+    [ "s1d13541_reg", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495a", [
+      [ "S1D13541_REG_CLOCK_CONFIG", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aafb4f0d499dce80d99b2affbe7a97618e", null ],
+      [ "S1D13541_REG_PROT_KEY_1", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aa8faf77c63b2764931c3725d619010dea", null ],
+      [ "S1D13541_REG_PROT_KEY_2", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aaf731ac52d49c4a8bd2549efb4dd8640b", null ],
+      [ "S1D13541_REG_FRAME_DATA_LENGTH", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aa93a90527f841027673bd7e217db52748", null ],
+      [ "S1D13541_REG_LINE_DATA_LENGTH", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aa1009815283085f2a92272f41899dbd26", null ],
+      [ "S1D13541_REG_WF_DECODER_BYPASS", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aa81b8fd747996a85e3a3d713c0b53054e", null ],
+      [ "S1D13541_REG_TEMP_SENSOR_VALUE", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aa0bf9d3c5d843306196129b9c699ff19c", null ],
+      [ "S1D13541_REG_GENERIC_TEMP_CONFIG", "s1d13541_8h.html#af6dce98c26e14a39f97e4719b1e9495aa293ed9681d114624009d6c66120ebe86", null ]
+    ] ]
+];

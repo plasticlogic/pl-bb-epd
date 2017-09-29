@@ -1,0 +1,19 @@
+<map id="epson/epson&#45;s1d135xx.h" name="epson/epson&#45;s1d135xx.h">
+<area shape="rect" id="node3" href="$epson-i2c_8c.html" title="epson/epson&#45;i2c.c" alt="" coords="5,80,133,107"/>
+<area shape="rect" id="node5" href="$epson-i2c_8h.html" title="epson/epson&#45;i2c.h" alt="" coords="157,80,285,107"/>
+<area shape="rect" id="node7" href="$s1d13524_8h.html" title="epson/s1d13524.h" alt="" coords="461,80,589,107"/>
+<area shape="rect" id="node13" href="$s1d13541_8h.html" title="epson/s1d13541.h" alt="" coords="309,80,437,107"/>
+<area shape="rect" id="node18" href="$epson-spi_8h.html" title="epson/epson&#45;spi.h" alt="" coords="1423,80,1551,107"/>
+<area shape="rect" id="node22" href="$s1d135xx__controller_8h.html" title="epson/s1d135xx_controller.h" alt="" coords="614,80,801,107"/>
+<area shape="rect" id="node26" href="$hw__setup_8c.html" title="src/hw_setup.c" alt="" coords="835,229,945,256"/>
+<area shape="rect" id="node28" href="$s1d135xx__hv_8h.html" title="epson/s1d135xx_hv.h" alt="" coords="877,80,1024,107"/>
+<area shape="rect" id="node33" href="$hw__setup_8h.html" title="src/hw_setup.h" alt="" coords="1157,80,1267,107"/>
+<area shape="rect" id="node35" href="$_b_bepdc_u_l_d_8c.html" title="src/BBepdcULD.c" alt="" coords="1350,155,1476,181"/>
+<area shape="rect" id="node9" href="$epson-s1d135xx_8c.html" title="epson/epson&#45;s1d135xx.c" alt="" coords="161,155,327,181"/>
+<area shape="rect" id="node11" href="$s1d13524__controller_8c.html" title="epson/s1d13524_controller.c" alt="" coords="563,155,751,181"/>
+<area shape="rect" id="node16" href="$s1d13541__controller_8c.html" title="epson/s1d13541_controller.c" alt="" coords="351,155,539,181"/>
+<area shape="rect" id="node20" href="$epson-spi_8c.html" title="epson/epson&#45;spi.c" alt="" coords="1501,155,1629,181"/>
+<area shape="rect" id="node30" href="$s1d135xx__hv_8c.html" title="epson/s1d135xx_hv.c" alt="" coords="928,155,1075,181"/>
+<area shape="rect" id="node37" href="$configparser_8h.html" title="src/configparser.h" alt="" coords="1149,155,1275,181"/>
+<area shape="rect" id="node39" href="$configparser_8c.html" title="src/configparser.c" alt="" coords="1199,229,1324,256"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="read_register_settings_from_file" name="read_register_settings_from_file">
+<area shape="rect" id="node3" href="$parser_8c.html#acc8345e8af7bd22b6bb057d81b56313d" title="parser_read_word" alt="" coords="206,12,330,39"/>
+<area shape="rect" id="node5" href="$parser_8c.html#a0aa07476c2ef20218b71264c9ad0b7ef" title="parser_read_str" alt="" coords="379,12,491,39"/>
+<area shape="rect" id="node7" href="$parser_8c.html#aee1cda9dd0b09e564a68d7abfc9e7a5d" title="parser_find_str" alt="" coords="539,12,645,39"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="parser_read_area" name="parser_read_area">
+<area shape="rect" id="node3" href="$parser_8c.html#a3b209c44b84c444b9c82bae304be3234" title="parser_read_int_list" alt="" coords="177,5,311,32"/>
+<area shape="rect" id="node5" href="$parser_8c.html#a2d28ffa8e146a033c3155e86b1f44991" title="parser_read_int" alt="" coords="361,5,471,32"/>
+<area shape="rect" id="node7" href="$parser_8c.html#a0aa07476c2ef20218b71264c9ad0b7ef" title="parser_read_str" alt="" coords="520,5,632,32"/>
+<area shape="rect" id="node9" href="$parser_8c.html#aee1cda9dd0b09e564a68d7abfc9e7a5d" title="parser_find_str" alt="" coords="680,5,787,32"/>
+</map>

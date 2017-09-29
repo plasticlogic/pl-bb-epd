@@ -1,0 +1,5 @@
+<map id="send_cmd_write_data" name="send_cmd_write_data">
+<area shape="rect" id="node3" href="$uc8156_8c.html#aa7bc024cfc0fef874443742866d33d37" title="set_cs" alt="" coords="213,5,275,32"/>
+<area shape="rect" id="node5" href="$uc8156_8c.html#a9d2b79cbdccd16c6e5868f350d823b76" title="send_cmd" alt="" coords="203,56,285,83"/>
+<area shape="rect" id="node7" href="$uc8156_8c.html#a6c5c77031bf0e3dee42d1a66d887318b" title="send_data" alt="" coords="203,107,285,133"/>
+</map>

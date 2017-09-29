@@ -1,0 +1,26 @@
+<map id="src/configparser.c" name="src/configparser.c">
+<area shape="rect" id="node3" href="$parser_8h.html" title="pl/parser.h" alt="" coords="284,88,367,115"/>
+<area shape="rect" id="node5" href="$assert_8h.html" title="pl/assert.h" alt="" coords="391,88,473,115"/>
+<area shape="rect" id="node7" href="$iniparser_8h.html" title="Parser for ini files. " alt="" coords="207,179,289,205"/>
+<area shape="rect" id="node22" href="$beaglebone-gpio_8h.html" title="beaglebone/beaglebone\l&#45;gpio.h" alt="" coords="727,81,885,122"/>
+<area shape="rect" id="node29" href="$beaglebone-i2c_8h.html" title="beaglebone/beaglebone\l&#45;i2c.h" alt="" coords="1761,171,1919,213"/>
+<area shape="rect" id="node32" href="$beaglebone-spi_8h.html" title="beaglebone/beaglebone\l&#45;spi.h" alt="" coords="599,171,757,213"/>
+<area shape="rect" id="node46" href="$configparser_8h.html" title="configparser.h" alt="" coords="1335,88,1437,115"/>
+<area shape="rect" id="node53" href="$hw__setup_8h.html" title="hw_setup.h" alt="" coords="1343,179,1431,205"/>
+<area shape="rect" id="node88" href="$utils_8h.html" title="pl/utils.h" alt="" coords="315,261,385,288"/>
+<area shape="rect" id="node15" href="$dictionary_8h.html" title="Implements a dictionary for string variables. " alt="" coords="121,261,209,288"/>
+<area shape="rect" id="node24" href="$gpio_8h.html" title="pl/gpio.h" alt="" coords="799,261,869,288"/>
+<area shape="rect" id="node37" href="$global_8h.html" title="pl/global.h" alt="" coords="462,261,543,288"/>
+<area shape="rect" id="node44" href="$spi_8h.html" title="pl/spi.h" alt="" coords="711,261,775,288"/>
+<area shape="rect" id="node48" href="$config__defs_8h.html" title="config_defs.h" alt="" coords="1789,261,1888,288"/>
+<area shape="rect" id="node50" href="$types_8h.html" title="pl/types.h" alt="" coords="1121,336,1199,363"/>
+<area shape="rect" id="node57" href="$i2c_8h.html" title="pl/i2c.h" alt="" coords="1459,336,1523,363"/>
+<area shape="rect" id="node61" href="$uc8156_8h.html" title="ultrachip/uc8156.h" alt="" coords="1272,336,1400,363"/>
+<area shape="rect" id="node64" href="$epson-s1d135xx_8h.html" title="epson/epson&#45;s1d135xx.h" alt="" coords="894,261,1060,288"/>
+<area shape="rect" id="node69" href="$pmic_8h.html" title="pl/pmic.h" alt="" coords="1259,261,1333,288"/>
+<area shape="rect" id="node71" href="$vcom_8h.html" title="pl/vcom.h" alt="" coords="1637,261,1715,288"/>
+<area shape="rect" id="node74" href="$hwinfo_8h.html" title="pl/hwinfo.h" alt="" coords="1648,336,1731,363"/>
+<area shape="rect" id="node77" href="$nvm_8h.html" title="pl/nvm.h" alt="" coords="1542,261,1612,288"/>
+<area shape="rect" id="node82" href="$hv_8h.html" title="pl/hv.h" alt="" coords="1357,261,1416,288"/>
+<area shape="rect" id="node84" href="$generic__controller_8h.html" title="pl/generic_controller.h" alt="" coords="1085,261,1235,288"/>
+</map>

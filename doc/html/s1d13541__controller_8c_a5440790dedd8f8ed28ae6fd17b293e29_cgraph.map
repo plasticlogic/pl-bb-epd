@@ -1,0 +1,18 @@
+<map id="s1d13541_controller_setup" name="s1d13541_controller_setup">
+<area shape="rect" id="node3" href="$s1d13541__controller_8c.html#a43418812f0fb728dd68333f49ded3524" title="configure_update" alt="" coords="212,5,332,32"/>
+<area shape="rect" id="node5" href="$s1d13541__controller_8c.html#a8bbf96ae89fab59b62df350a039ee280" title="trigger_update" alt="" coords="220,56,324,83"/>
+<area shape="rect" id="node7" href="$s1d13541__controller_8c.html#a5a02f9b9e2ac53487113099ed0c77d20" title="clear_update" alt="" coords="224,107,320,133"/>
+<area shape="rect" id="node9" href="$s1d13541__controller_8c.html#ac1d8d2fab71706b02d08add231235f7a" title="read_register" alt="" coords="223,157,321,184"/>
+<area shape="rect" id="node11" href="$s1d13541__controller_8c.html#a3f202eeb0062f4ac49174873c205645d" title="write_register" alt="" coords="223,208,321,235"/>
+<area shape="rect" id="node13" href="$s1d13541__controller_8c.html#af5966bce75190dc186bdd27f827a7cac" title="wait_update_end" alt="" coords="213,259,331,285"/>
+<area shape="rect" id="node15" href="$s1d13541__controller_8c.html#a00b75774e84fff8eb7a45a5fec22e820" title="load_wflib" alt="" coords="233,309,311,336"/>
+<area shape="rect" id="node17" href="$s1d13541__controller_8c.html#aa4e609ada0313c3e5448921a7d386461" title="fill" alt="" coords="253,360,291,387"/>
+<area shape="rect" id="node19" href="$s1d13541__controller_8c.html#ab1a57d18b794be2c70263129724b508c" title="load_png_image" alt="" coords="214,411,330,437"/>
+<area shape="rect" id="node21" href="$s1d13541__controller_8c.html#a5217791747d0beec9251195f63f7658e" title="set_power" alt="" coords="433,512,514,539"/>
+<area shape="rect" id="node23" href="$s1d13541__controller_8c.html#a4daa0081966f25da1b5520e42c453519" title="set_temp_mode" alt="" coords="215,512,329,539"/>
+<area shape="rect" id="node25" href="$s1d13541__controller_8c.html#a041d03c9c92b4b83618ba2a336a93598" title="s1d13541_update_temp" alt="" coords="192,613,352,640"/>
+<area shape="rect" id="node34" href="$s1d13541__controller_8c.html#a973839411c8ad260b2c8e41b4b6aa07f" title="init_controller" alt="" coords="223,563,321,589"/>
+<area shape="rect" id="node27" href="$s1d13541__controller_8c.html#a37072b5e3d57f7a2a4ec5bab5b992ab3" title="update_temp_manual" alt="" coords="400,588,547,615"/>
+<area shape="rect" id="node31" href="$s1d13541__controller_8c.html#a63515524c181740021feb4fdd4d33df7" title="update_temp_auto" alt="" coords="409,639,538,665"/>
+<area shape="rect" id="node29" href="$s1d13541__controller_8c.html#a709f775b567be69ca78758b539df3eb6" title="update_temp" alt="" coords="595,613,693,640"/>
+</map>

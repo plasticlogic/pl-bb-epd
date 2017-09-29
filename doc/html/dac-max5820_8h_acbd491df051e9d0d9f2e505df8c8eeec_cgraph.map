@@ -1,0 +1,12 @@
+<map id="dac_max5820_new" name="dac_max5820_new">
+<area shape="rect" id="node3" href="$dac-max5820_8c.html#aa91a5b6a50726f5006c4f2eb559b3419" title="dac_max5820_configure" alt="" coords="211,5,373,32"/>
+<area shape="rect" id="node5" href="$dac-max5820_8c.html#ad7afbde769578deddc10628e20529c1c" title="dac_max5820_set_output_mode" alt="" coords="187,56,397,83"/>
+<area shape="rect" id="node9" href="$dac-max5820_8c.html#a352316f79fdcf103375774b484174b82" title="dac_max5820_set_vcom\l_voltage" alt="" coords="209,173,375,214"/>
+<area shape="rect" id="node14" href="$dac-max5820_8c.html#a22d19bb1726323ea4050b3515263659e" title="dac_max5820_set_vcom\l_register" alt="" coords="209,107,375,149"/>
+<area shape="rect" id="node17" href="$dac-max5820_8c.html#a596218398ed6f002d8c5ed8afbbb44f8" title="dac_max5820_get_vcom\l_register" alt="" coords="209,238,375,279"/>
+<area shape="rect" id="node23" href="$dac-max5820_8c.html#a0e354b8cd0ab90b7e31838f8b32a4fb4" title="dac_max5820_delete" alt="" coords="219,304,365,331"/>
+<area shape="rect" id="node7" href="$i2c_8c.html#ae9768ad345d05bd5837d75e8ad096f8a" title="pl_i2c_reg_write_8" alt="" coords="455,115,585,141"/>
+<area shape="rect" id="node11" href="$vcom_8c.html#a7606738f1549e70418afc133120e167c" title="vcom_calculate" alt="" coords="465,180,575,207"/>
+<area shape="rect" id="node19" href="$i2c_8c.html#a3cabd3f9948db459bc6efaeeb2bd72c4" title="pl_i2c_reg_read_16be" alt="" coords="446,245,594,272"/>
+<area shape="rect" id="node21" href="$utils_8c.html#a2865e8c8b911bf1f0ab49f2d30183131" title="swap16" alt="" coords="643,245,709,272"/>
+</map>

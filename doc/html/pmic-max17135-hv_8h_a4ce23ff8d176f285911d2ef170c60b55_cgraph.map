@@ -1,0 +1,6 @@
+<map id="max17135_get_vcom_config" name="max17135_get_vcom_config">
+<area shape="rect" id="node3" href="$hv_8c.html#ad187595b529bdc4bd321f70448150908" title="vcom_config_new" alt="" coords="272,5,395,32"/>
+<area shape="rect" id="node7" href="$pmic-max17135-hv_8c.html#ab2085a00b28d813fb4207daf40f2ed10" title="max17135_vcom_config_set" alt="" coords="241,56,426,83"/>
+<area shape="rect" id="node9" href="$pmic-max17135-hv_8c.html#a28000be36bee7b8d80374b87178d4ac9" title="vcom_config_init" alt="" coords="275,107,392,133"/>
+<area shape="rect" id="node5" href="$hv_8c.html#a407ddb22ccf88ae7875ee2881c1f3d30" title="vcom_config_delete" alt="" coords="475,5,610,32"/>
+</map>

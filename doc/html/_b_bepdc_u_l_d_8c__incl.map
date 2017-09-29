@@ -1,0 +1,22 @@
+<map id="src/BBepdcULD.c" name="src/BBepdcULD.c">
+<area shape="rect" id="node15" href="$generic__epdc_8h.html" title="pl/generic_epdc.h" alt="" coords="1218,80,1341,107"/>
+<area shape="rect" id="node23" href="$i2c_8h.html" title="pl/i2c.h" alt="" coords="1233,245,1297,272"/>
+<area shape="rect" id="node26" href="$generic__controller_8h.html" title="pl/generic_controller.h" alt="" coords="1460,163,1609,189"/>
+<area shape="rect" id="node32" href="$vcom_8h.html" title="pl/vcom.h" alt="" coords="577,163,655,189"/>
+<area shape="rect" id="node35" href="$hwinfo_8h.html" title="pl/hwinfo.h" alt="" coords="501,245,584,272"/>
+<area shape="rect" id="node40" href="$assert_8h.html" title="pl/assert.h" alt="" coords="1828,80,1911,107"/>
+<area shape="rect" id="node42" href="$parser_8h.html" title="pl/parser.h" alt="" coords="1935,80,2017,107"/>
+<area shape="rect" id="node44" href="$pindef_8h.html" title="pindef.h" alt="" coords="288,80,355,107"/>
+<area shape="rect" id="node53" href="$hw__setup_8h.html" title="hw_setup.h" alt="" coords="1075,80,1163,107"/>
+<area shape="rect" id="node65" href="$epson-s1d135xx_8h.html" title="epson/epson&#45;s1d135xx.h" alt="" coords="679,163,845,189"/>
+<area shape="rect" id="node77" href="$utils_8h.html" title="pl/utils.h" alt="" coords="95,163,165,189"/>
+<area shape="rect" id="node17" href="$hv_8h.html" title="pl/hv.h" alt="" coords="1281,163,1340,189"/>
+<area shape="rect" id="node19" href="$nvm_8h.html" title="pl/nvm.h" alt="" coords="1365,163,1435,189"/>
+<area shape="rect" id="node28" href="$types_8h.html" title="pl/types.h" alt="" coords="779,245,857,272"/>
+<area shape="rect" id="node46" href="$gpio_8h.html" title="pl/gpio.h" alt="" coords="383,245,453,272"/>
+<area shape="rect" id="node50" href="$beaglebone-gpio_8h.html" title="beaglebone/beaglebone\l&#45;gpio.h" alt="" coords="242,155,400,197"/>
+<area shape="rect" id="node55" href="$config__defs_8h.html" title="config_defs.h" alt="" coords="871,163,969,189"/>
+<area shape="rect" id="node60" href="$spi_8h.html" title="pl/spi.h" alt="" coords="993,163,1057,189"/>
+<area shape="rect" id="node62" href="$uc8156_8h.html" title="ultrachip/uc8156.h" alt="" coords="993,245,1121,272"/>
+<area shape="rect" id="node70" href="$pmic_8h.html" title="pl/pmic.h" alt="" coords="1081,163,1156,189"/>
+</map>

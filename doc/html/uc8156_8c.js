@@ -1,0 +1,28 @@
+var uc8156_8c =
+[
+    [ "LOG_TAG", "uc8156_8c.html#a7ce0df38eb467e59f209470c8f5ac4e6", null ],
+    [ "UC8156_BUSY_TIMEOUT", "uc8156_8c.html#ac599026aea093bb62d827e6a63656513", null ],
+    [ "UC8156_EXPECTED_REVISION_CODE", "uc8156_8c.html#ad95ef39e5f60c740e21877f0be705ea3", null ],
+    [ "UC8156_READ_OPERATION", "uc8156_8c.html#aa60b74b192b567ea22ea04da6ccb7810", null ],
+    [ "UC8156_WRITE_OPERATION", "uc8156_8c.html#afb34816fef666626aae4c3785bcb75ac", null ],
+    [ "disable_hv_and_vcom", "uc8156_8c.html#a17ada63d77861a5672640b50b2bd3737", null ],
+    [ "enable_hv_and_vcom", "uc8156_8c.html#acbf7280add70254315ded0deeca60ca3", null ],
+    [ "get_busy", "uc8156_8c.html#a55439221af9d66e0d6ebaf7d91712c5c", null ],
+    [ "get_data", "uc8156_8c.html#a56449b9df7e41923a921bfb67016b8e3", null ],
+    [ "hard_reset", "uc8156_8c.html#afe686cdd4b35b77f11dca86dd294ebb2", null ],
+    [ "init", "uc8156_8c.html#a942e23d88a74506c70129f3b49b991b8", null ],
+    [ "read_data", "uc8156_8c.html#a2c591000524a270a79be583337a46be1", null ],
+    [ "send_cmd", "uc8156_8c.html#a9d2b79cbdccd16c6e5868f350d823b76", null ],
+    [ "send_cmd_write_data", "uc8156_8c.html#ac17fc9fec240a63a9ff1a3b6f7a7fe0a", null ],
+    [ "send_data", "uc8156_8c.html#a6c5c77031bf0e3dee42d1a66d887318b", null ],
+    [ "send_image_data", "uc8156_8c.html#ab5373da6365447bf17cacefc663a683b", null ],
+    [ "send_waveform_to_lut", "uc8156_8c.html#ab0d6793a4b0e0114cb0ceec37fd22c4c", null ],
+    [ "set_cs", "uc8156_8c.html#aa7bc024cfc0fef874443742866d33d37", null ],
+    [ "set_data", "uc8156_8c.html#a652e9eb8ba42d7af8f5d864c901c2fde", null ],
+    [ "soft_reset", "uc8156_8c.html#a72958313237c3cf4988f12dd961e49fd", null ],
+    [ "trigger_update", "uc8156_8c.html#af00191873764920069e3ca7239cfb8a1", null ],
+    [ "uc8156_check_revision_code", "uc8156_8c.html#a7217ebdb1dfb5b5a86ac3a4c12142b10", null ],
+    [ "uc8156_new", "uc8156_8c.html#afeec645661532373cfe1f6518b454cfc", null ],
+    [ "update_data", "uc8156_8c.html#a176086e2491772da320bdacb64229741", null ],
+    [ "wait_for_idle", "uc8156_8c.html#a44f9665f0a5cc447037d46af676b4823", null ]
+];

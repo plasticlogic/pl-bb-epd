@@ -1,0 +1,10 @@
+<map id="hardware/pmic&#45;max17135.c" name="hardware/pmic&#45;max17135.c">
+<area shape="rect" id="node3" href="$i2c_8h.html" title="pl/i2c.h" alt="" coords="285,155,349,181"/>
+<area shape="rect" id="node13" href="$assert_8h.html" title="assert.h" alt="" coords="305,80,374,107"/>
+<area shape="rect" id="node15" href="$vcom_8h.html" title="pl/vcom.h" alt="" coords="522,155,599,181"/>
+<area shape="rect" id="node21" href="$pmic-max17135_8h.html" title="pmic&#45;max17135.h" alt="" coords="398,80,523,107"/>
+<area shape="rect" id="node28" href="$utils_8h.html" title="pl/utils.h" alt="" coords="684,155,754,181"/>
+<area shape="rect" id="node18" href="$hwinfo_8h.html" title="pl/hwinfo.h" alt="" coords="423,229,506,256"/>
+<area shape="rect" id="node26" href="$pmic_8h.html" title="pl/pmic.h" alt="" coords="423,155,498,181"/>
+<area shape="rect" id="node37" href="$types_8h.html" title="types.h" alt="" coords="581,229,646,256"/>
+</map>

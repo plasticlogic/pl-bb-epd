@@ -1,0 +1,4 @@
+<map id="beaglebone_i2c_init" name="beaglebone_i2c_init">
+<area shape="rect" id="node3" href="$beaglebone-i2c_8c.html#a85d429b33247f53f069cbd4e016d60f4" title="beaglebone_i2c_read" alt="" coords="191,5,335,32"/>
+<area shape="rect" id="node5" href="$beaglebone-i2c_8c.html#af3dc93920c7cc24008d4277bdb0791e0" title="beaglebone_i2c_write" alt="" coords="189,56,336,83"/>
+</map>
