@@ -24,7 +24,7 @@
  *   Guillaume Tucker <guillaume.tucker@plasticlogic.com>
  *
  */
-
+#define LOG_TAG "pl-i2c"
 #include <pl/utils.h>
 #include <pl/i2c.h>
 

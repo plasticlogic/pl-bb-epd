@@ -86,10 +86,13 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	// ------------------------------------
 	// initialize i2c
 	// ----------------------
+	stat |= beaglebone_i2c_init(setup->i2c_port, &(setup->host_i2c));
+	if (stat) return -1;
+
 	if(setup->sInterfaceType == SPI){
 		LOG("Interface: SPI");
-		stat |= beaglebone_i2c_init(setup->i2c_port, &(setup->host_i2c));
-		if (stat) return -1;
+	}else{
+		LOG("Interface: Parallel");
 	}
 	// ------------------------------------
 	// initialize controller

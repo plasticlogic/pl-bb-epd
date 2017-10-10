@@ -87,11 +87,12 @@ draw_bitmap(FT_Bitmap* bitmap,
 }
 
 int show_ft_bitmap(struct pl_generic_controller* controller, struct pl_area* area, uint8_t invert) {
-	int i, j;
+
 
 	//struct timespec start;
 	//start_stopwatch(&start);
 #if 0
+	int i, j;
 	for (i = 0; i < area->width; i++) {
 		for (j = 0; j < area->height; j++) {
 			/*

@@ -38,7 +38,6 @@ int beaglebone_i2c_init(uint8_t channel, struct pl_i2c *i2c)
 {
 	int bufferSize = 100;
 	char userlandI2CDevice[bufferSize];
-
 	snprintf(userlandI2CDevice, bufferSize, "/dev/i2c-%d", channel);
 	if ( ( i2c->priv = open(userlandI2CDevice , O_RDWR, 0 ) ) == -1 )
 	{
@@ -48,10 +47,8 @@ int beaglebone_i2c_init(uint8_t channel, struct pl_i2c *i2c)
 		return -1;
 	}
 
-
 	i2c->read = beaglebone_i2c_read;
 	i2c->write = beaglebone_i2c_write;
-
 	return 0;
 }
 
@@ -69,7 +66,6 @@ int beaglebone_i2c_init(uint8_t channel, struct pl_i2c *i2c)
 static int beaglebone_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 			    const uint8_t *data, uint8_t count, uint8_t flags)
 {
-
 	if (ioctl(i2c->priv, I2C_SLAVE, i2c_addr) < 0) {
 	        LOG("Failed to acquire bus access and/or talk to slave.\n");
 	        /* ERROR HANDLING; you can check errno to see what went wrong */
@@ -105,13 +101,11 @@ static int beaglebone_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr, uint8_t *da
 	        return -1;
 	}
 
-
 	int result = read(i2c->priv, data, count);
 	if (result != count){
 		return -1;
 	}
 	return 0;
-
 
 }
 

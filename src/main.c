@@ -154,7 +154,9 @@ struct CmdLineOptions supportedOperations[] = {
  */
 int main(int argc, char* argv[])
 {
+
 	// debug features
+	printf("!\n");
 	int stat = 0;
 	char message[200];
 
@@ -228,10 +230,11 @@ int main(int argc, char* argv[])
 int initialize_environment(){
 	int stat = 0;
 
+
 	hardware = hw_setup_new();
 
 #ifdef INTERNAL_USAGE
-	stat |= hardware->init_from_configfile(hardware, "/root/epdc.config");
+	stat |= hardware->init_from_configfile(hardware, "/boot/uboot/epdc/S115_T1.1/epdc.config");
 #else
 	stat |= hardware->init_from_configfile(hardware, "BBepdcULD.config");
 #endif
@@ -260,6 +263,7 @@ int initialize_environment(){
  */
 int release_environment(){
 	// release spi device
+
 	hardware->sInterface->close(hardware->sInterface);
 	hardware->sInterface->delete(hardware->sInterface);
 
@@ -271,6 +275,7 @@ int release_environment(){
 // operation functions
 // ----------------------------------------------------------------------
 int execute_help(int argc, char **argv){
+
 	int print_all = false;
 
 	if (argc >=3){
@@ -284,6 +289,7 @@ int execute_help(int argc, char **argv){
 }
 
 int execute_start_epdc(int argc, char **argv){
+
 	int stat = 0;
 	int executeClear = false;
 	int initFromEEprom = false;
@@ -303,6 +309,7 @@ int execute_start_epdc(int argc, char **argv){
 }
 
 int execute_stop_epdc(int argc, char **argv){
+
 	int stat = 0;
 
 	stat = stop_epdc();
@@ -311,6 +318,7 @@ int execute_stop_epdc(int argc, char **argv){
 }
 
 int execute_set_vcom(int argc, char **argv){
+
 	int stat;
 
 	if(argc == 3)
@@ -326,6 +334,7 @@ int execute_set_vcom(int argc, char **argv){
 }
 
 int execute_set_waveform(int argc, char **argv){
+
 	int stat;
 	float temperature;
 
@@ -347,6 +356,7 @@ int execute_set_waveform(int argc, char **argv){
 }
 
 int execute_set_temperature(int argc, char **argv){
+
 	int stat;
 	float temperature;
 
@@ -364,6 +374,7 @@ int execute_set_temperature(int argc, char **argv){
 }
 
 int execute_update_image(int argc, char **argv){
+
 	int stat;
 
 	char* wfID = "default";
@@ -394,6 +405,7 @@ int execute_update_image(int argc, char **argv){
 }
 
 int execute_counter(int argc, char**argv){
+
 	int stat;
 	printf("%s\n",__func__);
 	stat = counter(NULL);
@@ -423,6 +435,7 @@ int execute_interface_data(int argc, char**argv){
 }
 */
 int execute_slideshow(int argc, char**argv){
+
 	int stat;
 	//slideshow path wfid waittime
 	int waitTime = 700;
@@ -441,6 +454,7 @@ int execute_slideshow(int argc, char**argv){
 }
 
 int execute_send_cmd(int argc, char **argv){
+
 	int stat;
 	regSetting_t regData;
 	regData.valCount = 1;
@@ -494,6 +508,7 @@ int execute_send_cmd(int argc, char **argv){
 }
 
 int execute_write_reg(int argc, char **argv){
+
 	int stat;
 	regSetting_t regData;
 	regData.valCount = 1;
@@ -545,6 +560,7 @@ int execute_write_reg(int argc, char **argv){
 }
 
 int execute_read_reg(int argc, char **argv){
+
 	int stat;
 	regSetting_t regData;
 	regData.valCount = 1;
@@ -599,6 +615,7 @@ int execute_pgm_nvm_binary(int argc, char **argv){
 
 int execute_info(int argc, char **argv){
 
+
 	int stat = 0;
 
 	stat = info();
@@ -607,6 +624,7 @@ int execute_info(int argc, char **argv){
 }
 
 int execute_switch_hv(int argc, char **argv){
+
 	int stat;
 	int state;
 
@@ -627,6 +645,7 @@ int execute_switch_hv(int argc, char **argv){
 }
 
 int print_versionInfo(int argc, char **argv){
+
 	printf("BBepdcULD version = %s\n", VERSION_INFO);
 
 	return 0;
@@ -642,28 +661,24 @@ int print_versionInfo(int argc, char **argv){
  */
 int start_epdc(int load_nvm_content, int execute_clear)
 {
-	int stat = 0;
 
-	LOG("load_nvm_content?: %d\n", load_nvm_content);
+	int stat = 0;
+	LOG("load_nvm_content?: %d", load_nvm_content);
 
 	// initialize GPIOs
 	if (pl_gpio_config_list(&(hardware->gpios), hardware->board_gpios, hardware->gpio_count)){
 		LOG("GPIO init failed");
 		return -1;
 	}
-
 	// enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
 	sleep(1);
-
 	if (epdc->init(epdc, load_nvm_content))
 		return -1;
-
 	if (execute_clear){
 		stat |= epdc->clear_init(epdc);
 	}
-
 	return stat;
 };
 
@@ -674,6 +689,7 @@ int start_epdc(int load_nvm_content, int execute_clear)
  */
 int stop_epdc()
 {
+
 	printf("stop\n");
 
 	hardware->gpios.set(hardware->vddGPIO, 0);
@@ -694,6 +710,7 @@ int stop_epdc()
  */
 int set_vcom(int vcom)
 {
+
   printf("vcom %d\n", vcom);
   return epdc->set_vcom(epdc, vcom);
 }
@@ -706,6 +723,7 @@ int set_vcom(int vcom)
  */
 int set_waveform(char *waveform, float *temperature)
 {
+
   int do_update = 0;
 
   if (temperature != NULL && (epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL))
@@ -732,6 +750,7 @@ int set_waveform(char *waveform, float *temperature)
  */
 int set_temperature(float temperature)
 {
+
 
 	if(epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL)
 	{
@@ -761,6 +780,7 @@ int set_temperature(float temperature)
  */
 int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		int vcomSwitchEnable, int updateCount, int waitTime) {
+
 
 	int cnt = 0;
 
@@ -805,6 +825,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
  */
 int read_register(regSetting_t regSetting){
 
+
 	uint16_t *data = malloc(sizeof(uint16_t)*regSetting.valCount);
 	regSetting.val = data;
 	if (regSetting.val == NULL)
@@ -829,6 +850,7 @@ int read_register(regSetting_t regSetting){
 */
 int write_register(regSetting_t regSetting, const uint32_t bitmask){
 
+
 	if (regSetting.val == NULL)
 		return -1;
 
@@ -846,6 +868,7 @@ int write_register(regSetting_t regSetting, const uint32_t bitmask){
 */
 int send_cmd(regSetting_t regSetting){
 
+
 	if (regSetting.val == NULL)
 		return -1;
 
@@ -860,6 +883,7 @@ int send_cmd(regSetting_t regSetting){
  * displays the general display informations.
  */
 int info(){
+
 
 	int stat = 0;
 	int isPgm = 0;
@@ -890,6 +914,7 @@ int info(){
 int switch_hv(int state){
 	int stat;
 
+
 	if (state == 1){
 		if ((epdc->hv->hvDriver != NULL) && (epdc->hv->hvDriver->switch_on != NULL))
 			stat = epdc->hv->hvDriver->switch_on(epdc->hv->hvDriver);
@@ -914,6 +939,7 @@ int switch_hv(int state){
  */
 int readBinaryFile(const char *binaryPath, uint8_t **blob){
 	// read binary blob
+
 	FILE *fs = fopen(binaryPath, "rb");
 	int len=0;
 
@@ -1049,6 +1075,7 @@ int interface_data(	char* interface,		// device where to find the data (can?)
 // ----------------------------------------------------------------------
 int counter(const char* wf)
 {
+
 	printf("%s\n",__func__);
 	int wfid = 4;
 	unsigned char count = 0;
@@ -1099,6 +1126,7 @@ int counter(const char* wf)
 int slideshow(const char *path, const char* wf, int waittime)
 {
 
+
 	DIR *dir;
 	struct dirent *d;
 	int wfid = -1;
@@ -1141,6 +1169,7 @@ int slideshow(const char *path, const char* wf, int waittime)
 
 int show_image(const char *dir, const char *file, int wfid)
 {
+
 	char path[256];
 
 	LOG("Image: %s %s", dir, file);
@@ -1170,6 +1199,7 @@ int show_image(const char *dir, const char *file, int wfid)
 // help messages
 // ----------------------------------------------------------------------
 void print_application_help(int print_all){
+
 	printf("\n");
 	printf("Usage:  BBepdcULD [operation] [parameter]   --> executes an operation \n");
 	printf("        BBepdcULD [operation] --help        --> prints detailed help  \n");
@@ -1363,6 +1393,7 @@ void printHelp_switch_hv(int identLevel){
 
 void debug_print_parameters(int argc, char **argv)
 {
+
 	int paramIdx = 0;
 	for(paramIdx = 0; paramIdx < argc; paramIdx++){
 		printf("param %d: '%s'\n", paramIdx, argv[paramIdx]);

@@ -78,9 +78,9 @@ static void generic_epdc_delete(struct pl_generic_epdc *p){
  * @return int value unequal to 0 if an error occured, otherwise 0
  */
 static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
+
 	assert(p != NULL);
 	int stat = 0;
-	LOG("%s", __func__);
 	// initialize controller
 	pl_generic_controller_t *controller = p->controller;
 	assert(controller != NULL);
@@ -92,15 +92,18 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 	controller->update_temp(controller);
 
 	// initialize hv
+	if(!p->hv)
+		return -1;
 	pl_hv_t *hv = p->hv;
 	assert(hv != NULL);
-	if (hv->init != NULL)
+	if (hv->init != NULL){
 		stat |= hv->init(hv);
-
+	}
 	if (stat) return -1;
 
 	// load data from display NVM and apply it's settings
 	if (load_nvm_content){
+		//LOG("%s: load data from display NVM and apply it's settings", __func__);
 		if (p->nvm == NULL){
 			LOG("Abort: There's no nvm defined in the EPDC.");
 			return -1;
@@ -198,6 +201,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 		}
 	}
 	else{
+		//LOG("%s: load waveform and vcom from std paths", __func__);
 		// load waveform and vcom from std paths
 		LOG("Loading wflib: %s", controller->waveform_file_path);
 		if (controller->load_wflib(controller, controller->waveform_file_path))
@@ -220,6 +224,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
  * @return success indicator: 0 if passed, otherwise <> 0
  */
 static int set_vcom(struct pl_generic_epdc *p, int vcomInMillivolt){
+
 	struct pl_vcom_config *vcom_config = p->hv->vcomConfig;
 
 	assert(vcom_config != NULL);
@@ -235,6 +240,7 @@ static int set_vcom(struct pl_generic_epdc *p, int vcomInMillivolt){
  * @return success indicator: 0 if passed, otherwise <> 0
  */
 static int read_register(struct pl_generic_epdc *p, const regSetting_t* setting){
+
 	assert(p != NULL);
 
 	pl_generic_controller_t *controller = p->controller;
@@ -254,6 +260,7 @@ static int read_register(struct pl_generic_epdc *p, const regSetting_t* setting)
 static int write_register(struct pl_generic_epdc *p, const regSetting_t setting, const uint32_t bitmask){
 	assert(p != NULL);
 
+
 	pl_generic_controller_t *controller = p->controller;
 	assert(controller != NULL);
 
@@ -269,6 +276,7 @@ static int write_register(struct pl_generic_epdc *p, const regSetting_t setting,
  */
 static int send_cmd(struct pl_generic_epdc *p, const regSetting_t setting){
 	assert(p != NULL);
+
 
 	pl_generic_controller_t *controller = p->controller;
 	assert(controller != NULL);
@@ -287,6 +295,7 @@ static int send_cmd(struct pl_generic_epdc *p, const regSetting_t setting){
  */
 static int generic_update(struct pl_generic_epdc *p, int wfID, enum pl_update_mode mode,
 		const struct pl_area *area){
+
 	assert(p != NULL);
 	pl_generic_controller_t *controller = p->controller;
 	pl_hv_t *hv = p->hv;
@@ -331,6 +340,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID, enum pl_update_mo
  * @return success indicator: 0 if passed, otherwise <> 0.
  */
 static int do_clear_update(struct pl_generic_epdc *p){
+
 	assert(p != NULL);
 	assert(p->controller != NULL);
 
@@ -376,6 +386,7 @@ static int do_clear_update(struct pl_generic_epdc *p){
  */
 static int unpack_nvm_content(uint8_t *buffer, int bufferSize){
 
+
 	char command[200];
 	const char *filename = "/tmp/dummy.nvm";
 
@@ -409,6 +420,7 @@ static int unpack_nvm_content(uint8_t *buffer, int bufferSize){
  */
 static int read_vcom_from_file(const char *filename, int *vcomInMillivolts){
 
+
 	FILE *fd = fopen(filename, "r");
 
 	// check if the file exists
@@ -436,6 +448,7 @@ static int read_vcom_from_file(const char *filename, int *vcomInMillivolts){
  */
 static int switch_hvs_on(pl_hv_t *hv){
 	int stat = 0;
+
 
 	if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_on != NULL))
 		stat |= hv->hvDriver->switch_on(hv->hvDriver);

@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include "hv.h"
 #include "assert.h"
-
+#define LOG_TAG "hv"
+#include <pl/utils.h>
 static void hv_delete(struct pl_hv *p);
 static int hv_init(struct pl_hv *p);
 static void hv_driver_delete(struct pl_hv_driver *p);
@@ -170,6 +171,7 @@ static void hv_delete(struct pl_hv *p){
 static int hv_init(struct pl_hv *p){
 	assert(p != NULL);
 	int stat = 0;
+
 	// init hv driver
 	if (p->hvDriver != NULL){
 		if (p->hvDriver->init != NULL){
@@ -179,8 +181,11 @@ static int hv_init(struct pl_hv *p){
 
 	// init hv config
 	if (p->hvConfig != NULL){
+		//LOG("%s: init hv config", __func__);
 		if (p->hvConfig->init != NULL){
+			//LOG("%s: init hv config", __func__);
 			stat |= p->hvConfig->init(p->hvConfig);
+			//LOG("%s: init hv config: stat = 0x%x", __func__, stat);
 		}
 	}
 
@@ -211,7 +216,7 @@ static int hv_init(struct pl_hv *p){
 			stat |= p->vcomSwitch->init(p->vcomSwitch);
 		}
 	}
-	printf("_%s_", __func__);
+
 	return stat;
 }
 

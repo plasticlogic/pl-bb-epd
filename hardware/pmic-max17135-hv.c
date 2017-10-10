@@ -141,7 +141,6 @@ static int hv_config_init(pl_hv_config_t *p){
 	assert(p != NULL);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
-
 	return max17135->init(max17135);
 }
 // -----------------------------------------------------------------------------

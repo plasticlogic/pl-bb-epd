@@ -140,7 +140,7 @@ static void set_hdc(struct s1d135xx *p, int state);
  */
 s1d135xx_t *s1d13524_new(struct pl_gpio *gpios, struct pl_generic_interface *interface, struct pl_i2c *i2c, const struct s1d135xx_pins *pins)
 {
-	//LOG("%s", __func__);
+
 	assert(gpios != NULL);
 	assert(pins != NULL);
 	assert(interface != NULL);
@@ -200,7 +200,7 @@ s1d135xx_t *s1d13524_new(struct pl_gpio *gpios, struct pl_generic_interface *int
  */
 s1d135xx_t *s1d13541_new(struct pl_gpio *gpios, struct pl_generic_interface *interface, struct pl_i2c *i2c, const struct s1d135xx_pins *pins)
 {
-	//LOG("%s", __func__);
+
 	assert(gpios != NULL);
 	assert(pins != NULL);
 	assert(interface != NULL);
@@ -252,7 +252,7 @@ s1d135xx_t *s1d13541_new(struct pl_gpio *gpios, struct pl_generic_interface *int
  */
 static void s1d135xx_hard_reset(struct s1d135xx* p)
 {
-	//LOG("%s", __func__);
+
 	if (p->pins->reset == PL_GPIO_NONE) {
 		LOG("Warning: no hard reset");
 		return;
@@ -271,7 +271,7 @@ static void s1d135xx_hard_reset(struct s1d135xx* p)
  */
 static int s1d135xx_soft_reset(struct s1d135xx *p)
 {
-	//LOG("%s", __func__);
+
 	s1d135xx_write_reg(p, S1D135XX_REG_SOFTWARE_RESET, 0xFF);
 
 	return s1d135xx_wait_idle(p);
@@ -284,7 +284,7 @@ static int s1d135xx_soft_reset(struct s1d135xx *p)
  */
 static int s1d135xx_wait_idle(struct s1d135xx *p)
 {
-	//LOG("%s", __func__);
+
 	unsigned long timeout = 50000; // ca. 20s
 
 	while (!get_hrdy(p)){
@@ -307,7 +307,7 @@ static int s1d135xx_wait_idle(struct s1d135xx *p)
  */
 static uint16_t s1d135xx_read_reg(struct s1d135xx *p, uint16_t reg)
 {
-	//LOG("%s", __func__);
+
 	uint16_t val;
 
 	set_cs(p, 0);
@@ -336,7 +336,7 @@ static uint16_t s1d135xx_read_reg(struct s1d135xx *p, uint16_t reg)
  */
 static int s1d135xx_write_reg(struct s1d135xx *p, uint16_t reg, uint16_t val)
 {
-	//LOG("%s", __func__);
+
 	const uint16_t params[] = { reg, val };
 
 	set_cs(p, 0);
@@ -357,7 +357,7 @@ static int s1d135xx_write_reg(struct s1d135xx *p, uint16_t reg, uint16_t val)
  */
 static int s1d135xx_read_spi(struct s1d135xx *p, uint8_t *val, size_t size)
 {
-	//LOG("%s", __func__);
+
 	unsigned int i;
 	uint16_t _val = 0;
 	const uint16_t params[] = { 0x0202, 0x0000 };
@@ -854,7 +854,6 @@ static int s1d135xx_pattern_check(struct s1d135xx *p, uint16_t height, uint16_t 
 
 static int s1d135xx_load_wflib(struct s1d135xx *p, const char *filename, uint32_t addr)
 {
-
 	FILE *file;
 	file=fopen(filename, "rb");
 	if(file==NULL){
@@ -1021,7 +1020,7 @@ static int s1d13541_init_controller(struct s1d135xx *p)
 
 static int s1d13524_init_controller(struct s1d135xx *p)
 {
-	//LOG("%s", __func__);
+
 	p->hard_reset(p);
 
 	if (p->soft_reset(p))
@@ -1040,7 +1039,7 @@ static int s1d13524_init_controller(struct s1d135xx *p)
 
 static int s1d13541_init_clocks(struct s1d135xx *p)
 {
-	//LOG("%s", __func__);
+
 	p->write_reg(p, S1D135XX_REG_I2C_CLOCK, S1D13541_I2C_CLOCK_DIV);
 	p->write_reg(p, S1D13541_REG_CLOCK_CONFIG,
 			   S1D13541_INTERNAL_CLOCK_ENABLE);
@@ -1050,7 +1049,7 @@ static int s1d13541_init_clocks(struct s1d135xx *p)
 
 static int s1d13524_init_clocks(struct s1d135xx *p)
 {
-	//LOG("%s", __func__);
+
 	static const uint16_t params[] = {
 		S1D13524_PLLCFG0, S1D13524_PLLCFG1,
 		S1D13524_PLLCFG2, S1D13524_PLLCFG3,
@@ -1072,7 +1071,7 @@ static int s1d13524_init_clocks(struct s1d135xx *p)
 // ------------------------------
 int s1d13524_init_ctlr_mode(struct s1d135xx *p)
 {
-	//LOG("%s", __func__);
+
 	static const uint16_t par[] = {
 		S1D13524_CTLR_AUTO_WFID,
 		(S1D13524_CTLR_NEW_AREA_PRIORITY |
@@ -1089,7 +1088,7 @@ int s1d13524_init_ctlr_mode(struct s1d135xx *p)
 // ------------------------------
 static int check_prod_code(struct s1d135xx *p, uint16_t ref_code)
 {
-	//LOG("%s", __func__);
+
 	uint16_t prod_code;
 
 	prod_code = p->read_reg(p, S1D135XX_REG_REV_CODE);
@@ -1106,7 +1105,7 @@ static int check_prod_code(struct s1d135xx *p, uint16_t ref_code)
 
 static int get_hrdy(struct s1d135xx *p)
 {
-	//LOG("%s", __func__);
+
 	uint16_t status;
 
 	if (p->pins->hrdy != PL_GPIO_NONE)
@@ -1120,7 +1119,7 @@ static int get_hrdy(struct s1d135xx *p)
 static int do_fill(struct s1d135xx *p, const struct pl_area *area,
 		   unsigned bpp, uint8_t g)
 {
-	//LOG("%s", __func__);
+
 	uint16_t val16 = 0;
 	uint16_t lines;
 	uint16_t pixels = 0;
@@ -1175,7 +1174,7 @@ static int do_fill(struct s1d135xx *p, const struct pl_area *area,
 
 static int wflib_wr(void *ctx, const uint8_t *data, size_t n)
 {
-	//LOG("%s", __func__);
+
 	struct s1d135xx *p = ctx;
 
 	set_cs(p, 0);
@@ -1189,7 +1188,7 @@ static int wflib_wr(void *ctx, const uint8_t *data, size_t n)
 
 static int transfer_file(struct pl_generic_interface *interface, FILE *file)
 {
-	//LOG("%s", __func__);
+
 	uint8_t data[DATA_BUFFER_LENGTH];
 
 	for (;;) {
@@ -1212,7 +1211,7 @@ static int transfer_file(struct pl_generic_interface *interface, FILE *file)
 
 static void transfer_data(struct pl_generic_interface *interface, const uint8_t *data, size_t n)
 {
-	//LOG("%s", __func__);
+
 	//	struct timespec t;
 	//	start_stopwatch(&t);
 	if(interface->mSpi){
@@ -1242,7 +1241,7 @@ static void transfer_data(struct pl_generic_interface *interface, const uint8_t 
 static void send_cmd_area(struct s1d135xx *p, uint16_t cmd, uint16_t mode,
 			  const struct pl_area *area)
 {
-	//LOG("%s", __func__);
+
 	const uint16_t args[] = {
 		mode,
 		(area->left & S1D135XX_XMASK),
@@ -1257,7 +1256,7 @@ static void send_cmd_area(struct s1d135xx *p, uint16_t cmd, uint16_t mode,
 
 static void send_cmd_cs(struct s1d135xx *p, uint16_t cmd)
 {
-	//LOG("%s", __func__);
+
 	set_cs(p, 0);
 	send_cmd(p, cmd);
 	set_cs(p, 1);
@@ -1265,7 +1264,7 @@ static void send_cmd_cs(struct s1d135xx *p, uint16_t cmd)
 
 static void send_cmd(struct s1d135xx *p, uint16_t cmd)
 {
-	//LOG("%s", __func__);
+
 	if(p->interface->mSpi)
 		cmd = htobe16(cmd);// for serial comm
 
@@ -1276,7 +1275,7 @@ static void send_cmd(struct s1d135xx *p, uint16_t cmd)
 
 static void send_params(struct pl_generic_interface *interface, const uint16_t *params, size_t n)
 {
-	//LOG("%s", __func__);
+
 	size_t i;
 
 	for (i = 0; i < n; ++i)
@@ -1285,7 +1284,7 @@ static void send_params(struct pl_generic_interface *interface, const uint16_t *
 
 static void send_param(struct pl_generic_interface *interface, uint16_t param)
 {
-	//LOG("%s", __func__);
+
 	if(interface->mSpi)
 		param = htobe16(param);// for serial comm
 
@@ -1294,13 +1293,13 @@ static void send_param(struct pl_generic_interface *interface, uint16_t param)
 
 static void set_cs(struct s1d135xx *p, int state)
 {
-	//LOG("%s", __func__);
+
 	pl_gpio_set(p->gpio, p->pins->cs0, state);
 }
 
 static void set_hdc(struct s1d135xx *p, int state)
 {
-	//LOG("%s", __func__);
+
 	const unsigned hdc = p->pins->hdc;
 
 	if (hdc != PL_GPIO_NONE)

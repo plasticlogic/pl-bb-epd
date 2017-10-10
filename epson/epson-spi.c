@@ -20,7 +20,7 @@ static int spi_chip_select(struct pl_spi *psSPI, uint8_t cs);
 static int spi_read_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size);
 static int spi_write_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size);
 
-static void delete(void *p);
+static void delete(struct pl_spi *p);
 
 
 /**
@@ -48,7 +48,7 @@ pl_spi_t *epson_spi_new(s1d135xx_t *c){
  *
  * @param p pl_spi structure
  */
-static void delete(void *p){
+static void delete(struct pl_spi *p){
 	if (p != NULL){
 		free(p);
 		p = NULL;

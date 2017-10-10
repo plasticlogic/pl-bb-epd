@@ -54,7 +54,6 @@ static int set_power_state(pl_generic_controller_t *p, enum pl_epdc_power_state 
 // initialisation
 // ------------------------------
 int s1d13524_controller_setup(pl_generic_controller_t *p, s1d135xx_t *s1d135xx){
-	//LOG("%s", __func__);
 	assert(p != NULL);
 	assert(s1d135xx != NULL);
 
@@ -100,7 +99,6 @@ int s1d13524_controller_setup(pl_generic_controller_t *p, s1d135xx_t *s1d135xx){
 // ------------------------------
 static int wait_update_end(pl_generic_controller_t *p)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -109,7 +107,6 @@ static int wait_update_end(pl_generic_controller_t *p)
 
 static int load_wflib(pl_generic_controller_t *p,  const char *filename)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -131,26 +128,32 @@ static int load_wflib(pl_generic_controller_t *p,  const char *filename)
 	if (s1d135xx->load_wflib(s1d135xx, filename, addr32))
 		return -1;
 //*/
+	if (s1d135xx->wait_for_idle(s1d135xx))
+		return -1;
+
 	s1d135xx->send_cmd_with_params(s1d135xx, S1D13524_CMD_RD_WF_INFO, addr16, ARRAY_SIZE(addr16));
 
 	if (s1d135xx->wait_for_idle(s1d135xx))
 		return -1;
 
+	//LOG("Testing Busy");
+
 	busy = s1d135xx->read_reg(s1d135xx, S1D135XX_REG_DISPLAY_BUSY);
+
+	//LOG("Busy: 0x%x", busy);
 
 	if (busy & S1D13541_WF_CHECKSUM_ERROR) {
 		LOG("Waveform checksum error");
 		return -1;
 	}
 
-	p->waveform_file_path = filename;
+	p->waveform_file_path = (char*) filename;
 
 	return 0;
 }
 
 static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t grey)
 {
-	////LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -160,7 +163,6 @@ static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t 
 static int load_png_image(pl_generic_controller_t *p, const char *path,
 			       const struct pl_area *area, int left, int top)
 {
-	////LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -172,7 +174,6 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,
 }
 static int load_buffer(pl_generic_controller_t *p, const char *buffer, const struct pl_area *area, int left, int top)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -184,7 +185,6 @@ static int load_buffer(pl_generic_controller_t *p, const char *buffer, const str
 
 static int read_register(pl_generic_controller_t *p, const regSetting_t* setting)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -195,7 +195,6 @@ static int read_register(pl_generic_controller_t *p, const regSetting_t* setting
 
 static int write_register(pl_generic_controller_t *p, const regSetting_t setting, const uint32_t bitmask)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -211,7 +210,6 @@ static int write_register(pl_generic_controller_t *p, const regSetting_t setting
 
 static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -226,7 +224,6 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting)
 
 static int configure_update(pl_generic_controller_t *p, int wfid, enum pl_update_mode mode, const struct pl_area *area){
 
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -234,7 +231,6 @@ static int configure_update(pl_generic_controller_t *p, int wfid, enum pl_update
 }
 
 static int trigger_update(pl_generic_controller_t *p){
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -242,7 +238,6 @@ static int trigger_update(pl_generic_controller_t *p){
 }
 
 static int clear_update(pl_generic_controller_t *p){
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -256,7 +251,6 @@ static int clear_update(pl_generic_controller_t *p){
 }
 
 static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -311,7 +305,6 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 
 static int set_temp_mode(pl_generic_controller_t *p, enum pl_epdc_temp_mode mode)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -341,7 +334,6 @@ static int set_temp_mode(pl_generic_controller_t *p, enum pl_epdc_temp_mode mode
 
 static int set_power_state(pl_generic_controller_t *p, enum pl_epdc_power_state state)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
@@ -355,12 +347,12 @@ static int set_power_state(pl_generic_controller_t *p, enum pl_epdc_power_state 
 
 static int update_temp(pl_generic_controller_t *p)
 {
-	//LOG("%s", __func__);
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
 	int stat = 0;
 	int new_temp;
+
 
 	switch (p->temp_mode) {
 	case PL_EPDC_TEMP_MANUAL:
@@ -384,7 +376,6 @@ static int update_temp(pl_generic_controller_t *p)
 #endif
 
 	s1d135xx->measured_temp = new_temp;
-
 	return 0;
 }
 

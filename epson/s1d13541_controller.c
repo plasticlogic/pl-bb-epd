@@ -211,7 +211,7 @@ static int load_wflib(pl_generic_controller_t *p, const char *filename)
 	if (s1d135xx->load_wflib(s1d135xx, filename, S1D13541_WF_ADDR))
 		return -1;
 
-	p->waveform_file_path = filename;
+	p->waveform_file_path = (char*) filename;
 
 	char absolute_filename[300];
 	realpath(filename, absolute_filename);

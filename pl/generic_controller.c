@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pl/generic_controller.h>
+#define LOG_TAG "generic_controller"
+#include <pl/utils.h>
 #include <pl/assert.h>
 
 static void generic_controller_delete(struct pl_generic_controller *p);
@@ -61,6 +63,7 @@ int pl_generic_controller_get_wfid(pl_generic_controller_t *p, const char *wf_pa
  * @param p pointer to the memory to be freed
  */
 static void generic_controller_delete(struct pl_generic_controller *p){
+
 	if (p != NULL){
 		free(p);
 		p = NULL;

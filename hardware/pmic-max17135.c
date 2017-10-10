@@ -165,7 +165,9 @@ static int max17135_init(pl_pmic_t *p){
 	int stat = 0;
 
 	if (p->is_initialized == false){
+
 		stat = p->check_revision_code(p);
+
 		p->is_initialized = true;
 	}
 	return stat;

@@ -10,7 +10,7 @@
 struct pl_gpio;
 
 pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* hw_ref, uint8_t serial){
-	pl_generic_interface_t* interface = malloc(sizeof(pl_generic_interface_t));
+	//pl_generic_interface_t* interface = malloc(sizeof(pl_generic_interface_t));
 	if(serial){
 		return (pl_generic_interface_t*) beaglebone_spi_new(spi_channel, hw_ref);
 	}else{

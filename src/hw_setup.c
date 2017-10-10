@@ -158,14 +158,14 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 		p->gpio_count = ARRAY_SIZE(g_chiffchaff_gpios);
 		p->vddGPIO = RUDDOCK_5V_EN;
 	}
-	else if (!strcmp(selection, "RUDDOCK" )){
+	else if (!strcmp(selection, "RUDDOCK" ) || !strcmp(selection, "FALCON_SERIAL" )){
 		p->s1d13524_pins = &g_s1d135xx_pins;
 		p->s1d13541_pins = &g_s1d135xx_pins;
 		p->board_gpios = g_ruddock_gpios;
 		p->gpio_count = ARRAY_SIZE(g_ruddock_gpios);
 		p->vddGPIO = RUDDOCK_5V_EN;
 	}
-	else if (!strcmp(selection, "RUDDOCK_PARALLEL" )){
+	else if (!strcmp(selection, "RUDDOCK_PARALLEL" ) || !strcmp(selection, "FALCON_PARALLEL" )){
 		p->s1d13524_pins = &g_s1d135xx_pins;
 		p->s1d13541_pins = &g_s1d135xx_pins;
 		p->board_gpios = g_ruddock_parallel_gpios;
