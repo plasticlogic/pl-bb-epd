@@ -1,6 +1,0 @@
-<map id="s1d135xx_get_vcom_driver" name="s1d135xx_get_vcom_driver">
-<area shape="rect" id="node3" href="$hv_8c.html#acb4452d73439a4e5d0d6fc5f5d443dfb" title="vcom_driver_new" alt="" coords="259,5,378,32"/>
-<area shape="rect" id="node7" href="$s1d135xx__hv_8c.html#a23fce399dc3bc5d6a09099b62d4728c6" title="triggers power&#45;on cycle of EPSON controller " alt="" coords="232,56,405,83"/>
-<area shape="rect" id="node9" href="$s1d135xx__hv_8c.html#a40ec46718c66d0d11757eb62dbfa2de7" title="triggers power&#45;off cycle of EPSON controller " alt="" coords="233,107,405,133"/>
-<area shape="rect" id="node5" href="$hv_8c.html#af971af7ceb21a562f1d6cdd1d744f61e" title="vcom_driver_delete" alt="" coords="453,5,584,32"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="uc8156_get_hv_driver" name="uc8156_get_hv_driver">
-<area shape="rect" id="node3" href="$hv_8c.html#a3215574d2019ed4229c3333c0d36e268" title="hv_driver_new" alt="" coords="220,5,321,32"/>
-<area shape="rect" id="node7" href="$uc8156__hv_8c.html#a146cbb2d8d6c3a54a23f8992811cb29f" title="uc8156_hv_driver_on" alt="" coords="200,56,341,83"/>
-<area shape="rect" id="node9" href="$uc8156__hv_8c.html#aa45d0976c3e46ac72d1584b5e7d63fc4" title="uc8156_hv_driver_off" alt="" coords="201,107,341,133"/>
-<area shape="rect" id="node5" href="$hv_8c.html#a6cf5cb51ecac43e1e6142b572d7ded1a" title="hv_driver_delete" alt="" coords="390,5,503,32"/>
-</map>

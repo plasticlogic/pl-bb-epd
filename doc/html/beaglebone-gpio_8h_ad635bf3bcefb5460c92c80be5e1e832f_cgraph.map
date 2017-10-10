@@ -1,7 +1,0 @@
-<map id="beaglebone_gpio_init" name="beaglebone_gpio_init">
-<area shape="rect" id="node3" href="$beaglebone-gpio_8c.html#acafb95d5893e663f09f9d19296e4853e" title="beaglebone_gpio_export" alt="" coords="204,5,367,32"/>
-<area shape="rect" id="node7" href="$beaglebone-gpio_8c.html#a970a49bf98661fa94ae9c51cd5d1bd40" title="beaglebone_gpio_unexport" alt="" coords="197,56,373,83"/>
-<area shape="rect" id="node9" href="$beaglebone-gpio_8c.html#aff9373664016c5996ad0047ef79102be" title="beaglebone_gpio_get" alt="" coords="213,107,357,133"/>
-<area shape="rect" id="node11" href="$beaglebone-gpio_8c.html#acfb734cab467235465339fa0e43b32d5" title="beaglebone_gpio_set" alt="" coords="213,157,357,184"/>
-<area shape="rect" id="node5" href="$gpio_8c.html#ab84edb618bd846312a043ab4fb99df64" title="pl_gpio_check_flags" alt="" coords="421,5,560,32"/>
-</map>

@@ -1,8 +1,0 @@
-<map id="uc8156_get_hv_config" name="uc8156_get_hv_config">
-<area shape="rect" id="node3" href="$hv_8c.html#af5585460f53bb9b0119e339d0bf11330" title="hv_config_new" alt="" coords="203,5,309,32"/>
-<area shape="rect" id="node7" href="$uc8156__hv_8c.html#a68acc26f0b74b27626e7f400c0a804b8" title="set_vgh" alt="" coords="223,56,289,83"/>
-<area shape="rect" id="node9" href="$uc8156__hv_8c.html#a2e9dec2999468e613e16ef533f0d6542" title="set_vgl" alt="" coords="225,107,287,133"/>
-<area shape="rect" id="node11" href="$uc8156__hv_8c.html#a01c8ce2155bedd338d63a168b9be65b4" title="set_vsh" alt="" coords="223,157,289,184"/>
-<area shape="rect" id="node13" href="$uc8156__hv_8c.html#af96a78378a4c6b3b37738359fd76a034" title="set_vsl" alt="" coords="225,208,287,235"/>
-<area shape="rect" id="node5" href="$hv_8c.html#ae55c1a24fe296855ed62051e660348fb" title="hv_config_delete" alt="" coords="357,5,475,32"/>
-</map>

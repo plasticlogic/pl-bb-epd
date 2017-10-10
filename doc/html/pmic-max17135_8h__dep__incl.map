@@ -1,6 +1,0 @@
-<map id="hardware/pmic&#45;max17135.h" name="hardware/pmic&#45;max17135.h">
-<area shape="rect" id="node3" href="$pmic-max17135-hv_8h.html" title="hardware/pmic&#45;max17135&#45;hv.h" alt="" coords="48,80,245,107"/>
-<area shape="rect" id="node7" href="$hw__setup_8c.html" title="src/hw_setup.c" alt="" coords="227,155,337,181"/>
-<area shape="rect" id="node9" href="$pmic-max17135_8c.html" title="hardware/pmic&#45;max17135.c" alt="" coords="320,80,501,107"/>
-<area shape="rect" id="node5" href="$pmic-max17135-hv_8c.html" title="hardware/pmic&#45;max17135&#45;hv.c" alt="" coords="5,155,203,181"/>
-</map>

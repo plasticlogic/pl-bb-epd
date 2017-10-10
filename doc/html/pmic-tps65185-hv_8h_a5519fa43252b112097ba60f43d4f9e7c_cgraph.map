@@ -1,9 +1,0 @@
-<map id="tps65185_get_vcom_switch" name="tps65185_get_vcom_switch">
-<area shape="rect" id="node3" href="$hv_8c.html#ac99138fe4c67616399d270ae59165a9d" title="vcom_switch_new" alt="" coords="243,5,370,32"/>
-<area shape="rect" id="node7" href="$pmic-tps65185-hv_8c.html#a066ff7af465471acbc041defd132cf68" title="vcom_switch_close" alt="" coords="239,56,374,83"/>
-<area shape="rect" id="node9" href="$pmic-tps65185-hv_8c.html#a9e61020f85be3bfde51812d4360025e0" title="vcom_switch_open" alt="" coords="241,107,372,133"/>
-<area shape="rect" id="node11" href="$pmic-tps65185-hv_8c.html#a8483d7e765aaeee46d0b9b26c5f447d3" title="vcom_switch_disable\l_bypass" alt="" coords="235,158,379,199"/>
-<area shape="rect" id="node13" href="$pmic-tps65185-hv_8c.html#af4376a50d56bad964f4f303e40843ae3" title="vcom_switch_enable\l_bypass" alt="" coords="236,223,377,265"/>
-<area shape="rect" id="node15" href="$pmic-tps65185-hv_8c.html#ab033487e30a79356754114213956eecd" title="vcom_switch_init" alt="" coords="247,289,367,316"/>
-<area shape="rect" id="node5" href="$hv_8c.html#a77f3d9dc156910c1d03c7600624ed416" title="vcom_switch_delete" alt="" coords="427,5,565,32"/>
-</map>

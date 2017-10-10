@@ -1,9 +1,0 @@
-<map id="open_vcom" name="open_vcom">
-<area shape="rect" id="node3" href="$beaglebone-hv_8h.html#a54c526f8e05e10b9a021a3126503fb2f" title="beaglebone_get_vcom\l_switch" alt="" coords="379,18,530,59"/>
-<area shape="rect" id="node13" href="$beaglebone-hv_8c.html#aba5ed83755a53f5203a78f357d2e37a9" title="enable_vcom_bypass_mode" alt="" coords="143,25,329,52"/>
-<area shape="rect" id="node16" href="$beaglebone-hv_8c.html#aeac4b05230ee3691bb86bd167b249777" title="disable_vcom_bypass_mode" alt="" coords="142,76,330,103"/>
-<area shape="rect" id="node5" href="$hw__setup_8c.html#a014d4956101ffe3926948e0c2237aa2b" title="initialize_vcom_switch" alt="" coords="579,25,730,52"/>
-<area shape="rect" id="node7" href="$hw__setup_8h.html#a3cf870d949262036fb5aae7514612b90" title="hw_setup_new" alt="" coords="779,25,885,52"/>
-<area shape="rect" id="node9" href="$_b_bepdc_u_l_d_8c.html#afa2a6dcbbe532b5d46e5b4e8fd9161fe" title="initialize_environment" alt="" coords="934,25,1079,52"/>
-<area shape="rect" id="node11" href="$_b_bepdc_u_l_d_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="main" alt="" coords="1128,25,1179,52"/>
-</map>

@@ -1,8 +1,0 @@
-<map id="beaglebone_get_vcom_switch" name="beaglebone_get_vcom_switch">
-<area shape="rect" id="node3" href="$hv_8c.html#ac99138fe4c67616399d270ae59165a9d" title="vcom_switch_new" alt="" coords="237,5,363,32"/>
-<area shape="rect" id="node7" href="$beaglebone-hv_8c.html#a304ead38baa760caaa3082af6536ef08" title="open_vcom" alt="" coords="469,107,555,133"/>
-<area shape="rect" id="node9" href="$beaglebone-hv_8c.html#ab5a6bf401e6d6c0ed40b4bf1e13c9cc3" title="close_vcom" alt="" coords="467,183,557,209"/>
-<area shape="rect" id="node11" href="$beaglebone-hv_8c.html#aba5ed83755a53f5203a78f357d2e37a9" title="enable_vcom_bypass_mode" alt="" coords="207,157,393,184"/>
-<area shape="rect" id="node15" href="$beaglebone-hv_8c.html#aeac4b05230ee3691bb86bd167b249777" title="disable_vcom_bypass_mode" alt="" coords="206,107,394,133"/>
-<area shape="rect" id="node5" href="$hv_8c.html#a77f3d9dc156910c1d03c7600624ed416" title="vcom_switch_delete" alt="" coords="443,5,581,32"/>
-</map>

@@ -1,7 +1,0 @@
-<map id="pl_nvm_new" name="pl_nvm_new">
-<area shape="rect" id="node3" href="$nvm_8c.html#a195843270d42af3c7c1fa0f06fff0309" title="read_wfdata" alt="" coords="147,71,237,97"/>
-<area shape="rect" id="node5" href="$nvm_8c.html#ad86b689c489532afefedd091395c1959" title="read_wfdata_UC8156\l_format" alt="" coords="299,5,443,46"/>
-<area shape="rect" id="node7" href="$nvm_8c.html#af1127ee728df9b3c1733521dff3a77fe" title="read_wfdata_S040_format" alt="" coords="285,71,456,97"/>
-<area shape="rect" id="node11" href="$nvm_8c.html#aae5265c892d52aca5d813e5f37d7c7e7" title="read_wfdata_plain_format" alt="" coords="287,121,455,148"/>
-<area shape="rect" id="node9" href="$utils_8c.html#a1718ba92fb27b2fdf5d441b4b7c3f091" title="swap32" alt="" coords="504,71,571,97"/>
-</map>

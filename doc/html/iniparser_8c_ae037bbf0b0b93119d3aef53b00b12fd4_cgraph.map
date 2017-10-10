@@ -1,8 +1,0 @@
-<map id="iniparser_dumpsection_ini" name="iniparser_dumpsection_ini">
-<area shape="rect" id="node3" href="$iniparser_8c.html#ab7607c8fe708cfe16b4fb1debce529fb" title="Finds out if a given entry exists in a dictionary. " alt="" coords="227,56,362,83"/>
-<area shape="rect" id="node5" href="$iniparser_8c.html#a7894f8480e1f254d4a1b4a31bdc51b46" title="Get the string associated to a key. " alt="" coords="411,56,539,83"/>
-<area shape="rect" id="node7" href="$dictionary_8c.html#a31c8e4cd784d16e28687ee2f10b80028" title="Duplicate a string. " alt="" coords="606,5,671,32"/>
-<area shape="rect" id="node9" href="$iniparser_8c.html#a283ddeb5b71e04ed119b35bf82431dce" title="Convert a string to lowercase. " alt="" coords="611,56,667,83"/>
-<area shape="rect" id="node11" href="$dictionary_8c.html#a967311464f457bcb8150ce981ef3c6dd" title="Get a value from a dictionary. " alt="" coords="587,107,690,133"/>
-<area shape="rect" id="node13" href="$dictionary_8c.html#a7c1ef0a729e668d1e8d6a7e774feaf2e" title="Compute the hash key for a string. " alt="" coords="739,107,853,133"/>
-</map>

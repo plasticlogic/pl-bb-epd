@@ -1,7 +1,0 @@
-<map id="setTemperatureMode" name="setTemperatureMode">
-<area shape="rect" id="node3" href="$iniparser_8c.html#a7894f8480e1f254d4a1b4a31bdc51b46" title="Get the string associated to a key. " alt="" coords="197,56,325,83"/>
-<area shape="rect" id="node5" href="$dictionary_8c.html#a31c8e4cd784d16e28687ee2f10b80028" title="Duplicate a string. " alt="" coords="393,5,458,32"/>
-<area shape="rect" id="node7" href="$iniparser_8c.html#a283ddeb5b71e04ed119b35bf82431dce" title="Convert a string to lowercase. " alt="" coords="397,56,453,83"/>
-<area shape="rect" id="node9" href="$dictionary_8c.html#a967311464f457bcb8150ce981ef3c6dd" title="Get a value from a dictionary. " alt="" coords="374,107,477,133"/>
-<area shape="rect" id="node11" href="$dictionary_8c.html#a7c1ef0a729e668d1e8d6a7e774feaf2e" title="Compute the hash key for a string. " alt="" coords="526,107,639,133"/>
-</map>

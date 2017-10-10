@@ -1,7 +1,0 @@
-<map id="epson_spi_new" name="epson_spi_new">
-<area shape="rect" id="node3" href="$epson-spi_8c.html#aab53f9e4f0e1f988ceba6f0a53ae3e0f" title="spi_open" alt="" coords="184,5,259,32"/>
-<area shape="rect" id="node5" href="$epson-spi_8c.html#aaa166916e0c01850678bf998a6690d76" title="spi_close" alt="" coords="183,56,260,83"/>
-<area shape="rect" id="node7" href="$epson-spi_8c.html#a48047e93318927e23f34ac92c56f8edb" title="spi_read_bytes" alt="" coords="166,107,277,133"/>
-<area shape="rect" id="node9" href="$epson-spi_8c.html#ae4d9a50853376c26de3e1e0edb16253c" title="spi_write_bytes" alt="" coords="165,157,277,184"/>
-<area shape="rect" id="node11" href="$epson-spi_8c.html#a7584c144995bbcb057c9e6f9e7210ae2" title="spi_chip_select" alt="" coords="165,208,277,235"/>
-</map>

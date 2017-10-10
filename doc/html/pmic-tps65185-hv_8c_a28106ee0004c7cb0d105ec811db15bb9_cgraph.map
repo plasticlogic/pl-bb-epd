@@ -1,6 +1,0 @@
-<map id="tps65185_get_vcom_config" name="tps65185_get_vcom_config">
-<area shape="rect" id="node3" href="$hv_8c.html#ad187595b529bdc4bd321f70448150908" title="vcom_config_new" alt="" coords="260,5,383,32"/>
-<area shape="rect" id="node7" href="$pmic-tps65185-hv_8c.html#a58cda68680d1d8f1e2db5a3449d22cfd" title="tps65185_vcom_config_set" alt="" coords="232,56,411,83"/>
-<area shape="rect" id="node9" href="$pmic-tps65185-hv_8c.html#a28000be36bee7b8d80374b87178d4ac9" title="vcom_config_init" alt="" coords="263,107,380,133"/>
-<area shape="rect" id="node5" href="$hv_8c.html#a407ddb22ccf88ae7875ee2881c1f3d30" title="vcom_config_delete" alt="" coords="459,5,594,32"/>
-</map>

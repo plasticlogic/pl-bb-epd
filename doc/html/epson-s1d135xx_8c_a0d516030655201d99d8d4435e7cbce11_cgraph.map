@@ -1,6 +1,0 @@
-<map id="s1d135xx_wait_dspe_trig" name="s1d135xx_wait_dspe_trig">
-<area shape="rect" id="node3" href="$epson-s1d135xx_8c.html#a0056f184a899af97ba559f377804f368" title="send_cmd_cs" alt="" coords="222,31,325,57"/>
-<area shape="rect" id="node5" href="$epson-s1d135xx_8c.html#a0bce8f70bbbe6f5b1fde9e2db61c1a4c" title="set_cs" alt="" coords="384,5,445,32"/>
-<area shape="rect" id="node7" href="$epson-s1d135xx_8c.html#acab0062282d73c56d643a2774a0f3af3" title="send_cmd" alt="" coords="373,56,456,83"/>
-<area shape="rect" id="node9" href="$epson-s1d135xx_8c.html#a14d6581f865306c044959e41c5cca496" title="set_hdc" alt="" coords="505,56,573,83"/>
-</map>

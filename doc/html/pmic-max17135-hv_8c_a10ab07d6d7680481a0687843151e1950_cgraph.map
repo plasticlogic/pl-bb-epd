@@ -1,7 +1,0 @@
-<map id="max17135_get_hv_config" name="max17135_get_hv_config">
-<area shape="rect" id="node3" href="$hv_8c.html#af5585460f53bb9b0119e339d0bf11330" title="hv_config_new" alt="" coords="222,5,327,32"/>
-<area shape="rect" id="node7" href="$pmic-max17135-hv_8c.html#a01c8ce2155bedd338d63a168b9be65b4" title="set_vsh" alt="" coords="241,56,308,83"/>
-<area shape="rect" id="node9" href="$pmic-max17135-hv_8c.html#af96a78378a4c6b3b37738359fd76a034" title="set_vsl" alt="" coords="243,107,306,133"/>
-<area shape="rect" id="node11" href="$pmic-max17135-hv_8c.html#a47baf3b3f4023a9280a0f6ef266e0983" title="hv_config_init" alt="" coords="225,157,324,184"/>
-<area shape="rect" id="node5" href="$hv_8c.html#ae55c1a24fe296855ed62051e660348fb" title="hv_config_delete" alt="" coords="376,5,493,32"/>
-</map>

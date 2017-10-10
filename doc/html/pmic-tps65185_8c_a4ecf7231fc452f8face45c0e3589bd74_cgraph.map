@@ -1,4 +1,0 @@
-<map id="tps65185_set_vcom_voltage" name="tps65185_set_vcom_voltage">
-<area shape="rect" id="node3" href="$vcom_8c.html#a7606738f1549e70418afc133120e167c" title="vcom_calculate" alt="" coords="247,5,358,32"/>
-<area shape="rect" id="node5" href="$i2c_8c.html#ae9768ad345d05bd5837d75e8ad096f8a" title="pl_i2c_reg_write_8" alt="" coords="238,56,367,83"/>
-</map>

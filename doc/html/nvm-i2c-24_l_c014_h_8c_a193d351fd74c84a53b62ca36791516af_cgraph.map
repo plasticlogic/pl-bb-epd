@@ -1,4 +1,0 @@
-<map id="nvm_24LC014H_i2c_pgm" name="nvm_24LC014H_i2c_pgm">
-<area shape="rect" id="node3" href="$i2c_8c.html#ae9768ad345d05bd5837d75e8ad096f8a" title="pl_i2c_reg_write_8" alt="" coords="222,5,351,32"/>
-<area shape="rect" id="node5" href="$i2c_8c.html#af8143afb92c7b098bce27de8894b17ef" title="pl_i2c_reg_read_8" alt="" coords="223,56,350,83"/>
-</map>

@@ -1,9 +1,0 @@
-<map id="hardware/dac&#45;max5820.c" name="hardware/dac&#45;max5820.c">
-<area shape="rect" id="node3" href="$i2c_8h.html" title="pl/i2c.h" alt="" coords="5,155,69,181"/>
-<area shape="rect" id="node13" href="$assert_8h.html" title="assert.h" alt="" coords="617,80,687,107"/>
-<area shape="rect" id="node15" href="$vcom_8h.html" title="pl/vcom.h" alt="" coords="181,155,259,181"/>
-<area shape="rect" id="node21" href="$dac-max5820_8h.html" title="hardware/dac&#45;max5820.h" alt="" coords="50,80,216,107"/>
-<area shape="rect" id="node26" href="$utils_8h.html" title="pl/utils.h" alt="" coords="471,155,541,181"/>
-<area shape="rect" id="node18" href="$hwinfo_8h.html" title="pl/hwinfo.h" alt="" coords="144,229,227,256"/>
-<area shape="rect" id="node35" href="$types_8h.html" title="types.h" alt="" coords="510,229,575,256"/>
-</map>

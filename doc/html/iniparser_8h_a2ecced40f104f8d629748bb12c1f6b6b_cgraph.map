@@ -1,6 +1,0 @@
-<map id="iniparser_unset" name="iniparser_unset">
-<area shape="rect" id="node3" href="$dictionary_8c.html#a31c8e4cd784d16e28687ee2f10b80028" title="Duplicate a string. " alt="" coords="191,5,257,32"/>
-<area shape="rect" id="node5" href="$iniparser_8c.html#a283ddeb5b71e04ed119b35bf82431dce" title="Convert a string to lowercase. " alt="" coords="196,56,252,83"/>
-<area shape="rect" id="node7" href="$dictionary_8c.html#a27f0752948d52ccd2568dae22f5db2bc" title="Delete a key in a dictionary. " alt="" coords="165,107,283,133"/>
-<area shape="rect" id="node9" href="$dictionary_8c.html#a7c1ef0a729e668d1e8d6a7e774feaf2e" title="Compute the hash key for a string. " alt="" coords="331,107,445,133"/>
-</map>

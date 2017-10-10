@@ -1,7 +1,0 @@
-<map id="wflib_wr" name="wflib_wr">
-<area shape="rect" id="node3" href="$epson-s1d135xx_8c.html#a0bce8f70bbbe6f5b1fde9e2db61c1a4c" title="set_cs" alt="" coords="139,5,200,32"/>
-<area shape="rect" id="node5" href="$epson-s1d135xx_8c.html#acab0062282d73c56d643a2774a0f3af3" title="send_cmd" alt="" coords="128,56,211,83"/>
-<area shape="rect" id="node9" href="$epson-s1d135xx_8c.html#ae7c5a76a0d20a9603eac69953d3fca25" title="send_param" alt="" coords="123,107,216,133"/>
-<area shape="rect" id="node11" href="$epson-s1d135xx_8c.html#a446a582a1eddb3d4437892cb5eeb6a0a" title="transfer_data" alt="" coords="121,157,218,184"/>
-<area shape="rect" id="node7" href="$epson-s1d135xx_8c.html#a14d6581f865306c044959e41c5cca496" title="set_hdc" alt="" coords="267,56,335,83"/>
-</map>

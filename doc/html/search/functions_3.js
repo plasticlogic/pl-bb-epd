@@ -1,9 +1,0 @@
-var searchData=
-[
-  ['calcpixelindex',['calcPixelIndex',['../scramble_8c.html#aefb5df9b184c0cd4c7cc02895b5696d3',1,'scramble.c']]],
-  ['calcscrambledindex',['calcScrambledIndex',['../scramble_8c.html#a92c987e529bce74ff5fe02fa12e50a49',1,'calcScrambledIndex(int physConfig, int logConfig, int gl, int sl, int glCount, int slCount):&#160;scramble.c'],['../scramble_8h.html#a92c987e529bce74ff5fe02fa12e50a49',1,'calcScrambledIndex(int physConfig, int logConfig, int gl, int sl, int glCount, int slCount):&#160;scramble.c']]],
-  ['check_5fprod_5fcode',['check_prod_code',['../epson-s1d135xx_8c.html#a25f7bbc143ddb06ca5fc7040ba247e41',1,'epson-s1d135xx.c']]],
-  ['clear_5fupdate',['clear_update',['../s1d13524__controller_8c.html#a5a02f9b9e2ac53487113099ed0c77d20',1,'clear_update(pl_generic_controller_t *p):&#160;s1d13524_controller.c'],['../s1d13541__controller_8c.html#a5a02f9b9e2ac53487113099ed0c77d20',1,'clear_update(pl_generic_controller_t *p):&#160;s1d13541_controller.c'],['../uc8156__controller_8c.html#a5a02f9b9e2ac53487113099ed0c77d20',1,'clear_update(pl_generic_controller_t *p):&#160;uc8156_controller.c']]],
-  ['close_5fvcom',['close_vcom',['../beaglebone-hv_8c.html#ab5a6bf401e6d6c0ed40b4bf1e13c9cc3',1,'beaglebone-hv.c']]],
-  ['configure_5fupdate',['configure_update',['../s1d13524__controller_8c.html#a43418812f0fb728dd68333f49ded3524',1,'configure_update(pl_generic_controller_t *p, int wfid, const struct pl_area *area):&#160;s1d13524_controller.c'],['../s1d13541__controller_8c.html#a43418812f0fb728dd68333f49ded3524',1,'configure_update(pl_generic_controller_t *p, int wfid, const struct pl_area *area):&#160;s1d13541_controller.c'],['../uc8156__controller_8c.html#acce52c4de1e68bf6f7c5d9505cf6af17',1,'configure_update(struct pl_generic_controller *controller, int wfid, const struct pl_area *area):&#160;uc8156_controller.c']]]
-];

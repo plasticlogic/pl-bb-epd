@@ -1,4 +1,0 @@
-<map id="enable_vcom_bypass_mode" name="enable_vcom_bypass_mode">
-<area shape="rect" id="node3" href="$beaglebone-hv_8c.html#ab5a6bf401e6d6c0ed40b4bf1e13c9cc3" title="close_vcom" alt="" coords="240,5,331,32"/>
-<area shape="rect" id="node5" href="$beaglebone-hv_8c.html#a304ead38baa760caaa3082af6536ef08" title="open_vcom" alt="" coords="242,56,329,83"/>
-</map>

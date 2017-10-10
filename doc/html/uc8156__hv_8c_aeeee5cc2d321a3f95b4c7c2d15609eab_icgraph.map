@@ -1,7 +1,0 @@
-<map id="vcom_driver_on" name="vcom_driver_on">
-<area shape="rect" id="node3" href="$uc8156__hv_8h.html#a8dccb62cdaae780ba9bb61df25846698" title="uc8156_get_vcom_driver" alt="" coords="165,5,328,32"/>
-<area shape="rect" id="node5" href="$hw__setup_8c.html#aeaff19c95fce5e59d0fca110c733c1a1" title="initialize_vcom_driver" alt="" coords="377,5,519,32"/>
-<area shape="rect" id="node7" href="$hw__setup_8h.html#a3cf870d949262036fb5aae7514612b90" title="hw_setup_new" alt="" coords="568,5,675,32"/>
-<area shape="rect" id="node9" href="$_b_bepdc_u_l_d_8c.html#afa2a6dcbbe532b5d46e5b4e8fd9161fe" title="initialize_environment" alt="" coords="723,5,869,32"/>
-<area shape="rect" id="node11" href="$_b_bepdc_u_l_d_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="main" alt="" coords="917,5,968,32"/>
-</map>

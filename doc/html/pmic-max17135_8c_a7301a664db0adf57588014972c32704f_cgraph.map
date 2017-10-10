@@ -1,5 +1,0 @@
-<map id="max17135_temperature_measure" name="max17135_temperature_measure">
-<area shape="rect" id="node3" href="$i2c_8c.html#af8143afb92c7b098bce27de8894b17ef" title="pl_i2c_reg_read_8" alt="" coords="225,5,351,32"/>
-<area shape="rect" id="node5" href="$i2c_8c.html#a3cabd3f9948db459bc6efaeeb2bd72c4" title="pl_i2c_reg_read_16be" alt="" coords="214,56,362,83"/>
-<area shape="rect" id="node7" href="$utils_8c.html#a2865e8c8b911bf1f0ab49f2d30183131" title="swap16" alt="" coords="411,56,477,83"/>
-</map>

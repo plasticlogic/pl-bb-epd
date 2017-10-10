@@ -1,6 +1,0 @@
-<map id="s1d135xx_get_vcom_switch" name="s1d135xx_get_vcom_switch">
-<area shape="rect" id="node3" href="$hv_8c.html#ac99138fe4c67616399d270ae59165a9d" title="vcom_switch_new" alt="" coords="254,5,381,32"/>
-<area shape="rect" id="node7" href="$s1d135xx__hv_8c.html#a7ec447c0c2857ff34d342e80f81a73aa" title="s1d135xx_vcom_switch\l_disable_bypass" alt="" coords="238,57,397,98"/>
-<area shape="rect" id="node9" href="$s1d135xx__hv_8c.html#a7dc44f49f29f5e15bc60339048133580" title="s1d135xx_vcom_switch\l_enable_bypass" alt="" coords="238,122,397,163"/>
-<area shape="rect" id="node5" href="$hv_8c.html#a77f3d9dc156910c1d03c7600624ed416" title="vcom_switch_delete" alt="" coords="445,5,584,32"/>
-</map>

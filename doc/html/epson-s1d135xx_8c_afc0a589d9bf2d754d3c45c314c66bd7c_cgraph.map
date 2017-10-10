@@ -1,7 +1,0 @@
-<map id="s1d135xx_write_reg" name="s1d135xx_write_reg">
-<area shape="rect" id="node3" href="$epson-s1d135xx_8c.html#a0bce8f70bbbe6f5b1fde9e2db61c1a4c" title="set_cs" alt="" coords="212,5,273,32"/>
-<area shape="rect" id="node5" href="$epson-s1d135xx_8c.html#acab0062282d73c56d643a2774a0f3af3" title="send_cmd" alt="" coords="201,56,284,83"/>
-<area shape="rect" id="node9" href="$epson-s1d135xx_8c.html#adc4b6bfba94de318b4bc92931b3ceea1" title="send_params" alt="" coords="193,107,293,133"/>
-<area shape="rect" id="node7" href="$epson-s1d135xx_8c.html#a14d6581f865306c044959e41c5cca496" title="set_hdc" alt="" coords="354,56,422,83"/>
-<area shape="rect" id="node11" href="$epson-s1d135xx_8c.html#ae7c5a76a0d20a9603eac69953d3fca25" title="send_param" alt="" coords="341,107,435,133"/>
-</map>

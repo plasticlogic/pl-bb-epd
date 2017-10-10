@@ -1,6 +1,0 @@
-<map id="tps65185_get_hv_timing" name="tps65185_get_hv_timing">
-<area shape="rect" id="node3" href="$hv_8c.html#acd0fbb4fca72cf3e9a218d8f0e0d3c3a" title="hv_timing_new" alt="" coords="216,5,323,32"/>
-<area shape="rect" id="node7" href="$pmic-tps65185-hv_8c.html#a88dab0d246a67ad21c4ec727b85def86" title="set_hv_timings" alt="" coords="377,81,485,108"/>
-<area shape="rect" id="node9" href="$pmic-tps65185-hv_8c.html#a5d0670e4c682e6d7d74d7f3bb1454d38" title="hv_timing_init" alt="" coords="219,107,319,133"/>
-<area shape="rect" id="node5" href="$hv_8c.html#a7a1f31b443b4e2e5d9b0f227bf9f10ca" title="hv_timing_delete" alt="" coords="371,5,490,32"/>
-</map>

@@ -1,7 +1,0 @@
-<map id="s1d13541_clear_init" name="s1d13541_clear_init">
-<area shape="rect" id="node3" href="$epson-s1d135xx_8c.html#a0056f184a899af97ba559f377804f368" title="send_cmd_cs" alt="" coords="409,31,511,57"/>
-<area shape="rect" id="node11" href="$epson-s1d135xx_8c.html#a0d516030655201d99d8d4435e7cbce11" title="s1d135xx_wait_dspe_trig" alt="" coords="192,56,360,83"/>
-<area shape="rect" id="node5" href="$epson-s1d135xx_8c.html#a0bce8f70bbbe6f5b1fde9e2db61c1a4c" title="set_cs" alt="" coords="571,5,632,32"/>
-<area shape="rect" id="node7" href="$epson-s1d135xx_8c.html#acab0062282d73c56d643a2774a0f3af3" title="send_cmd" alt="" coords="560,56,643,83"/>
-<area shape="rect" id="node9" href="$epson-s1d135xx_8c.html#a14d6581f865306c044959e41c5cca496" title="set_hdc" alt="" coords="691,56,759,83"/>
-</map>

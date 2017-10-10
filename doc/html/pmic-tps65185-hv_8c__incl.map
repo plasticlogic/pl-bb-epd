@@ -1,9 +1,0 @@
-<map id="hardware/pmic&#45;tps65185&#45;hv.c" name="hardware/pmic&#45;tps65185&#45;hv.c">
-<area shape="rect" id="node3" href="$pmic-tps65185-hv_8h.html" title="hardware/pmic&#45;tps65185&#45;hv.h" alt="" coords="69,80,259,107"/>
-<area shape="rect" id="node15" href="$assert_8h.html" title="pl/assert.h" alt="" coords="335,80,417,107"/>
-<area shape="rect" id="node17" href="$utils_8h.html" title="pl/utils.h" alt="" coords="442,80,512,107"/>
-<area shape="rect" id="node5" href="$pmic-tps65185_8h.html" title="hardware/pmic&#45;tps65185.h" alt="" coords="5,155,179,181"/>
-<area shape="rect" id="node11" href="$hv_8h.html" title="pl/hv.h" alt="" coords="204,155,263,181"/>
-<area shape="rect" id="node9" href="$pmic_8h.html" title="pl/pmic.h" alt="" coords="55,229,129,256"/>
-<area shape="rect" id="node25" href="$types_8h.html" title="types.h" alt="" coords="667,155,732,181"/>
-</map>

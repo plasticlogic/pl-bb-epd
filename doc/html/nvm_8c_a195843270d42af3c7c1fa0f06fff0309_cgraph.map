@@ -1,6 +1,0 @@
-<map id="read_wfdata" name="read_wfdata">
-<area shape="rect" id="node3" href="$nvm_8c.html#ad86b689c489532afefedd091395c1959" title="read_wfdata_UC8156\l_format" alt="" coords="157,5,301,46"/>
-<area shape="rect" id="node5" href="$nvm_8c.html#af1127ee728df9b3c1733521dff3a77fe" title="read_wfdata_S040_format" alt="" coords="144,71,315,97"/>
-<area shape="rect" id="node9" href="$nvm_8c.html#aae5265c892d52aca5d813e5f37d7c7e7" title="read_wfdata_plain_format" alt="" coords="145,121,313,148"/>
-<area shape="rect" id="node7" href="$utils_8c.html#a1718ba92fb27b2fdf5d441b4b7c3f091" title="swap32" alt="" coords="363,71,429,97"/>
-</map>

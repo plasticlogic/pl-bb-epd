@@ -1,7 +1,0 @@
-<map id="tps65185_get_hv_driver" name="tps65185_get_hv_driver">
-<area shape="rect" id="node3" href="$hv_8c.html#a3215574d2019ed4229c3333c0d36e268" title="hv_driver_new" alt="" coords="236,5,337,32"/>
-<area shape="rect" id="node7" href="$pmic-tps65185-hv_8c.html#a2669614278c89ba5221068c11104aab1" title="tps65185_hv_driver_on" alt="" coords="211,56,363,83"/>
-<area shape="rect" id="node9" href="$pmic-tps65185-hv_8c.html#af1cf871f49745ee693bcb7e9b5111f18" title="tps65185_hv_driver_off" alt="" coords="211,107,362,133"/>
-<area shape="rect" id="node11" href="$pmic-tps65185-hv_8c.html#a78638c5376bc0fce7fc1fbb397e5a1ab" title="hv_driver_init" alt="" coords="239,157,334,184"/>
-<area shape="rect" id="node5" href="$hv_8c.html#a6cf5cb51ecac43e1e6142b572d7ded1a" title="hv_driver_delete" alt="" coords="411,5,525,32"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="load_png_image" name="load_png_image">
-<area shape="rect" id="node3" href="$utils_8c.html#a9b5f859ba07dd1e86283bb2255aec16b" title="read_png" alt="" coords="189,5,264,32"/>
-<area shape="rect" id="node5" href="$scramble_8c.html#a89c94eeb376aaece7344d388a164d8f6" title="scramble_array" alt="" coords="171,56,282,83"/>
-<area shape="rect" id="node7" href="$scramble_8c.html#a92c987e529bce74ff5fe02fa12e50a49" title="calcScrambledIndex" alt="" coords="331,31,469,57"/>
-<area shape="rect" id="node9" href="$scramble_8c.html#aefb5df9b184c0cd4c7cc02895b5696d3" title="calcPixelIndex" alt="" coords="517,56,624,83"/>
-</map>

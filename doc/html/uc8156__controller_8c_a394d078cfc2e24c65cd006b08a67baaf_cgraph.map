@@ -1,4 +1,0 @@
-<map id="init_controller" name="init_controller">
-<area shape="rect" id="node3" href="$uc8156__controller_8c.html#a2c9002b2789fa707e35be637054c7e4d" title="set_registers" alt="" coords="153,5,250,32"/>
-<area shape="rect" id="node5" href="$uc8156__controller_8c.html#a5363aaff5607b6a0ef84b18bc644b170" title="write_register" alt="" coords="299,5,397,32"/>
-</map>
