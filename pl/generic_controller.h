@@ -16,6 +16,8 @@ typedef struct pl_generic_controller{
 	regSetting_t *regDefaults;
 	unsigned xres;
 	unsigned yres;
+	int xoffset;
+	int yoffset;
 	const struct pl_wfid *wf_table;
 	enum pl_epdc_power_state power_state;
 	enum pl_epdc_temp_mode temp_mode;

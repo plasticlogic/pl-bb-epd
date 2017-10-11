@@ -91,6 +91,8 @@ typedef struct s1d135xx {
 	int measured_temp;
 	unsigned xres;
 	unsigned yres;
+	int xoffset;
+	int yoffset;
 	int display_scrambling;
 	struct s1d135xx_update_cmd next_update_cmd;
 	struct {

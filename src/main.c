@@ -42,9 +42,6 @@
 #define LOG_TAG "main"
 #include <pl/utils.h>
 #include "text.h"
-/* remove
-#include "epson/epson-s1d135xx.h"
-*/
 
 #define INTERNAL_USAGE
 #define VERSION_INFO		"v1"
@@ -101,10 +98,8 @@ int execute_set_temperature(int argc, char **argv);
 int execute_update_image(int argc, char **argv);
 int execute_slideshow(int argc, char **argv);
 int execute_counter(int argc, char **argv);
-//remove int execute_interface_data(int argc, char**argv);
 int execute_write_reg(int argc, char **argv);
 int execute_read_reg(int argc, char **argv);
-//remove int execute_pgm_nvm_binary(int argc, char **argv);
 int execute_info(int argc, char **argv);
 int execute_switch_hv(int argc, char **argv);
 int execute_send_cmd(int argc, char **argv);
@@ -118,9 +113,7 @@ void printHelp_set_temperature(int identLevel);
 void printHelp_update_image(int identLevel);
 void printHelp_write_reg(int identLevel);
 void printHelp_read_reg(int identLevel);
-//remove void printHelp_pgm_nvm_binary(int identLevel);
 void printHelp_info(int identLevel);
-//remove void printHelp_interface_data(int identLevel);
 void printHelp_slideshow(int identLevel);
 void printHelp_counter(int identLevel);
 void printHelp_switch_hv(int identLevel);
@@ -134,8 +127,7 @@ struct CmdLineOptions supportedOperations[] = {
 		{"-set_temperature","sets the temperature", 					execute_set_temperature,printHelp_set_temperature},
 		{"-update_image", 	"updates the display", 						execute_update_image, 	printHelp_update_image},
 		{"-slideshow",		"shows a slidshow of .png images",			execute_slideshow,		printHelp_slideshow},
-		//remove 		{"-interface",		"shows a data of an interface",				execute_interface_data,	printHelp_interface_data},
-		{"-count",			"shows a counting number",					execute_counter,		printHelp_counter},
+//		{"-count",			"shows a counting number",					execute_counter,		printHelp_counter},
 #ifdef INTERNAL_USAGE
 		{"-send_cmd", 		"sends a command of EPD controller", 		execute_send_cmd, 		printHelp_send_cmd},
 		{"-write_reg", 		"writes to a register of EPD controller", 	execute_write_reg, 		printHelp_write_reg},
@@ -143,7 +135,6 @@ struct CmdLineOptions supportedOperations[] = {
 		{"-info",			"displays general display informations",	execute_info, printHelp_info},
 #endif
 		{"-switch_hv",	    "switches hv on/off based on parameter",	execute_switch_hv,	    printHelp_switch_hv},
-		//remove 		{"-pgm_nvm",		"programs the nvm with a binary file",		execute_pgm_nvm_binary,	printHelp_pgm_nvm_binary},
 		{"--version", 		"displays version info", 					print_versionInfo, 		NULL},
 		{"--help", 			"prints this help message", 				execute_help, 			NULL},
 };
@@ -156,7 +147,7 @@ int main(int argc, char* argv[])
 {
 
 	// debug features
-	printf("!\n");
+
 	int stat = 0;
 	char message[200];
 
@@ -412,28 +403,7 @@ int execute_counter(int argc, char**argv){
 
 	return stat;
 }
-/*//remove
-int execute_interface_data(int argc, char**argv){
-	int stat;
-	printf("%s\n",__func__);
-	char* interface = "/dev/can1";
-	int number_of_values = 4;
-	char values = 0x03;
 
-	if(argc >= 5) values = atoi(argv[4]);
-	if(argc >= 4) number_of_values = atoi(argv[3]);
-
-	if(argc>=3){
-		interface = argv[2];
-		stat = interface_data(argv[2], number_of_values, values);
-	}
-	else
-	{
-		stat = interface_data(interface, number_of_values, values);
-	}
-	return stat;
-}
-*/
 int execute_slideshow(int argc, char**argv){
 
 	int stat;
@@ -1075,7 +1045,7 @@ int interface_data(	char* interface,		// device where to find the data (can?)
 // ----------------------------------------------------------------------
 int counter(const char* wf)
 {
-
+	return -1;
 	printf("%s\n",__func__);
 	int wfid = 4;
 	unsigned char count = 0;
@@ -1086,10 +1056,10 @@ int counter(const char* wf)
 		LOG("Using Waveform %i" ,wfid);
 	}
 	struct pl_area area;
-	area.height = 960;
-	area.width = 1280;
-	area.top = 0;
-	area.left = 0;
+	area.height = 192;
+	area.width = 1024;
+	area.top = epdc->controller->yoffset;
+	area.left = epdc->controller->xoffset;
 //#if VERBOSE
 	LOG("Running counter");
 //#endif
@@ -1108,7 +1078,7 @@ int counter(const char* wf)
 		sprintf(counter, "%u" ,count++);
 
 		//read_stopwatch(&t, "start loop", 1);
-		if(show_text(epdc->controller, &area, counter, FONT0, 270, 300, 50, 100,1))
+		if(show_text(epdc->controller, &area, counter, FONT0, 270, 50, 5, 1,1))
 			return -1;
 		//read_stopwatch(&t, "show text", 1);
 		if (epdc->update(epdc, wfid,PL_FULL_UPDATE_NOWAIT, NULL))

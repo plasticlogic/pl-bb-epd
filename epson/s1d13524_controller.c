@@ -167,6 +167,8 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,
 	assert(s1d135xx != NULL);
 
 	s1d135xx->display_scrambling = p->display_scrambling;
+	s1d135xx->xoffset = p->xoffset;
+	s1d135xx->yoffset = p->yoffset;
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_FRAME_DATA_LENGTH);
 

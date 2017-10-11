@@ -115,7 +115,8 @@ static int s1d13541_init_clocks(struct s1d135xx *p);
 static int s1d13524_init_clocks(struct s1d135xx *p);
 
 // private functions
-static void memory_padding(uint8_t *source, uint8_t *target, int s_gl, int s_sl, int t_gl, int t_sl);
+//static void memory_padding(uint8_t *source, uint8_t *target, int s_gl, int s_sl, int t_gl, int t_sl);
+static void memory_padding(uint8_t *source, uint8_t *target, int s_gl, int s_sl, int t_gl, int t_sl, int o_gl, int o_sl);
 static int check_prod_code(struct s1d135xx *p, uint16_t ref_code);
 static int get_hrdy(struct s1d135xx *p);
 static int wflib_wr(void *ctx, const uint8_t *data, size_t n);
@@ -663,29 +664,43 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 		unsigned bpp, const struct pl_area *area, int left,
 		int top){
 		assert(p != NULL);
-
+		LOG("%s", __func__);
 		int stat = 0;
-		int memorySize = (area!=NULL)?area->width * area->height:p->yres*p->xres;
-		// scramble image
 
-		uint8_t *memoryBuffer;
+		int height = 0;
+		int width = 0;
+
+		int memorySize;
+
+		if(area==NULL){
+			height = p->xres;
+			width = p->yres;
+			memorySize = p->yres*p->xres;
+		}else{
+			memorySize = area->width * area->height;
+			height = area->height;
+			width = area->width;
+		}
+		// scramble image
+		if(area)
+			LOG("AREA: L: %i, T: %i, H: %i, W: %i", area->left, area->top, area->height, area->width);
+		uint8_t *scrambledPNG = malloc(height*width);
+		scramble_array((uint8_t*) buffer, scrambledPNG, &height, &width,  p->display_scrambling);
+
+		// adapt image to memory
+
+		uint8_t *memoryBuffer = malloc(p->yres*p->xres);
+		memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
+
 
 		// memory optimisation - if 4 bit per pixel mode is used
 		if (bpp == 4){
 			memorySize /= 2;
-			memoryBuffer = malloc(memorySize);
 			int bitIdx;
 			for(bitIdx = 0; bitIdx < memorySize; bitIdx++){
-				memoryBuffer[bitIdx] = (buffer[bitIdx*2+1] & 0xF0) | (buffer[bitIdx*2] >> 4);
-			}
-		}else{
-			memoryBuffer = malloc(memorySize);
-			int bitIdx;
-			for(bitIdx = 0; bitIdx < memorySize; bitIdx++){
-				memoryBuffer[bitIdx] = buffer[bitIdx];
+				memoryBuffer[bitIdx] = (memoryBuffer[bitIdx*2+1] & 0xF0) | (memoryBuffer[bitIdx*2] >> 4);
 			}
 		}
-
 
 		set_cs(p, 0);
 
@@ -729,8 +744,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		int top)
 {
 	assert(p != NULL);
-	//struct timespec t;
-	//start_stopwatch(&t);
+
 	int height = 0;
 	int width = 0;
 	uint8_t *pngBuffer;
@@ -740,15 +754,16 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	// read png image
 	if (read_png(path, &pngBuffer, &width, &height))
 		return -1;
-	//read_stopwatch(&t, "ReadPNG",1);
+
 	// scramble image
 	uint8_t *scrambledPNG = malloc(height*width);
 	scramble_array(pngBuffer, scrambledPNG, &height, &width,  p->display_scrambling);
-	//read_stopwatch(&t, "ScrambleImage",1);
+
 	// adapt image to memory
+
 	uint8_t *memoryBuffer = malloc(p->yres*p->xres);
-	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres);
-	//read_stopwatch(&t, "MapMemory",1);
+	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
+
 	// memory optimisation - if 4 bit per pixel mode is used
 	if (bpp == 4){
 		memorySize /= 2;
@@ -757,7 +772,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 			memoryBuffer[bitIdx] = (memoryBuffer[bitIdx*2+1] & 0xF0) | (memoryBuffer[bitIdx*2] >> 4);
 		}
 	}
-	//read_stopwatch(&t, "OptimizeData",1);
+
 	set_cs(p, 0);
 
 	if (area != NULL) {
@@ -775,11 +790,10 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	set_cs(p, 0);
 	send_cmd(p, S1D135XX_CMD_WRITE_REG);
 	send_param(p->interface, S1D135XX_REG_HOST_MEM_PORT);
-	//read_stopwatch(&t, "Prepare Transfer",1);
+
 	if (area == NULL)
 		transfer_data(p->interface, memoryBuffer, memorySize);
-	//printf("\n***************\nmemorySize: %i\n***************\n", memorySize);
-	//read_stopwatch(&t, "Perform Transfer",1);
+
 	set_cs(p, 1);
 
 	if(memoryBuffer)
@@ -796,10 +810,11 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		return -1;
 //*/
 	send_cmd_cs(p, S1D135XX_CMD_LD_IMG_END);
-	//read_stopwatch(&t, "Finish",1);
+
 	return p->wait_for_idle(p);
 }
 
+#if 0
 /**
  * This function pads the target (memory) with offset source and gate lines if needed.
  * The source content will be placed in the right lower corner, while the left upper space is containing the offset lines.
@@ -816,6 +831,38 @@ static void memory_padding(uint8_t *source, uint8_t *target,  int s_gl, int s_sl
 			target [(gl+gl_offset)*t_sl+(sl+sl_offset)] = source [gl*s_sl+sl];
 		}
 }
+#else
+
+/**
+ * This function pads the target (memory) with offset source and gate lines if needed.
+ * If no offset is defined (o_gl=-1, o_sl=-1) the source content will be placed in the right lower corner,
+ * while the left upper space is containing the offset lines.
+ */
+static void memory_padding(uint8_t *source, uint8_t *target,  int s_gl, int s_sl, int t_gl, int t_sl, int o_gl, int o_sl)
+{
+	int sl, gl;
+	int _gl_offset = 0;
+	int _sl_offset = 0;
+
+	if(o_gl > 0)
+		_gl_offset = o_gl;
+	else
+		_gl_offset = t_gl - s_gl;
+
+	if(o_sl > 0)
+		_sl_offset = o_sl;
+	else
+		_sl_offset = t_sl - s_sl;
+
+
+	for (gl=0; gl<s_gl; gl++)
+		for(sl=0; sl<s_sl; sl++)
+		{
+			target [(gl+_gl_offset)*t_sl+(sl+_sl_offset)] = source [gl*s_sl+sl];
+		}
+}
+#endif
+
 
 static int s1d135xx_pattern_check(struct s1d135xx *p, uint16_t height, uint16_t width, uint16_t checker_size, uint16_t mode)
 {
