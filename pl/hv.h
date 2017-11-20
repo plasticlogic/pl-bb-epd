@@ -31,6 +31,7 @@ typedef struct pl_vcom_config{
 	void *hw_ref;
 
 	int (*set_vcom)(struct pl_vcom_config *p, double value);
+	int (*get_vcom)(struct pl_vcom_config *p);
 	int (*init)(struct pl_vcom_config *p);
 	void (*delete)(struct pl_vcom_config *p);
 } pl_vcom_config_t;

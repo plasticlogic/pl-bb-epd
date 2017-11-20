@@ -97,7 +97,9 @@ void swap32_array(int32_t **x, uint16_t n);
 
 /** reads a png file into a monochrome buffer */
 int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * heigth);
-
+/** reads a png file into a color buffer */
+int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width, int * heigth);
+uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, rgbw_pixel_t pixel);
 /** loads a file with register settings and supplies a vector containing all settings */
 int read_register_settings_from_file(const char* filename, regSetting_t** settings);
 void dump_register_settings(regSetting_t *settings, int n);

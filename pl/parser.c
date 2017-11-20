@@ -27,6 +27,9 @@
 #include <pl/parser.h>
 #include <pl/types.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int parser_find_str(const char *str, const char *sep, int skip)
 {
@@ -120,3 +123,31 @@ int parser_read_area(const char *str, const char *sep, struct pl_area *a)
 	return parser_read_int_list(str, sep, coords);
 }
 
+int parser_read_file_line(FILE *f, char *buffer, int max_length)
+{
+	size_t count;
+	char *out;
+	int i;
+
+	for (i = 0, out = buffer; i < max_length; ++i, ++out) {
+		count = fread(out, 1, 1,f);
+		//printf("count: %i\n", count);
+		if (count != 1){
+
+			return -1;
+		}
+
+
+		if ((*out == '\n') || !count)
+			break;
+
+		if (*out == '\r')
+			--out;
+	}
+
+	if (i == max_length)
+		return -1;
+
+	*out = '\0';
+	return !!count;
+}

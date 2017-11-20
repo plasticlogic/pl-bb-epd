@@ -32,6 +32,7 @@ typedef struct pl_pmic {
 	int (*configure)(struct pl_pmic *pmic, struct vcom_cal *cal);
 	int (*set_vcom_register)(struct pl_pmic *pmic, int dac_value);
 	int (*set_vcom_voltage)(struct pl_pmic *pmic, int mv);
+	int (*get_vcom_voltage)(struct pl_pmic *pmic);
 	int (*wait_pok)(struct pl_pmic *pmic);
 	int (*hv_enable)(struct pl_pmic *pmic);
 	int (*hv_disable)(struct pl_pmic *pmic);

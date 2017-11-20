@@ -55,5 +55,6 @@ extern void vcom_init(struct vcom_cal *v, struct pl_hw_vcom_info *c);
 
 /** Get the DAC register value for a given VCOM input voltage */
 extern int vcom_calculate(const struct vcom_cal *v, int input_mv);
+extern int vcom_calculate_dac(const struct vcom_cal *v, int dac_value);
 
 #endif /* VCOM_H_ */

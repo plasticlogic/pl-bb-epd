@@ -85,6 +85,7 @@ static int tps65185_wait_pok(pl_pmic_t *p);
 static int tps65185_hv_enable(pl_pmic_t *p);
 static int tps65185_hv_disable(pl_pmic_t *p);
 static int tps65185_set_vcom_voltage(pl_pmic_t *p, int mv);
+static int tps65185_get_vcom_voltage(pl_pmic_t *p);
 static int tps65185_set_vcom_register(pl_pmic_t *p, int value);
 static int tps65185_temperature_measure(pl_pmic_t *p, int16_t *measured);
 static int tps65185_vcom_enable(pl_pmic_t *p);
@@ -129,6 +130,7 @@ pl_pmic_t *tps65185_new(struct pl_i2c *i2c, uint8_t i2c_addr){
 	p->apply_timings = tps65185_apply_timings;
 	p->set_vcom_register = tps65185_set_vcom_register;
 	p->set_vcom_voltage = tps65185_set_vcom_voltage;
+	p->get_vcom_voltage = tps65185_get_vcom_voltage;
 	p->temp_disable = tps65185_temp_disable;
 	p->temp_enable = tps65185_temp_enable;
 	p->temperature_measure = tps65185_temperature_measure;
@@ -278,6 +280,7 @@ static int tps65185_set_vcom_voltage(pl_pmic_t *p, int mv)
 	assert(p != NULL);
 
 	dac_value = vcom_calculate(p->cal, mv);
+	LOG("calculate: %i, %i", mv, dac_value);
 
 	if (dac_value < HVPMIC_DAC_MIN)
 		dac_value = HVPMIC_DAC_MIN;
@@ -292,6 +295,29 @@ static int tps65185_set_vcom_voltage(pl_pmic_t *p, int mv)
 
 	return pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_VCOM2, v2);
 }
+
+/* program the internal VCOM Dac to give us the required voltage */
+static int tps65185_get_vcom_voltage(pl_pmic_t *pmic)
+{
+
+	uint8_t v1 = 0;
+	uint8_t v2 = 0;
+	int mv;
+	uint16_t dac_value;
+	assert(pmic != NULL);
+
+	pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_VCOM1, v1);
+	pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_VCOM2, v2);
+
+	dac_value = v1 + ((uint16_t) v2 << 8);
+
+	mv = vcom_calculate_dac(pmic->cal, dac_value);
+#if VERBOSE
+	LOG("calculate: %i, %i", mv, dac_value);
+#endif
+	return mv;
+}
+
 
 static int tps65185_temperature_measure(pl_pmic_t *p, int16_t *measured)
 {

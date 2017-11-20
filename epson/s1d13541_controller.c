@@ -13,6 +13,8 @@
 #include <pl/gpio.h>
 #include <src/pindef.h>
 
+#define VERBOSE 1
+
 static const struct pl_wfid wf_table[] = {
 	{ "default",	   1 },
 	{ "0",             0 },
@@ -58,7 +60,7 @@ static int update_temp_manual(struct s1d135xx *p, int manual_temp);
 static int update_temp_auto(struct s1d135xx *p, uint16_t temp_reg);
 
 static int set_power(pl_generic_controller_t *p, enum pl_epdc_power_state state);
-
+static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres);
 
 // -----------------------------------------------------------------------------
 // initialization
@@ -68,11 +70,11 @@ int s1d13541_controller_setup(pl_generic_controller_t *p, struct s1d135xx *s1d13
 	assert(p != NULL);
 	assert(s1d135xx != NULL);
 
-//	if (s1d135xx->pins->hrdy != PL_GPIO_NONE)
-//		LOG("Using HRDY GPIO");
-//
-//	if (s1d135xx->pins->hdc != PL_GPIO_NONE)
-//		LOG("Using HDC GPIO");
+	if (s1d135xx->pins->hrdy != PL_GPIO_NONE)
+		LOG("Using HRDY GPIO");
+
+	if (s1d135xx->pins->hdc != PL_GPIO_NONE)
+		LOG("Using HDC GPIO");
 
 
 	p->configure_update = configure_update;
@@ -93,7 +95,7 @@ int s1d13541_controller_setup(pl_generic_controller_t *p, struct s1d135xx *s1d13
 	p->init = init_controller;
 	p->wf_table = wf_table;
 	p->hw_ref = s1d135xx;
-
+	p->get_resolution = get_resolution;
 
 	s1d135xx->flags.needs_update = 0;
 	s1d135xx->hrdy_mask = S1D13541_STATUS_HRDY;
@@ -109,6 +111,21 @@ int s1d13541_controller_setup(pl_generic_controller_t *p, struct s1d135xx *s1d13
 // -----------------------------------------------------------------------------
 // private controller interface functions
 // ------------------------------
+static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres){
+	s1d135xx_t *s1d135xx = p->hw_ref;
+	assert(s1d135xx != NULL);
+	if(xres && yres){
+		// TODO: Check if scrambled!!!
+		int x,y;
+		x = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
+		y = s1d135xx->read_reg(s1d135xx, S1D13541_REG_FRAME_DATA_LENGTH);
+		*xres = x;
+		*yres = y;
+		return 0;
+	}
+	return -1;
+}
+
 static int configure_update(pl_generic_controller_t *p, int wfid, enum pl_update_mode mode, const struct pl_area *area)
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
@@ -313,7 +330,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,  const s
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
-
+	s1d135xx->cfa_overlay = p->cfa_overlay;
 	s1d135xx->display_scrambling = p->display_scrambling;
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_FRAME_DATA_LENGTH);
@@ -400,6 +417,27 @@ static void update_temp(struct s1d135xx *p, uint16_t reg)
 #endif
 
 	p->measured_temp = regval;
+}
+
+static void get_temp(struct s1d135xx *p, int* temperature)
+{
+#if 0
+	uint16_t regval;
+
+	regval = p->read_reg(p, S1D135XX_REG_INT_RAW_STAT);
+	p->flags.needs_update = (regval & S1D13541_INT_RAW_WF_UPDATE) ? 1 : 0;
+	p->write_reg(p, S1D135XX_REG_INT_RAW_STAT,
+			   (S1D13541_INT_RAW_WF_UPDATE |
+			    S1D13541_INT_RAW_OUT_OF_RANGE));
+	regval = p->read_reg(p, reg) & S1D135XX_TEMP_MASK;
+
+#if VERBOSE_TEMPERATURE
+	if (regval != p->measured_temp)
+		LOG("Temperature: %d", regval);
+#endif
+
+	p->measured_temp = regval;
+#endif
 }
 
 static int update_temp_manual(struct s1d135xx *p, int manual_temp)

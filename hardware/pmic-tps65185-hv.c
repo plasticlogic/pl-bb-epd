@@ -20,6 +20,7 @@ static void set_vsl(struct pl_hv_config *p, double valueInVolts);
 static int set_hv_timings(struct pl_hv_timing *p);
 static int vcom_driver_on(pl_vcom_driver_t *p);
 static int tps65185_vcom_config_set(struct pl_vcom_config *p, double vcomInMillivolt);
+static int tps65185_vcom_config_get(struct pl_vcom_config *p);
 static int vcom_driver_off(pl_vcom_driver_t *p);
 static int hv_driver_init(pl_hv_driver_t *p);
 static int hv_config_init(pl_hv_config_t *p);
@@ -216,6 +217,7 @@ pl_vcom_config_t *tps65185_get_vcom_config(pl_pmic_t *tps65185){
 	struct pl_vcom_config *p = vcom_config_new();
 	p->hw_ref = tps65185;
 	p->set_vcom = tps65185_vcom_config_set;
+	p->get_vcom = tps65185_vcom_config_get;
 	p->init = vcom_config_init;
 	return p;
 }
@@ -226,6 +228,14 @@ static int tps65185_vcom_config_set(struct pl_vcom_config *p, double vcomInMilli
 	assert(tps65185 != NULL);
 
 	return tps65185->set_vcom_voltage(tps65185, (int)vcomInMillivolt);
+}
+
+static int tps65185_vcom_config_get(struct pl_vcom_config *p){
+	assert(p != NULL);
+	pl_pmic_t *tps65185 = (pl_pmic_t*)p->hw_ref;
+	assert(tps65185 != NULL);
+
+	return tps65185->get_vcom_voltage(tps65185);
 }
 
 /**

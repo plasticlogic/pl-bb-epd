@@ -50,6 +50,9 @@
 #define HBZ1_3_PMIC_EN 		BEAGLEBONE_GPIO(3,21)  //P9-25
 #define HBZ1_3_3V3_EN		BEAGLEBONE_GPIO(1,28)  //P9-12
 
+#define FALCON_NVM_CS		BEAGLEBONE_GPIO(3,17)	//P9-28
+
+
 static const struct pl_gpio_config g_chiffchaff_gpios[] = {
 	{CHIFFCHAFF_32MHZ_EN, PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ VCOM_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
@@ -68,9 +71,9 @@ static const struct pl_gpio_config g_chiffchaff_gpios[] = {
 };
 
 static const struct pl_gpio_config g_ruddock_gpios[] = {
-	/*{ VCOM_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },*/
+	{ VCOM_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ PMIC_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	/*{ PMIC_POK,   PL_GPIO_INPUT                   },*/
+	{ PMIC_POK,   PL_GPIO_INPUT                   },
 	{ PMIC_FLT,   PL_GPIO_INPUT                   },
 	{ RUDDOCK_5V_EN,  		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HIRQ,    		PL_GPIO_INPUT  | PL_GPIO_PU     },
@@ -80,6 +83,22 @@ static const struct pl_gpio_config g_ruddock_gpios[] = {
 	{ RUDDOCK_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_RESERVE_2,   	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 };
+
+static const struct pl_gpio_config g_falcon_gpios[] = {
+	{ VCOM_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ PMIC_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ PMIC_POK,   PL_GPIO_INPUT                   },
+	{ PMIC_FLT,   PL_GPIO_INPUT                   },
+	{ RUDDOCK_5V_EN,  		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HIRQ,    		PL_GPIO_INPUT  | PL_GPIO_PU     },
+	{ RUDDOCK_HRDY,    		PL_GPIO_INPUT  | PL_GPIO_INIT_H },  // needed for Ruddock
+	{ RUDDOCK_HDC,     		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_RESET,   		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ FALCON_NVM_CS,      	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_RESERVE_2,   	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+};
+
 
 static const  struct pl_gpio_config g_ruddock_parallel_gpios[] = {
 	{ VCOM_EN,    			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
@@ -111,6 +130,37 @@ static const  struct pl_gpio_config g_ruddock_parallel_gpios[] = {
 	{ RUDDOCK_HDB15,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 };
 
+static const  struct pl_gpio_config g_falcon_parallel_gpios[] = {
+	{ VCOM_EN,    			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ PMIC_EN,    			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ PMIC_POK,   			PL_GPIO_INPUT                   },
+	{ PMIC_FLT,   			PL_GPIO_INPUT                   },
+	{ RUDDOCK_5V_EN,  		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HIRQ,    		PL_GPIO_INPUT  | PL_GPIO_PU     },
+	{ RUDDOCK_HRDY,    		PL_GPIO_INPUT  | PL_GPIO_INIT_H },  // needed for Ruddock parallel
+	{ RUDDOCK_HDC,     		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_RESET,   		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ FALCON_NVM_CS,      	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_RESERVE_2,   	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_HDB0,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB1,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB2,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB3,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB4,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB5,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB6,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB7,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB8,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB9,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB10,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB11,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB12,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB13,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB14,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HDB15,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+};
+
 static const struct pl_gpio_config g_HBZ1_3_gpios[] = {
 	{ HBZ1_3_HIRQ,    		PL_GPIO_INPUT  | PL_GPIO_PU     },
 	{ RUDDOCK_HDC,     		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
@@ -121,4 +171,17 @@ static const struct pl_gpio_config g_HBZ1_3_gpios[] = {
 	{ HBZ1_3_3V3_EN,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 };
 
+static const struct pl_gpio_config g_hbz6_3_gpios[] = {
+	{ VCOM_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ PMIC_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ PMIC_POK,   PL_GPIO_INPUT                   },
+	{ PMIC_FLT,   PL_GPIO_INPUT                   },
+	{ RUDDOCK_5V_EN,  		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_HIRQ,    		PL_GPIO_INPUT  | PL_GPIO_PU     },
+	{ RUDDOCK_HRDY,    		PL_GPIO_INPUT  | PL_GPIO_INIT_H },  // needed for Ruddock
+	{ RUDDOCK_HDC,     		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_RESET,   		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ RUDDOCK_RESERVE_2,   	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+};
 #endif /* PINDEF_H_ */

@@ -1,5 +1,5 @@
 /*
- * BBepdcULD.c
+ * epdc-app.c
  *
  *  Created on: 10.09.2014
  *      Author: sebastian.friebe
@@ -75,6 +75,10 @@ int stop_epdc();
 int set_vcom(int vcom);
 int set_waveform(char *waveform, float *temperature);
 int set_temperature(float temperature);
+int get_vcom(void);
+int get_waveform(void);
+int get_temperature(void);
+int get_resolution(void);
 int update_image(char *path, const char* wfID, enum pl_update_mode mode, int vcom_switch, int updateCount, int waitTime);
 int read_register(regSetting_t regSetting);
 int write_register(regSetting_t regSetting, const uint32_t bitmask);
@@ -95,6 +99,10 @@ int execute_stop_epdc(int argc, char **argv);
 int execute_set_vcom(int argc, char **argv);
 int execute_set_waveform(int argc, char **argv);
 int execute_set_temperature(int argc, char **argv);
+int execute_get_vcom(int argc, char **argv);
+int execute_get_waveform(int argc, char **argv);
+int execute_get_temperature(int argc, char **argv);
+int execute_get_resolution(int argc, char **argv);
 int execute_update_image(int argc, char **argv);
 int execute_slideshow(int argc, char **argv);
 int execute_counter(int argc, char **argv);
@@ -110,6 +118,10 @@ void printHelp_stop_epdc(int identLevel);
 void printHelp_set_vcom(int identLevel);
 void printHelp_set_waveform(int identLevel);
 void printHelp_set_temperature(int identLevel);
+void printHelp_get_vcom(int identLevel);
+void printHelp_get_resolution(int identLevel);
+void printHelp_get_waveform(int identLevel);
+void printHelp_get_temperature(int identLevel);
 void printHelp_update_image(int identLevel);
 void printHelp_write_reg(int identLevel);
 void printHelp_read_reg(int identLevel);
@@ -125,6 +137,10 @@ struct CmdLineOptions supportedOperations[] = {
 		{"-set_vcom", 		"sets com voltage", 						execute_set_vcom, 		printHelp_set_vcom},
 		{"-set_waveform", 	"sets the waveform", 						execute_set_waveform, 	printHelp_set_waveform},
 		{"-set_temperature","sets the temperature", 					execute_set_temperature,printHelp_set_temperature},
+		{"-get_vcom", 		"gets com voltage", 						execute_get_vcom, 		printHelp_get_vcom},
+		{"-get_resolution",	"gets display resolution",					execute_get_resolution,	printHelp_get_resolution},
+		{"-get_waveform", 	"gets the waveform", 						execute_get_waveform, 	printHelp_get_waveform},
+		{"-get_temperature","gets the temperature", 					execute_get_temperature,printHelp_get_temperature},
 		{"-update_image", 	"updates the display", 						execute_update_image, 	printHelp_update_image},
 		{"-slideshow",		"shows a slidshow of .png images",			execute_slideshow,		printHelp_slideshow},
 //		{"-count",			"shows a counting number",					execute_counter,		printHelp_counter},
@@ -147,7 +163,7 @@ int main(int argc, char* argv[])
 {
 
 	// debug features
-
+	//printf("%s\n", __func__);
 	int stat = 0;
 	char message[200];
 
@@ -220,30 +236,43 @@ int main(int argc, char* argv[])
 
 int initialize_environment(){
 	int stat = 0;
-
+	//printf("%s\n", __func__);
 
 	hardware = hw_setup_new();
+	//printf("%s\n", __func__);
 
 #ifdef INTERNAL_USAGE
-	stat |= hardware->init_from_configfile(hardware, "/boot/uboot/epdc/S115_T1.1/epdc.config");
+	stat |= hardware->init_from_configfile(hardware, NULL);///"/boot/uboot/epdc/S115_T1.1/epdc.config");
 #else
-	stat |= hardware->init_from_configfile(hardware, "BBepdcULD.config");
+	stat |= hardware->init_from_configfile(hardware, "epdc-app.config");
 #endif
 
+	//printf("%s\n", __func__);
 	epdc = generic_epdc_new();
+	//printf("%s\n", __func__);
 
 	epdc->hv = hv_new();
+	//printf("%s\n", __func__);
 
 	epdc->hv->hvConfig = hardware->hvConfig;
+	//printf("%s\n", __func__);
 	epdc->hv->hvDriver = hardware->hvDriver;
+	//printf("%s\n", __func__);
 	epdc->hv->hvTiming = hardware->hvTiming;
+	//printf("%s\n", __func__);
 	epdc->hv->vcomConfig = hardware->vcomConfig;
+	//printf("%s\n", __func__);
 	epdc->hv->vcomDriver = hardware->vcomDriver;
+	//printf("%s\n", __func__);
 	epdc->hv->vcomSwitch = hardware->vcomSwitch;
+	//printf("%s\n", __func__);
 
 	epdc->nvm = hardware->nvm;
+	//printf("%s\n", __func__);
 	epdc->controller = hardware->controller;
+	//printf("%s\n", __func__);
 	epdc->default_vcom = hardware->default_vcom;
+	//printf("%s\n", __func__);
 
 	return stat;
 }
@@ -254,7 +283,7 @@ int initialize_environment(){
  */
 int release_environment(){
 	// release spi device
-
+	//printf("%s\n", __func__);
 	hardware->sInterface->close(hardware->sInterface);
 	hardware->sInterface->delete(hardware->sInterface);
 
@@ -266,7 +295,7 @@ int release_environment(){
 // operation functions
 // ----------------------------------------------------------------------
 int execute_help(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int print_all = false;
 
 	if (argc >=3){
@@ -280,7 +309,7 @@ int execute_help(int argc, char **argv){
 }
 
 int execute_start_epdc(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat = 0;
 	int executeClear = false;
 	int initFromEEprom = false;
@@ -300,7 +329,7 @@ int execute_start_epdc(int argc, char **argv){
 }
 
 int execute_stop_epdc(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat = 0;
 
 	stat = stop_epdc();
@@ -309,7 +338,7 @@ int execute_stop_epdc(int argc, char **argv){
 }
 
 int execute_set_vcom(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 
 	if(argc == 3)
@@ -325,7 +354,7 @@ int execute_set_vcom(int argc, char **argv){
 }
 
 int execute_set_waveform(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	float temperature;
 
@@ -347,7 +376,7 @@ int execute_set_waveform(int argc, char **argv){
 }
 
 int execute_set_temperature(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	float temperature;
 
@@ -364,8 +393,42 @@ int execute_set_temperature(int argc, char **argv){
 	return stat;
 }
 
-int execute_update_image(int argc, char **argv){
 
+int execute_get_vcom(int argc, char **argv){
+	//printf("%s\n", __func__);
+	int stat;
+	stat = get_vcom();
+	return stat;
+}
+
+int execute_get_waveform(int argc, char **argv){
+	//printf("%s\n", __func__);
+	int stat;
+	stat = get_waveform();
+
+	return stat;
+}
+
+int execute_get_temperature(int argc, char **argv){
+	//printf("%s\n", __func__);
+	int stat;
+	stat = get_temperature();
+
+	return stat;
+}
+
+int execute_get_resolution(int argc, char **argv){
+	//printf("%s\n", __func__);
+	int stat;
+	stat = get_resolution();
+
+	return stat;
+}
+
+
+
+int execute_update_image(int argc, char **argv){
+	//printf("%s\n", __func__);
 	int stat;
 
 	char* wfID = "default";
@@ -396,7 +459,7 @@ int execute_update_image(int argc, char **argv){
 }
 
 int execute_counter(int argc, char**argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	printf("%s\n",__func__);
 	stat = counter(NULL);
@@ -405,7 +468,7 @@ int execute_counter(int argc, char**argv){
 }
 
 int execute_slideshow(int argc, char**argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	//slideshow path wfid waittime
 	int waitTime = 700;
@@ -424,7 +487,7 @@ int execute_slideshow(int argc, char**argv){
 }
 
 int execute_send_cmd(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	regSetting_t regData;
 	regData.valCount = 1;
@@ -478,7 +541,7 @@ int execute_send_cmd(int argc, char **argv){
 }
 
 int execute_write_reg(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	regSetting_t regData;
 	regData.valCount = 1;
@@ -530,7 +593,7 @@ int execute_write_reg(int argc, char **argv){
 }
 
 int execute_read_reg(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	regSetting_t regData;
 	regData.valCount = 1;
@@ -584,7 +647,7 @@ int execute_pgm_nvm_binary(int argc, char **argv){
 */
 
 int execute_info(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 
 	int stat = 0;
 
@@ -594,7 +657,7 @@ int execute_info(int argc, char **argv){
 }
 
 int execute_switch_hv(int argc, char **argv){
-
+	//printf("%s\n", __func__);
 	int stat;
 	int state;
 
@@ -615,8 +678,8 @@ int execute_switch_hv(int argc, char **argv){
 }
 
 int print_versionInfo(int argc, char **argv){
-
-	printf("BBepdcULD version = %s\n", VERSION_INFO);
+	//printf("%s\n", __func__);
+	printf("epdc-app version = %s\n", VERSION_INFO);
 
 	return 0;
 }
@@ -631,7 +694,7 @@ int print_versionInfo(int argc, char **argv){
  */
 int start_epdc(int load_nvm_content, int execute_clear)
 {
-
+	//printf("%s\n", __func__);
 	int stat = 0;
 	LOG("load_nvm_content?: %d", load_nvm_content);
 
@@ -659,7 +722,7 @@ int start_epdc(int load_nvm_content, int execute_clear)
  */
 int stop_epdc()
 {
-
+	//printf("%s\n", __func__);
 	printf("stop\n");
 
 	hardware->gpios.set(hardware->vddGPIO, 0);
@@ -680,7 +743,7 @@ int stop_epdc()
  */
 int set_vcom(int vcom)
 {
-
+	//printf("%s\n", __func__);
   printf("vcom %d\n", vcom);
   return epdc->set_vcom(epdc, vcom);
 }
@@ -693,7 +756,7 @@ int set_vcom(int vcom)
  */
 int set_waveform(char *waveform, float *temperature)
 {
-
+	//printf("%s\n", __func__);
   int do_update = 0;
 
   if (temperature != NULL && (epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL))
@@ -721,7 +784,7 @@ int set_waveform(char *waveform, float *temperature)
 int set_temperature(float temperature)
 {
 
-
+	//printf("%s\n", __func__);
 	if(epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL)
 	{
 	  printf("temperature %f\n", temperature);
@@ -738,6 +801,45 @@ int set_temperature(float temperature)
   return 0;
 }
 
+int get_vcom(void)
+{//printf("%s\n", __func__);
+	LOG("VCOM: %i", epdc->get_vcom(epdc));
+	return 0;
+}
+
+/**
+ * Sends given waveform data to EPDC.
+ * @param waveform path to a waveform file.
+ * @param manual set temperature.
+ * @return status
+ */
+int get_waveform(void)
+{
+	//printf("%s\n", __func__);
+	LOG("Not implemented.");
+	return 0;
+}
+
+/**
+ * Sends given temperature to EPDC if manual temperature mode is active.
+ * @return status
+ */
+int get_temperature(void)
+{
+	//printf("%s\n", __func__);
+	LOG("Not implemented.");
+	return 0;
+}
+
+int get_resolution(void)
+{
+	int x,y;
+	if(epdc->controller->get_resolution(epdc->controller, &x, &y))
+		return -1;
+	LOG("Physical Resolution: %ix%i", x,y);
+	return 0;
+}
+
 /**
  * Updates image.
  * @param path image path.
@@ -750,18 +852,18 @@ int set_temperature(float temperature)
  */
 int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		int vcomSwitchEnable, int updateCount, int waitTime) {
-
+	//printf("%s\n", __func__);
 
 	int cnt = 0;
 
-	printf("path: %s\n", path);
+	LOG("path: %s", path);
 
 	int wfId = pl_generic_controller_get_wfid(epdc->controller, wfID);
-	printf("wfID: %d\n", wfId);
-	printf("updateMode: %d\n", mode);
-	printf("updateCount: %d\n", updateCount);
-	printf("waitTime: %d\n", waitTime);
-	printf("vcomSwitch: %d\n", vcomSwitchEnable);
+	LOG("wfID: %d", wfId);
+	LOG("updateMode: %d", mode);
+	LOG("updateCount: %d", updateCount);
+	LOG("waitTime: %d", waitTime);
+	LOG("vcomSwitch: %d", vcomSwitchEnable);
 
 	if (wfId == -1)
 		return -1;
@@ -795,7 +897,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
  */
 int read_register(regSetting_t regSetting){
 
-
+	//printf("%s\n", __func__);
 	uint16_t *data = malloc(sizeof(uint16_t)*regSetting.valCount);
 	regSetting.val = data;
 	if (regSetting.val == NULL)
@@ -820,7 +922,7 @@ int read_register(regSetting_t regSetting){
 */
 int write_register(regSetting_t regSetting, const uint32_t bitmask){
 
-
+	//printf("%s\n", __func__);
 	if (regSetting.val == NULL)
 		return -1;
 
@@ -838,7 +940,7 @@ int write_register(regSetting_t regSetting, const uint32_t bitmask){
 */
 int send_cmd(regSetting_t regSetting){
 
-
+	//printf("%s\n", __func__);
 	if (regSetting.val == NULL)
 		return -1;
 
@@ -854,7 +956,7 @@ int send_cmd(regSetting_t regSetting){
  */
 int info(){
 
-
+	//printf("%s\n", __func__);
 	int stat = 0;
 	int isPgm = 0;
 
@@ -883,7 +985,7 @@ int info(){
  */
 int switch_hv(int state){
 	int stat;
-
+	//printf("%s\n", __func__);
 
 	if (state == 1){
 		if ((epdc->hv->hvDriver != NULL) && (epdc->hv->hvDriver->switch_on != NULL))
@@ -909,7 +1011,7 @@ int switch_hv(int state){
  */
 int readBinaryFile(const char *binaryPath, uint8_t **blob){
 	// read binary blob
-
+	//printf("%s\n", __func__);
 	FILE *fs = fopen(binaryPath, "rb");
 	int len=0;
 
@@ -1095,7 +1197,7 @@ int counter(const char* wf)
 // ----------------------------------------------------------------------
 int slideshow(const char *path, const char* wf, int waittime)
 {
-
+	//printf("%s\n", __func__);
 
 	DIR *dir;
 	struct dirent *d;
@@ -1139,7 +1241,7 @@ int slideshow(const char *path, const char* wf, int waittime)
 
 int show_image(const char *dir, const char *file, int wfid)
 {
-
+	//printf("%s\n", __func__);
 	char path[256];
 
 	LOG("Image: %s %s", dir, file);
@@ -1169,11 +1271,11 @@ int show_image(const char *dir, const char *file, int wfid)
 // help messages
 // ----------------------------------------------------------------------
 void print_application_help(int print_all){
-
+	//printf("%s\n", __func__);
 	printf("\n");
-	printf("Usage:  BBepdcULD [operation] [parameter]   --> executes an operation \n");
-	printf("        BBepdcULD [operation] --help        --> prints detailed help  \n");
-	printf("        BBepdcULD [operation] --help -all   --> prints complete help at once \n");
+	printf("Usage:  epdc-app [operation] [parameter]   --> executes an operation \n");
+	printf("        epdc-app [operation] --help        --> prints detailed help  \n");
+	printf("        epdc-app [operation] --help -all   --> prints complete help at once \n");
 	printf("\n");
 	printf("Available Operations:\n");
 	int operationIdx = 0;
@@ -1199,7 +1301,7 @@ void print_application_help(int print_all){
 void printHelp_start_epdc(int identLevel){
 	printf("%*s Activates and initializes the EPD controller.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -start_epdc [<nvm_flag> [ <clear_flag> ]]]\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -start_epdc [<nvm_flag> [ <clear_flag> ]]]\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<nvm_flag>    	   : \tif 0 = override of waveform and vcom enabled (default).\n", identLevel, " ");
 	printf("%*s \t                       \tif 1 = override disabled, use settings from NV memory.\n", identLevel, " ");
@@ -1211,14 +1313,14 @@ void printHelp_start_epdc(int identLevel){
 void printHelp_stop_epdc(int identLevel){
 	printf("%*s De-initializes the EPD controller.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -stop_epdc\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -stop_epdc\n", identLevel, " ");
 	printf("\n");
 }
 
 void printHelp_set_vcom(int identLevel){
 	printf("%*s Sets the Vcom voltage.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -set_vcom <voltage>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -set_vcom <voltage>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<voltage>  : \tcom voltage in volts.\n", identLevel, " ");
 	printf("\n");
@@ -1227,7 +1329,7 @@ void printHelp_set_vcom(int identLevel){
 void printHelp_set_waveform(int identLevel){
 	printf("%*s Sets the waveform used for later update operations.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -set_waveform <waveform> <temp>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -set_waveform <waveform> <temp>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<waveform> : \tpath to the waveform file.\n", identLevel, " ");
 	printf("%*s \t<temp>     : \tTemperature in degree celsius.\n", identLevel, " ");
@@ -1237,7 +1339,44 @@ void printHelp_set_waveform(int identLevel){
 void printHelp_set_temperature(int identLevel){
 	printf("%*s Sets the temperature.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -set_temperature <temp>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -set_temperature <temp>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<temp>     : \tTemperature in degree celsius.\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_get_resolution(int identLevel){
+	printf("%*s Sets the Vcom voltage.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -set_vcom <voltage>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<voltage>  : \tcom voltage in volts.\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_get_vcom(int identLevel){
+	printf("%*s Sets the Vcom voltage.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -set_vcom <voltage>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<voltage>  : \tcom voltage in volts.\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_get_waveform(int identLevel){
+	printf("%*s Sets the waveform used for later update operations.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -set_waveform <waveform> <temp>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<waveform> : \tpath to the waveform file.\n", identLevel, " ");
+	printf("%*s \t<temp>     : \tTemperature in degree celsius.\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_get_temperature(int identLevel){
+	printf("%*s Sets the temperature.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -set_temperature <temp>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<temp>     : \tTemperature in degree celsius.\n", identLevel, " ");
 	printf("\n");
@@ -1246,7 +1385,7 @@ void printHelp_set_temperature(int identLevel){
 void printHelp_update_image(int identLevel){
 	printf("%*s Updates the display with a given image.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -update_image <image>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -update_image <image>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<image>               : \tpath to the image file.\n", identLevel, " ");
 	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
@@ -1260,7 +1399,7 @@ void printHelp_update_image(int identLevel){
 void printHelp_write_reg(int identLevel){
 	printf("%*s Writes to a specified register of the EPD controller.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -write_reg <reg_addr> <datacount> <data> [bitmask]\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -write_reg <reg_addr> <datacount> <data> [bitmask]\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<reg_addr> : \tspecifies the address of the register where the data is written.\n", identLevel, " ");
 	printf("%*s \t<datacount>: \tspecifies the amount of data portions to be written.\n", identLevel, " ");
@@ -1274,7 +1413,7 @@ void printHelp_write_reg(int identLevel){
 void printHelp_send_cmd(int identLevel){
 	printf("%*s Sends a command with specified arguments to the EPD controller.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -send_cmd <cmd> <datacount> <data> [bitmask]\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -send_cmd <cmd> <datacount> <data> [bitmask]\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<cmd> : \tspecifies the cmd to be executed.\n", identLevel, " ");
 	printf("%*s \t<datacount>: \toptional paraetmer, specifies the amount of data portions to be written.\n", identLevel, " ");
@@ -1287,7 +1426,7 @@ void printHelp_read_reg(int identLevel){
 
 	printf("%*s Reads from a specified register of the EPD controller and prints the values to the shell.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -read_reg <reg_addr> <datacount>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -read_reg <reg_addr> <datacount>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<reg_addr> : \tspecifies the address of the register to be read.\n", identLevel, " ");
 	printf("%*s \t<datacount>: \tspecifies the amount of data portions to be read.\n", identLevel, " ");
@@ -1297,7 +1436,7 @@ void printHelp_read_reg(int identLevel){
 void printHelp_pgm_nvm_binary(int identLevel){
 	printf("%*s Programs the specified binary to the specific NVM.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -pgm_nvm <displayId> <Vcom> <binary_path>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -pgm_nvm <displayId> <Vcom> <binary_path>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<display_id>  : specifies display id to be programmed into the nvm.\n", identLevel, " ");
 	printf("%*s \t<Vcom>        : specifies the Vcom to be programmed into the nvm.\n", identLevel, " ");
@@ -1316,7 +1455,7 @@ void printHelp_pgm_nvm_binary(int identLevel){
 void printHelp_counter(int identLevel){
 	printf("%*s Shows a counting number.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -count\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -count\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
 	printf("%*s \t<waitTime>            : \ttime to wait after each image update [ms].\n", identLevel, " ");
@@ -1326,7 +1465,7 @@ void printHelp_counter(int identLevel){
 void printHelp_slideshow(int identLevel){
 	printf("%*s Updates the display with a slideshow of a given path.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -slideshow <image path>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -slideshow <image path>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<image path>          : \tpath to the image files.\n", identLevel, " ");
 	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
@@ -1337,7 +1476,7 @@ void printHelp_slideshow(int identLevel){
 void printHelp_interface_data(int identLevel){
 	printf("%*s Updates the display with a data of a given interface.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -interface <dev path>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -interface <dev path>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<dev path>            : \tpath to the interface. Default is /dev/can1.\n", identLevel, " ");
 	printf("%*s \t<number of values>    : \tvalues count to be displayed at a time.\n", identLevel, " ");
@@ -1348,14 +1487,14 @@ void printHelp_interface_data(int identLevel){
 void printHelp_info(int identLevel){
 	printf("%*s Displays general display informations.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -info\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -info\n", identLevel, " ");
 	printf("\n");
 }
 
 void printHelp_switch_hv(int identLevel){
 	printf("%*s Switches HV on/off based on parameter.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: BBepdcULD -hv <state>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -hv <state>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<state>  		: 0 = off; 1= on.\n", identLevel, " ");
 	printf("\n");
@@ -1363,7 +1502,7 @@ void printHelp_switch_hv(int identLevel){
 
 void debug_print_parameters(int argc, char **argv)
 {
-
+	//printf("%s\n", __func__);
 	int paramIdx = 0;
 	for(paramIdx = 0; paramIdx < argc; paramIdx++){
 		printf("param %d: '%s'\n", paramIdx, argv[paramIdx]);

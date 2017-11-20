@@ -80,6 +80,7 @@ static int max17135_load_timings(pl_pmic_t *pmic);
 static int max17135_configure(pl_pmic_t *pmic, struct vcom_cal *cal);
 static int max17135_set_vcom_register(pl_pmic_t *pmic, int dac_value);
 static int max17135_set_vcom_voltage(pl_pmic_t *pmic, int mv);
+static int max17135_get_vcom_voltage(pl_pmic_t *pmic);
 static int max17135_wait_pok(pl_pmic_t *pmic);
 static int max17135_hv_enable(pl_pmic_t *pmic);
 static int max17135_hv_disable(pl_pmic_t *pmic);
@@ -125,6 +126,7 @@ pl_pmic_t *max17135_new(struct pl_i2c *i2c, uint8_t i2c_addr){
 	p->apply_timings = max17135_load_timings;
 	p->set_vcom_register = max17135_set_vcom_register;
 	p->set_vcom_voltage = max17135_set_vcom_voltage;
+	p->get_vcom_voltage = max17135_get_vcom_voltage;
 	p->temp_disable = max17135_temp_disable;
 	p->temp_enable = max17135_temp_enable;
 	p->temperature_measure = max17135_temperature_measure;
@@ -253,7 +255,7 @@ static int max17135_set_vcom_voltage(pl_pmic_t *pmic, int mv)
 	assert(pmic);
 
 	dac_value = vcom_calculate(pmic->cal, mv);
-
+	LOG("calculate: %i, %i", mv, dac_value);
 	if (dac_value < HVPMIC_DAC_MIN)
 		dac_value = HVPMIC_DAC_MIN;
 	else if (dac_value > HVPMIC_DAC_MAX)
@@ -261,6 +263,19 @@ static int max17135_set_vcom_voltage(pl_pmic_t *pmic, int mv)
 
 	return pl_i2c_reg_write_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_DVR,
 				  (uint8_t)dac_value);
+}
+
+static int max17135_get_vcom_voltage(pl_pmic_t *pmic)
+{
+	int mv;
+	uint8_t dac_value;
+	assert(pmic);
+	pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_DVR, &dac_value);
+	mv = vcom_calculate_dac(pmic->cal, dac_value);
+#if VERBOSE
+	LOG("calculate: %i, %i", mv, dac_value);
+#endif
+	return mv;
 }
 
 static int max17135_wait_pok(pl_pmic_t *pmic)

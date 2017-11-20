@@ -349,6 +349,144 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * he
   return 0;
 }
 
+int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width, int * height)
+{
+  int ERROR = -1;
+
+  LOG("filename %s", file_name);
+
+  png_structp png_ptr;
+  png_infop info_ptr;
+  FILE *fp;
+
+  if ((fp = fopen(file_name, "rb")) == NULL)
+     return (ERROR);
+
+  /* Create and initialize the png_struct with the desired error handler
+    * functions.  If you want to use the default stderr and longjump method,
+    * you can supply NULL for the last three parameters.  We also supply the
+    * the compiler header file version, so that we know if the application
+    * was compiled with a compatible version of the library.  REQUIRED
+    */
+   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+      NULL, NULL, NULL);
+
+   if (png_ptr == NULL)
+   {
+      fclose(fp);
+      return (ERROR);
+   }
+
+   /* Allocate/initialize the memory for image information.  REQUIRED. */
+   info_ptr = png_create_info_struct(png_ptr);
+   if (info_ptr == NULL)
+   {
+      fclose(fp);
+      png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+      return (ERROR);
+   }
+
+   /* Set error handling if you are using the setjmp/longjmp method (this is
+    * the normal method of doing things with libpng).  REQUIRED unless you
+    * set up your own error handlers in the png_create_read_struct() earlier.
+    */
+
+   if (setjmp(png_jmpbuf(png_ptr)))
+   {
+      /* Free all of the memory associated with the png_ptr and info_ptr */
+      png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+      fclose(fp);
+      /* If we get here, we had a problem reading the file */
+      return (ERROR);
+   }
+
+   /* Set up the input control if you are using standard C streams */
+   png_init_io(png_ptr, fp);
+
+   // read the header
+  png_read_info(png_ptr, info_ptr);
+
+  *width = (int)png_get_image_width(png_ptr, info_ptr);
+  *height = (int) png_get_image_height(png_ptr, info_ptr);
+  int _bit_depth = (int) png_get_bit_depth(png_ptr, info_ptr);
+  int _channels = (int) png_get_channels(png_ptr, info_ptr);
+  int color_type = (int) png_get_color_type(png_ptr, info_ptr);
+  uint8_t color_offset;
+  switch(color_type){
+	  case 2:{
+		  color_offset = 3;
+		  break;
+	  }
+	  case 6:
+	  default:{
+		  color_offset = 4;
+		  break;
+	  }
+  }
+
+  LOG("width %d, height %d, bit_depth %d, channels %d, color type: %d", *width, *height, _bit_depth, _channels, color_type);
+
+  png_bytep row_pointers[*height];
+
+  int row;
+  /* Clear the pointer array */
+  for (row = 0; row < (*height); row++)
+     row_pointers[row] = NULL;
+
+  for (row = 0; row < (*height); row++)
+     row_pointers[row] = png_malloc(png_ptr, png_get_rowbytes(png_ptr,
+        info_ptr));
+
+  /* Now it's time to read the image.  One of these methods is REQUIRED */
+  /* Read the entire image in one go */
+  png_read_image(png_ptr, row_pointers);
+
+  png_set_expand(png_ptr);
+
+  png_read_end(png_ptr, info_ptr);
+
+  // copy rows to buffer
+  rgbw_pixel_t * image_buffer;
+  image_buffer = malloc((*height)*(*width)*sizeof(rgbw_pixel_t));
+
+  int h, w;
+  for(h=0; h<(*height); h++)
+    for (w=0; w<(*width); w++)
+    {
+    	image_buffer[h*(*width)+w].r = (uint8_t) *(row_pointers[h]+0+color_offset*w);
+    	image_buffer[h*(*width)+w].g = (uint8_t) *(row_pointers[h]+1+color_offset*w);
+    	image_buffer[h*(*width)+w].b = (uint8_t) *(row_pointers[h]+2+color_offset*w);
+    	if(color_type & 4){
+    		image_buffer[h*(*width)+w].w = (uint8_t) *(row_pointers[h]+3+color_offset*w);
+
+    	}else{
+			image_buffer[h*(*width)+w].w = (uint8_t) (((image_buffer[h*(*width)+w].r * 299) + (image_buffer[h*(*width)+w].g * 587) + (image_buffer[h*(*width)+w].b * 114)) / 1000);
+		}
+    	/*
+    	if(w==0 || w==1){
+    		LOG("W: %i, 0x%02X%02X%02X%02X", h, image_buffer[h*(*width)+w].r,image_buffer[h*(*width)+w].g,image_buffer[h*(*width)+w].b,image_buffer[h*(*width)+w].w);
+    	}
+    	//*/
+    	/*
+		if(w==0 && h==0){
+			LOG("W: %i, 0x%02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X", h, *(row_pointers[h]+0),*(row_pointers[h]+1),*(row_pointers[h]+2),*(row_pointers[h]+3),*(row_pointers[h]+4),*(row_pointers[h]+5),*(row_pointers[h]+6),*(row_pointers[h]+7), *(row_pointers[h]+8),*(row_pointers[h]+9),*(row_pointers[h]+10),*(row_pointers[h]+11),*(row_pointers[h]+12),*(row_pointers[h]+13),*(row_pointers[h]+14),*(row_pointers[h]+15));
+			LOG("W: %i, 0x%02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X", h, *(row_pointers[h]+16),*(row_pointers[h]+17),*(row_pointers[h]+18),*(row_pointers[h]+19),*(row_pointers[h]+20),*(row_pointers[h]+21),*(row_pointers[h]+22),*(row_pointers[h]+23), *(row_pointers[h]+24),*(row_pointers[h]+25),*(row_pointers[h]+26),*(row_pointers[h]+27),*(row_pointers[h]+28),*(row_pointers[h]+29),*(row_pointers[h]+30),*(row_pointers[h]+31));
+		}
+		//*/
+
+    }
+
+  *image_ptr = image_buffer;
+
+  /* Clean up after the read, and free any memory allocated - REQUIRED */
+  png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+
+  /* Close the file */
+  fclose(fp);
+
+  return 0;
+}
+
 int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to_settings){
 
 	static const char sep[] = ", ";
@@ -530,4 +668,16 @@ unsigned long long read_stopwatch(struct timespec* starttime, char* label, int r
 	if (reset) clock_gettime(CLOCK_REALTIME, starttime);
 #endif
 	return elapsedTime;
+}
+
+uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, rgbw_pixel_t pixel){
+	if(cfa_overlay.r_position == pixel_position)
+		return pixel.r;
+	if(cfa_overlay.g_position == pixel_position)
+		return pixel.g;
+	if(cfa_overlay.b_position == pixel_position)
+		return pixel.b;
+	if(cfa_overlay.w_position == pixel_position)
+		return pixel.w;
+	return -1;
 }

@@ -48,6 +48,25 @@ struct pl_wfid {
 	int id;
 };
 
+typedef struct rgbw{
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t w;
+}rgbw_pixel_t;
+
+typedef struct cfa{
+	/* RGBW overlay
+	 * 01
+	 * 23
+	 * => GRBW => R:1, G:0, B:2, W:3
+	 */
+	int8_t r_position;
+	int8_t g_position;
+	int8_t b_position;
+	int8_t w_position;
+}cfa_overlay_t;
+
 enum pl_update_mode {
 	PL_FULL_UPDATE = 0,
 	PL_PART_UPDATE,

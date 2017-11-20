@@ -155,7 +155,7 @@ static int read_wfdata_generic_format(struct pl_nvm *nvm, uint8_t **data, int *c
 	wf_start |= (int) buffer[NVM_WF_START_POS + 1] << 16;
 	wf_start |= (int) buffer[NVM_WF_START_POS + 2] <<  8;
 	wf_start |= (int) buffer[NVM_WF_START_POS + 3];
-
+	//LOG("%s: wf_start: 0x%x",__func__,wf_start);
 	// get wf length
 	wf_len =  (int) buffer[NVM_WF_LEN_POS]     << 24;
 	wf_len |= (int) buffer[NVM_WF_LEN_POS + 1] << 16;
@@ -163,7 +163,7 @@ static int read_wfdata_generic_format(struct pl_nvm *nvm, uint8_t **data, int *c
 	wf_len |= (int) buffer[NVM_WF_LEN_POS + 3];
 
 	*data = (uint8_t *)malloc(sizeof(uint8_t)*wf_len);
-
+	//LOG("%s: WFLEN: %x sizeof(WFLEN): %i",__func__,wf_len, sizeof(uint8_t)*wf_len);
 	// extract waveform data
 	memcpy(*data, buffer + wf_start, wf_len);
 	*count = wf_len;

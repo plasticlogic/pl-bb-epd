@@ -27,7 +27,7 @@
 #ifndef INCLUDE_APP_PARSER_H
 #define INCLUDE_APP_PARSER_H 1
 
-//#include "FatFs/ff.h"
+#include <stdio.h>
 
 struct pl_area;
 
@@ -52,6 +52,6 @@ extern int parser_read_word(const char *str, const char *sep, unsigned int *out)
 /** Read area coordinates (left, top, width, height) */
 extern int parser_read_area(const char *str, const char *sep,
 			    struct pl_area *area);
-
+extern int parser_read_file_line(FILE *f, char *buffer, int max_length);
 
 #endif /* INCLUDE_APP_PARSER_H */

@@ -7,7 +7,8 @@
 
 #include <stdint.h>
 #include "scramble.h"
-
+#define LOG_TAG "scramble"
+#include "utils.h"
 static int calcPixelIndex(int gl, int sl, int slCount);
 
 void scramble_array(uint8_t* source, uint8_t* target, int *glCount, int *slCount, int scramblingMode){

@@ -13,6 +13,7 @@
 
 static void generic_epdc_delete(struct pl_generic_epdc *p);
 static int set_vcom(struct pl_generic_epdc *p, int vcomInMillivolt);
+static int get_vcom(struct pl_generic_epdc *p);
 static int read_register(struct pl_generic_epdc *p, const regSetting_t* setting);
 static int write_register(struct pl_generic_epdc *p, const regSetting_t setting, const uint32_t bitmask);
 static int send_cmd(struct pl_generic_epdc *p, const regSetting_t setting);
@@ -42,6 +43,7 @@ struct pl_generic_epdc *generic_epdc_new(){
 	p->init = epdc_init;
 	p->update = generic_update;
 	p->set_vcom = set_vcom;
+	p->get_vcom = get_vcom;
 	p->read_register = read_register;
 	p->write_register = write_register;
 	p->send_cmd = send_cmd;
@@ -68,6 +70,115 @@ static void generic_epdc_delete(struct pl_generic_epdc *p){
 		free(p);
 		p = NULL;
 	}
+}
+
+int do_load_nvm_content(struct pl_generic_epdc *p){
+	if (p->nvm == NULL){
+		LOG("Abort: There's no nvm defined in the EPDC.");
+		return -1;
+	}
+
+	if (p->hv->vcomConfig == NULL){
+		LOG("Abort: There's no vcom configuration HW defined in the EPDC.");
+		return -1;
+	}
+
+	if (p->controller == NULL){
+		LOG("Abort: There's no controller HW defined in the EPDC.");
+		return -1;
+	}
+
+	uint8_t *buffer = NULL;
+	int bufferSize;
+
+	// read NVM content to file
+	p->nvm->read_wfdata(p->nvm, &buffer, &bufferSize);
+	if (bufferSize <= 0){
+		LOG("Cannot read NVM content!");
+		return -1;
+	}
+	if (p->nvm->nvm_format == NVM_FORMAT_S040){
+
+		// unpack vcom and waveform data from NVM content
+		if (unpack_nvm_content(buffer, bufferSize))
+			return -1;
+
+		int vcomInMillivolts;
+
+		// load vcom file and send data to vcomConfig
+		if (read_vcom_from_file("/tmp/vcom_from_display_nvm", &vcomInMillivolts))
+			return -1;
+
+		if (p->hv->vcomConfig->set_vcom(p->hv->vcomConfig, vcomInMillivolts))
+			return -1;
+
+		// load waveform file and send data to controller
+		if (p->controller->update_temp(p->controller))
+			return -1;
+
+		if (p->controller->load_wflib(p->controller, "/tmp/waveform_from_display_nvm.bin"))
+			return -1;
+	}
+	else if (p->nvm->nvm_format == NVM_FORMAT_S1D13541){
+		LOG("NVM_FORMAT_S1D13541 does not support Wf loading from NVM");
+		return -1;
+	}
+	else if (p->nvm->nvm_format == NVM_FORMAT_EPSON){
+
+		FILE *fd = fopen("/tmp/dummy.generic.wbf", "wb");
+		if (fd == NULL) {
+			LOG("error creating binary file.");
+			return -1;
+		}
+#if 0
+		int i;
+		LOG("Buffer:");
+		printf("0x");
+		for(i=0; i<bufferSize; i++){
+			printf("%x", buffer[i]);
+		}
+		printf("\n");
+#endif
+		int count = fwrite(buffer, sizeof(uint8_t), bufferSize, fd);
+		fclose(fd);
+
+		if (count != bufferSize){
+			LOG("error during binary file write.");
+			return -1;
+		}
+
+		int isPgm = 0;
+		if(p->nvm->read_header(p->nvm, &isPgm))
+			return -1;
+		LOG("Setting vcom: %d",p->nvm->vcom);
+		if (p->hv->vcomConfig->set_vcom(p->hv->vcomConfig, p->nvm->vcom))
+			return -1;
+
+		// load waveform file and send data to controller
+		if (p->controller->update_temp(p->controller))
+			return -1;
+
+		if (p->controller->load_wflib(p->controller, "/tmp/dummy.generic.wbf"))
+			return -1;
+	}
+	else if (p->nvm->nvm_format == NVM_FORMAT_PLAIN){
+
+		FILE *fd = fopen("/tmp/dummy.plain.bin", "wb");
+		if (fd == NULL) {
+			LOG("error creating binary file.");
+			return -1;
+		}
+
+		int count = fwrite(buffer, sizeof(uint8_t), bufferSize, fd);
+		fclose(fd);
+
+		if (count != bufferSize){
+			LOG("error during binary file write.");
+			return -1;
+		}
+	}
+	return 0;
+
 }
 
 /**
@@ -101,9 +212,10 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 	}
 	if (stat) return -1;
 
+#if 0
 	// load data from display NVM and apply it's settings
 	if (load_nvm_content){
-		//LOG("%s: load data from display NVM and apply it's settings", __func__);
+		//LOG("%s: load data from display NVM and apply it's settings %i", __func__, p->nvm->nvm_format);
 		if (p->nvm == NULL){
 			LOG("Abort: There's no nvm defined in the EPDC.");
 			return -1;
@@ -124,9 +236,10 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 
 		// read NVM content to file
 		p->nvm->read_wfdata(p->nvm, &buffer, &bufferSize);
-		if (bufferSize <= 0)
+		if (bufferSize <= 0){
+			LOG("Cannot read NVM content!");
 			return -1;
-
+		}
 		if (p->nvm->nvm_format == NVM_FORMAT_S040){
 
 			// unpack vcom and waveform data from NVM content
@@ -160,7 +273,15 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 				LOG("error creating binary file.");
 				return -1;
 			}
-
+#if 0
+			int i;
+			LOG("Buffer:");
+			printf("0x");
+			for(i=0; i<bufferSize; i++){
+				printf("%x", buffer[i]);
+			}
+			printf("\n");
+#endif
 			int count = fwrite(buffer, sizeof(uint8_t), bufferSize, fd);
 			fclose(fd);
 
@@ -172,7 +293,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 			int isPgm = 0;
 			if(p->nvm->read_header(p->nvm, &isPgm))
 				return -1;
-
+			LOG("Setting vcom: %d",p->nvm->vcom);
 			if (p->hv->vcomConfig->set_vcom(p->hv->vcomConfig, p->nvm->vcom))
 				return -1;
 
@@ -201,6 +322,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 		}
 	}
 	else{
+
 		//LOG("%s: load waveform and vcom from std paths", __func__);
 		// load waveform and vcom from std paths
 		LOG("Loading wflib: %s", controller->waveform_file_path);
@@ -210,7 +332,19 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 		LOG("Setting vcom: %d", p->default_vcom);
 		if (p->set_vcom(p, p->default_vcom))
 			return -1;
+
 	}
+#else
+	if(do_load_nvm_content(p) || !load_nvm_content){
+		LOG("Loading wflib: %s", controller->waveform_file_path);
+		if (controller->load_wflib(controller, controller->waveform_file_path))
+			return -1;
+
+		LOG("Setting vcom: %d", p->default_vcom);
+		if (p->set_vcom(p, p->default_vcom))
+			return -1;
+	}
+#endif
 
 	return stat;
 
@@ -482,3 +616,11 @@ static int switch_hvs_off(pl_hv_t *hv){
 
 	return stat;
 }
+
+static int get_vcom(struct pl_generic_epdc *p){
+
+	struct pl_vcom_config *vcom_config = p->hv->vcomConfig;
+	assert(vcom_config != NULL);
+	return vcom_config->get_vcom(vcom_config);
+}
+

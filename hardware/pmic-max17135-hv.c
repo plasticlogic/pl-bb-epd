@@ -19,6 +19,7 @@ static void set_vsl(struct pl_hv_config *p, double valueInVolts);
 static int set_hv_timings(struct pl_hv_timing *p);
 static int vcom_driver_on(pl_vcom_driver_t *p);
 static int max17135_vcom_config_set(struct pl_vcom_config *p, double vcomInMillivolt);
+static int max17135_vcom_config_get(struct pl_vcom_config *p);
 static int vcom_driver_off(pl_vcom_driver_t *p);
 static int hv_driver_init(pl_hv_driver_t *p);
 static int hv_config_init(pl_hv_config_t *p);
@@ -209,6 +210,7 @@ pl_vcom_config_t *max17135_get_vcom_config(pl_pmic_t *max17135){
 	struct pl_vcom_config *p = vcom_config_new();
 	p->hw_ref = max17135;
 	p->set_vcom = max17135_vcom_config_set;
+	p->get_vcom = max17135_vcom_config_get;
 	p->init = vcom_config_init;
 	return p;
 }
@@ -221,6 +223,13 @@ static int max17135_vcom_config_set(struct pl_vcom_config *p, double vcomInMilli
 	return max17135->set_vcom_voltage(max17135, (int)vcomInMillivolt);
 }
 
+static int max17135_vcom_config_get(struct pl_vcom_config *p){
+	assert(p != NULL);
+	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
+	assert(max17135 != NULL);
+
+	return max17135->get_vcom_voltage(max17135);
+}
 /**
  * Initializes the underlying Maxim MAX17135 hardware.
  *

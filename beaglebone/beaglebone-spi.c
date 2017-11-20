@@ -14,6 +14,8 @@
 #include <string.h>
 #include <src/pindef.h>
 
+#define VERBOSE 0
+
 // function prototypes
 static int spi_close(struct pl_spi *psSPI);
 static int spi_read_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size);
@@ -141,7 +143,9 @@ static int spi_read_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size){
 	  int iResult;
 
 	  int i;
-
+#if VERBOSE
+	  int s=size;
+#endif
 	  // enough transfer buffers for 64 * 64 bytes or 4K
 	  struct spi_ioc_transfer asTrans[ MAX_SPI_TRANSFER_BUFFERS ];
 	  struct spi_ioc_transfer *psTrans;
@@ -162,7 +166,7 @@ static int spi_read_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size){
 		// length is the number of bytes in the buffer, so for 9-bit mode it is
 		// 2 bytes per word.
 		psTrans->len = boLast ? size : MAX_SPI_BYTES_PER_TRANSFER;
-		psTrans->delay_usecs = 0;
+		psTrans->delay_usecs = 20;
 		//psSPI->msh = 12000000;
 		psTrans->speed_hz = psSPI->mSpi->msh; //SPI_TRANSFER_RATE_IN_HZ;
 		psTrans->bits_per_word =  psSPI->mSpi->bpw; //SPI_BITS_PER_WORD;
@@ -178,7 +182,15 @@ static int spi_read_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size){
 		fprintf( stderr, "Can't write SPI transaction in %d parts (%d)\n", i, iResult );
 		return FALSE;
 	  }
-
+#if VERBOSE
+	  int tmp = rxBuffer;
+	  printf("spi\tread ");
+	  for(i=0;i<s;i++){
+		  printf("0x%02X ", *buff++);
+	  }
+	  printf("\n");
+	  rxBuffer=tmp;
+#endif
 	  return iResult;
 }
 
@@ -193,14 +205,24 @@ static int spi_read_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size){
 static int spi_write_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size){
 
 	  int iResult;
-
+#if VERBOSE
+	  iResult = buff;
+#endif
 	  int i;
 	  // enough transfer buffers for 64 * 64 bytes or 4K
 	  struct spi_ioc_transfer asTrans[ MAX_SPI_TRANSFER_BUFFERS ];
 	  struct spi_ioc_transfer *psTrans;
 	  uint8_t *pbBuffer = buff;
 	  bool boLast;
-
+#if VERBOSE
+	  printf("spi\twrite ");
+	  for(i=0;i<size;i++){
+		  printf("0x%02X ", *buff++);
+	  }
+	  printf("\n");
+	  buff = iResult;
+	  iResult = 0;
+#endif
 	  memset( &asTrans, 0, sizeof( asTrans ) );
 
 	  // fill in the array of transfer buffers, limiting each one to transferring
@@ -244,6 +266,5 @@ static int spi_set_cs(struct pl_spi *psSPI, uint8_t cs){
 
 	struct pl_gpio * gpio = (struct pl_gpio *) psSPI->hw_ref;
 	gpio->set(psSPI->cs_gpio, cs);
-
 	return 0;
 }

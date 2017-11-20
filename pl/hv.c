@@ -105,6 +105,7 @@ struct pl_vcom_config *vcom_config_new(){
 	p->hw_ref = NULL;
 	p->init = NULL;
 	p->set_vcom = NULL;
+	p->get_vcom = NULL;
 	return p;
 }
 /**

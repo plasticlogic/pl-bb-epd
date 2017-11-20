@@ -23,6 +23,8 @@
 #define LOG_TAG "configparser"
 #include "pl/utils.h"
 
+
+
 static int getRegValCount(char *str);
 static int getRegVal(char *str, int count, uint16_t *out);
 static int loadRegisterSettings(hw_setup_t *setup, dictionary *dictConfig);
@@ -30,19 +32,48 @@ static int setTemperatureMode(pl_generic_controller_t *controller, dictionary *d
 
 int parse_config(hw_setup_t *setup, const char *filename){
 	char *str;
+	int i;
+	dictionary *dictConfig;
 
-	LOG("loading config file - '%s'", filename);
-	dictionary *dictConfig = iniparser_load(filename);
+	if(!filename){
+
+		FILE * config = NULL ;
+		char line[1025] ;
+		char filename_str[64];
+		char displaytype[64];
+		//int len = 0;
+
+		if ((config=fopen("/boot/uboot/config.txt", "r"))==NULL) {
+			fprintf(stderr, "parser: cannot open /boot/uboot/config.txt\n");
+			return -1;
+		}
+		memset(line,    0, 1024);
+
+		while(parser_read_file_line(config, line, 1024)){
+			//LOG("Line: %s" , line);
+			if(strncmp(line, "display_type", 12)==0){
+				strcpy(displaytype, &line[13]);
+				// evaluate string
+				LOG("DISPLAYTYPE: %s", displaytype);
+				break;
+			}
+		}
+		strcpy(filename_str, "/boot/uboot/");
+		strcat(filename_str, displaytype);
+		strcat(filename_str, "/epdc.config");
+		dictConfig = iniparser_load(filename_str);
+	}else{
+		dictConfig = iniparser_load(filename);
+	}
+
 	LOG("version - %s\n", iniparser_getstring(dictConfig, "version:name", ""));
 
 	if (dictConfig == NULL)
 		return -1;
-
 	int stat = 0;
 
 	// initialize gpio strcuture
 	beaglebone_gpio_init(&(setup->gpios));
-
 	// ------------------------------------
 	// initialize board related settings
 	// ----------------------
@@ -56,15 +87,19 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	stat |= setup->initialize_driver_board(setup, str);
 	if (stat) return -1;
 
-	str = iniparser_getstring(dictConfig, "general:spi_port", NULL);
-	if (str == NULL) LOG("missing general:spi_port setting...");
-	int spi_channel = atoi(str);
+	str = iniparser_getstring(dictConfig, "general:nvm_spi_port", NULL);
+	if (str == NULL) LOG("missing general:nvm_spi_port setting...");
+	int nvm_spi_channel = atoi(str);
+
+	str = iniparser_getstring(dictConfig, "general:epdc_spi_port", NULL);
+	if (str == NULL) LOG("missing general:epdc_spi_port setting...");
+	int epdc_spi_channel = atoi(str);
 
 	// ------------------------------------
 	// initialize spi devices
 	// ----------------------
 
-	setup->sInterface = interface_new(spi_channel,&(setup->gpios), setup->sInterfaceType);
+	setup->sInterface = interface_new(epdc_spi_channel,&(setup->gpios), setup->sInterfaceType);
 	if (setup->sInterface == NULL){
 		LOG("EPD Interface init has failed");
 		return -1;
@@ -74,7 +109,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 		return -1;
 
 	// nvm spi device
-	setup->nvmSPI = beaglebone_spi_new((uint8_t) spi_channel, &(setup->gpios));
+	setup->nvmSPI = beaglebone_spi_new((uint8_t) nvm_spi_channel, &(setup->gpios));
 	if (setup->nvmSPI == NULL){
 		LOG("nvmSPI init has failed");
 		return -1;
@@ -135,6 +170,51 @@ int parse_config(hw_setup_t *setup, const char *filename){
 
 	str = iniparser_getstring(dictConfig, "general:DISPLAY_SCRAMBLE_YOFFSET", NULL);
 	setup->controller->yoffset = (str == NULL) ? -1 : atoi(str);
+
+	str = iniparser_getstring(dictConfig, "general:CFA", NULL);
+	if(str==NULL){
+		setup->controller->cfa_overlay.r_position = -1;
+		setup->controller->cfa_overlay.b_position = -1;
+		setup->controller->cfa_overlay.g_position = -1;
+		setup->controller->cfa_overlay.w_position = -1;
+	}else{
+		for(i=0; i<4; i++){
+			switch(str[i]){
+				case 'R':{
+					setup->controller->cfa_overlay.r_position = i;
+					break;
+				}
+				case 'G':{
+					setup->controller->cfa_overlay.g_position = i;
+					break;
+				}
+				case 'B':{
+					setup->controller->cfa_overlay.b_position = i;
+					break;
+				}
+				case 'W':{
+					setup->controller->cfa_overlay.w_position = i;
+					break;
+				}
+				default:{
+					LOG("Invalid CFA overlay (Use upper case letters only)");
+					setup->controller->cfa_overlay.r_position = -1;
+					setup->controller->cfa_overlay.b_position = -1;
+					setup->controller->cfa_overlay.g_position = -1;
+					setup->controller->cfa_overlay.w_position = -1;
+					i=4;
+				}
+			}
+		}
+		rgbw_pixel_t rgbw_pixel = {'R','G','B','W'};
+
+		LOG("CFA overlay: %c%c%c%c",
+				get_rgbw_pixel_value(0, setup->controller->cfa_overlay, rgbw_pixel),
+				get_rgbw_pixel_value(1, setup->controller->cfa_overlay, rgbw_pixel),
+				get_rgbw_pixel_value(2, setup->controller->cfa_overlay, rgbw_pixel),
+				get_rgbw_pixel_value(3, setup->controller->cfa_overlay, rgbw_pixel));
+	}
+
 	// ------------------------------------
 	// initialize HV parts
 	// ----------------------

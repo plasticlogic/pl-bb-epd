@@ -26,6 +26,8 @@ enum driving_board {
 	HBZ5,
 	HBZ1_3,
 	HBZ6_3,	
+	FALCON_SERIAL,
+	FALCON_PARALLEL,
 	RUDDOCK_PARALLEL,
 };
 

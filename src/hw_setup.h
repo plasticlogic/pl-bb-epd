@@ -23,6 +23,7 @@
 #include "pl/generic_interface.h"
 
 typedef struct hw_setup {
+	char* boardname;
 	int default_vcom;
 	int i2c_port;									//!< the I2C port used
 	unsigned vddGPIO;

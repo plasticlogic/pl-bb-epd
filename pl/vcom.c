@@ -59,3 +59,19 @@ int vcom_calculate(const struct vcom_cal *v, int input_mv)
 
 	return dac_value;
 }
+
+int vcom_calculate_dac(const struct vcom_cal *v, int dac_value)
+{
+	int32_t scaled_mv;
+	int mv;
+
+	assert(v != NULL);
+
+	scaled_mv = /*DIV_ROUND_CLOSEST*/(dac_value * v->dac_dy/ v->dac_dx) + v->dac_offset;
+	mv = /*DIV_ROUND_CLOSEST*/(scaled_mv * v->swing_ideal/ v->swing);
+#if VERBOSE
+	LOG("input: %d, scaled: %d, DAC reg: 0x%02X",
+	    mv, scaled_mv, dac_value);
+#endif
+	return mv;
+}

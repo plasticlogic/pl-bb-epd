@@ -47,9 +47,10 @@ static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t 
 static int load_wflib(pl_generic_controller_t *p,  const char *filename);
 
 static int update_temp(pl_generic_controller_t *p);
+static int get_temp(pl_generic_controller_t *p, int* temperature);
 static int set_temp_mode(pl_generic_controller_t *p, enum pl_epdc_temp_mode mode);
 static int set_power_state(pl_generic_controller_t *p, enum pl_epdc_power_state state);
-
+static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres);
 // -----------------------------------------------------------------------------
 // initialisation
 // ------------------------------
@@ -78,11 +79,11 @@ int s1d13524_controller_setup(pl_generic_controller_t *p, s1d135xx_t *s1d135xx){
 	p->set_power_state = set_power_state;
 	p->set_temp_mode = set_temp_mode;
 	p->update_temp = update_temp;
-
+	p->get_temp = get_temp;
 	p->init = init_controller;
 	p->wf_table = wf_table;
 	p->hw_ref = s1d135xx;
-
+	p->get_resolution = get_resolution;
 
 	s1d135xx->flags.needs_update = 0;
 	s1d135xx->hrdy_mask = S1D13524_STATUS_HRDY;
@@ -97,6 +98,21 @@ int s1d13524_controller_setup(pl_generic_controller_t *p, s1d135xx_t *s1d135xx){
 // -----------------------------------------------------------------------------
 // private controller interface functions
 // ------------------------------
+static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres){
+	s1d135xx_t *s1d135xx = p->hw_ref;
+	assert(s1d135xx != NULL);
+	if(xres && yres){
+		// TODO: Check if scrambled!!!
+		int x,y;
+		x = s1d135xx->read_reg(s1d135xx, S1D13524_REG_LINE_DATA_LENGTH);
+		y = s1d135xx->read_reg(s1d135xx, S1D13524_REG_FRAME_DATA_LENGTH);
+		*xres = x;
+		*yres = y;
+		return 0;
+	}
+	return -1;
+}
+
 static int wait_update_end(pl_generic_controller_t *p)
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
@@ -165,7 +181,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
-
+	s1d135xx->cfa_overlay = p->cfa_overlay;
 	s1d135xx->display_scrambling = p->display_scrambling;
 	s1d135xx->xoffset = p->xoffset;
 	s1d135xx->yoffset = p->yoffset;
@@ -179,6 +195,7 @@ static int load_buffer(pl_generic_controller_t *p, const char *buffer, const str
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
+	s1d135xx->cfa_overlay = p->cfa_overlay;
 	s1d135xx->display_scrambling = p->display_scrambling;
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_FRAME_DATA_LENGTH);
@@ -378,6 +395,19 @@ static int update_temp(pl_generic_controller_t *p)
 #endif
 
 	s1d135xx->measured_temp = new_temp;
+	return 0;
+}
+
+static int get_temp(pl_generic_controller_t *p, int* temperature)
+{
+	s1d135xx_t *s1d135xx = p->hw_ref;
+	assert(s1d135xx != NULL);
+
+	int stat = 0;
+	int temp;
+
+	temp = s1d135xx->read_reg(s1d135xx, S1D13524_REG_TEMP);
+	*temperature = temp;
 	return 0;
 }
 

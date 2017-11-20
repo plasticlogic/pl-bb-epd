@@ -34,11 +34,12 @@
 #include <unistd.h>
 #include <pl/assert.h>
 
+
 #define LOG_TAG "s1d135xx"
 #include <pl/utils.h>
 #include <pl/parser.h>
 #include <pl/scramble.h>
-
+#include <pl/color.h>
 
 /* Set to 1 to enable verbose update and EPD power on/off log messages */
 #define VERBOSE 0
@@ -103,7 +104,6 @@ static int s1d135xx_fill(struct s1d135xx *p, uint16_t mode, unsigned bpp,
 static int s1d135xx_wait_dspe_trig(struct s1d135xx *p);
 static int s1d135xx_init_gate_drv(struct s1d135xx *p);
 static int s1d135xx_load_wflib(struct s1d135xx *p, const char *filename, uint32_t addr);
-
 // controller specific interface functions
 static int s1d13541_check_prod_code(struct s1d135xx *p, uint16_t ref_code);
 static int s1d13524_check_prod_code(struct s1d135xx *p, uint16_t ref_code);
@@ -185,9 +185,6 @@ s1d135xx_t *s1d13524_new(struct pl_gpio *gpios, struct pl_generic_interface *int
 	p->clear_init = s1d13524_clear_init;
 	p->init = s1d13524_init_controller;
 	p->init_clocks = s1d13524_init_clocks;
-
-
-
 	return p;
 }
 
@@ -242,7 +239,6 @@ s1d135xx_t *s1d13541_new(struct pl_gpio *gpios, struct pl_generic_interface *int
 	p->clear_init = s1d13541_clear_init;
 	p->init = s1d13541_init_controller;
 	p->init_clocks = s1d13541_init_clocks;
-
 	return p;
 }
 
@@ -747,23 +743,45 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 
 	int height = 0;
 	int width = 0;
-	uint8_t *pngBuffer;
+
+
 	int stat = 0;
 	int memorySize = p->yres*p->xres;
+	uint8_t *scrambledPNG;
 
-	// read png image
-	if (read_png(path, &pngBuffer, &width, &height))
-		return -1;
+	if(p->cfa_overlay.r_position == -1){
+		LOG("BW");
+		uint8_t *pngBuffer;
+		// read png image
+		if (read_png(path, &pngBuffer, &width, &height))
+			return -1;
 
-	// scramble image
-	uint8_t *scrambledPNG = malloc(height*width);
-	scramble_array(pngBuffer, scrambledPNG, &height, &width,  p->display_scrambling);
+		// scramble image
+		scrambledPNG = malloc(height*width);
+		scramble_array(pngBuffer, scrambledPNG, &height, &width,  p->display_scrambling);
+		if(pngBuffer)
+			free(pngBuffer);
+	}else{
+		LOG("CFA");
+		rgbw_pixel_t *pngBuffer;
+		// read png image
+		if (read_rgbw_png(path, &pngBuffer, &width, &height))
+			return -1;
+
+		// scramble image
+		scrambledPNG = malloc(2*2*height*width);
+		uint8_t *colorBuffer = malloc(2*height*2*width);
+		rgbw_processing(&width, &height, pngBuffer, colorBuffer, (struct pl_area*) area, p->cfa_overlay);
+		scramble_array(colorBuffer, scrambledPNG, &height, &width,  p->display_scrambling);
+		free(colorBuffer);
+		if(pngBuffer)
+			free(pngBuffer);
+	}
 
 	// adapt image to memory
 
 	uint8_t *memoryBuffer = malloc(p->yres*p->xres);
 	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
-
 	// memory optimisation - if 4 bit per pixel mode is used
 	if (bpp == 4){
 		memorySize /= 2;
@@ -800,8 +818,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		free(memoryBuffer);
 	if(scrambledPNG)
 		free(scrambledPNG);
-	if(pngBuffer)
-		free(pngBuffer);
+
 
 	if (stat)
 		return -1;
@@ -998,10 +1015,10 @@ static int s1d13524_check_prod_code(struct s1d135xx *p, uint16_t ref_code)
 {
 	uint16_t rev;
 	uint16_t conf;
-
+	set_cs(p, 0);
 	if (check_prod_code(p, ref_code))
 		return -1;
-
+	set_cs(p, 1);
 	rev = p->read_reg(p, 0x0000);
 	conf = p->read_reg(p, 0x0004);
 
@@ -1258,7 +1275,6 @@ static int transfer_file(struct pl_generic_interface *interface, FILE *file)
 
 static void transfer_data(struct pl_generic_interface *interface, const uint8_t *data, size_t n)
 {
-
 	//	struct timespec t;
 	//	start_stopwatch(&t);
 	if(interface->mSpi){
@@ -1340,8 +1356,10 @@ static void send_param(struct pl_generic_interface *interface, uint16_t param)
 
 static void set_cs(struct s1d135xx *p, int state)
 {
-
-	pl_gpio_set(p->gpio, p->pins->cs0, state);
+	//LOG("CS: %i", state);
+	const unsigned cs = p->pins->cs0;
+	if (cs != PL_GPIO_NONE)
+		pl_gpio_set(p->gpio, p->pins->cs0, state);
 }
 
 static void set_hdc(struct s1d135xx *p, int state)

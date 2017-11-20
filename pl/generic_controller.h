@@ -27,6 +27,7 @@ typedef struct pl_generic_controller{
 	int display_scrambling;
 	int gate_offset;
 	int source_offset;
+	cfa_overlay_t cfa_overlay;
 
 	void (*delete)(struct pl_generic_controller *p);
 	int (*init)(struct pl_generic_controller *p, int use_wf_from_nvm);
@@ -44,7 +45,8 @@ typedef struct pl_generic_controller{
 	int (*set_power_state)(struct pl_generic_controller *p, enum pl_epdc_power_state state);
 	int (*set_temp_mode)(struct pl_generic_controller *p, enum pl_epdc_temp_mode mode);
 	int (*update_temp)(struct pl_generic_controller *p);
-
+	int (*get_temp)(struct pl_generic_controller *p, int* temperature);
+	int (*get_resolution)(struct pl_generic_controller *p, int* xres, int* yres);
 } pl_generic_controller_t;
 
 pl_generic_controller_t *generic_controller_new();
