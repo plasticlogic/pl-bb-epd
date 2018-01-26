@@ -1,9 +1,28 @@
 /*
+  Plastic Logic EPD project on BeagleBone
+
+  Copyright (C) 2018 Plastic Logic
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*
  * pmic-tps65185.c -- Driver for TI TPS65185 PMIC
  *
  */
 
 #include <pl/i2c.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include "pl/assert.h"
 #include "pl/vcom.h"
@@ -13,7 +32,7 @@
 #include "pl/utils.h"
 
 /* Set to 1 to enable verbose log messages */
-#define VERBOSE 0
+#define VERBOSE 1
 
 /* Set to 1 to dump registers */
 #define DO_REG_DUMP 0
@@ -180,8 +199,8 @@ static int tps65185_init(pl_pmic_t *p)
 
 static int tps65185_check_revision(pl_pmic_t *p)
 {
-	assert(p);
 	union tps65185_version ver;
+	assert(p);
 
 	if (pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_REV_ID, &ver.byte))
 		return -1;
@@ -242,6 +261,7 @@ static int tps65185_hv_enable(pl_pmic_t *p)
 {
 	//LOG("tps65185_hv_enable - not yet implemented!");
 	pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_ENABLE, 0xbf);
+	usleep(10000);
 	return 0;
 }
 
@@ -249,7 +269,9 @@ static int tps65185_hv_enable(pl_pmic_t *p)
 static int tps65185_hv_disable(pl_pmic_t *p)
 {
 	//LOG("tps65185_hv_disable - not yet implemented!");
+	usleep(100000);
 	pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_ENABLE, 0x40);
+
 	return 0;
 }
 
@@ -274,6 +296,7 @@ static int tps65185_set_vcom_register(pl_pmic_t *p, int value)
 static int tps65185_set_vcom_voltage(pl_pmic_t *p, int mv)
 {
 	int dac_value;
+
 	uint8_t v1;
 	uint8_t v2;
 
@@ -306,8 +329,8 @@ static int tps65185_get_vcom_voltage(pl_pmic_t *pmic)
 	uint16_t dac_value;
 	assert(pmic != NULL);
 
-	pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_VCOM1, v1);
-	pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_VCOM2, v2);
+	pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_VCOM1, &v1);
+	pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_VCOM2, &v2);
 
 	dac_value = v1 + ((uint16_t) v2 << 8);
 

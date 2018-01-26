@@ -1,4 +1,22 @@
 /*
+  Plastic Logic EPD project on BeagleBone
+
+  Copyright (C) 2018 Plastic Logic
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*
  * epdc-app.c
  *
  *  Created on: 10.09.2014
@@ -85,11 +103,13 @@ int write_register(regSetting_t regSetting, const uint32_t bitmask);
 int send_cmd(regSetting_t regSetting);
 //remove int pgm_nvm(const char *waveform);
 int switch_hv(int state);
+int switch_com(int state);
 void debug_print_parameters(int argc, char **argv);
 void print_application_help(int print_all);
 int info();
 int show_image(const char *dir, const char *file, int wfid);
 int counter(const char* wf);
+int fill(uint8_t gl, uint8_t wfid, int update_mode);
 //remove int interface_data(	char* interface,int number_of_values,char values);
 int slideshow(const char *path, const char* wf, int count);
 
@@ -110,7 +130,9 @@ int execute_write_reg(int argc, char **argv);
 int execute_read_reg(int argc, char **argv);
 int execute_info(int argc, char **argv);
 int execute_switch_hv(int argc, char **argv);
+int execute_switch_com(int argc, char **argv);
 int execute_send_cmd(int argc, char **argv);
+int execute_fill(int argc, char **argv);
 int print_versionInfo(int argc, char **argv);
 
 void printHelp_start_epdc(int identLevel);
@@ -129,7 +151,9 @@ void printHelp_info(int identLevel);
 void printHelp_slideshow(int identLevel);
 void printHelp_counter(int identLevel);
 void printHelp_switch_hv(int identLevel);
+void printHelp_switch_com(int identLevel);
 void printHelp_send_cmd(int identLevel);
+void printHelp_fill(int identLevel);
 
 struct CmdLineOptions supportedOperations[] = {
 		{"-start_epdc",	 	"initializes the EPD controller", 			execute_start_epdc, 	printHelp_start_epdc},
@@ -143,6 +167,7 @@ struct CmdLineOptions supportedOperations[] = {
 		{"-get_temperature","gets the temperature", 					execute_get_temperature,printHelp_get_temperature},
 		{"-update_image", 	"updates the display", 						execute_update_image, 	printHelp_update_image},
 		{"-slideshow",		"shows a slidshow of .png images",			execute_slideshow,		printHelp_slideshow},
+		{"-fill", 			"fill the screen with a defined greylevel", execute_fill, 			printHelp_fill},
 //		{"-count",			"shows a counting number",					execute_counter,		printHelp_counter},
 #ifdef INTERNAL_USAGE
 		{"-send_cmd", 		"sends a command of EPD controller", 		execute_send_cmd, 		printHelp_send_cmd},
@@ -151,6 +176,7 @@ struct CmdLineOptions supportedOperations[] = {
 		{"-info",			"displays general display informations",	execute_info, printHelp_info},
 #endif
 		{"-switch_hv",	    "switches hv on/off based on parameter",	execute_switch_hv,	    printHelp_switch_hv},
+		{"-switch_com",	    "switches com on/off based on parameter",	execute_switch_com,	    printHelp_switch_com},
 		{"--version", 		"displays version info", 					print_versionInfo, 		NULL},
 		{"--help", 			"prints this help message", 				execute_help, 			NULL},
 };
@@ -540,8 +566,39 @@ int execute_send_cmd(int argc, char **argv){
 	return stat;
 }
 
+int execute_fill(int argc, char **argv){
+
+	uint8_t gl = 0xFF;
+	int update_mode = PL_FULL_UPDATE;
+	int wfid = 2;
+	if (argc > 2){
+		if(!strncmp(argv[2], "GL",2)){
+			int _gl;
+			sscanf(argv[2], "GL%i", &_gl);
+			gl = (uint8_t) (_gl*16);
+
+		}else{
+			gl = atoi(argv[2]);
+		}
+
+		if(argc > 3){
+			wfid = atoi(argv[3]);
+
+			if(argc > 4){
+				if(!strcmp(argv[4], "partial")){
+					update_mode = PL_PART_UPDATE;
+				}else if(!strcmp(argv[4], "full")){
+					update_mode = PL_FULL_UPDATE;
+				}else{
+					return -22;
+				}
+			}
+		}
+	}
+	return fill(gl, wfid, update_mode);
+}
+
 int execute_write_reg(int argc, char **argv){
-	//printf("%s\n", __func__);
 	int stat;
 	regSetting_t regData;
 	regData.valCount = 1;
@@ -677,6 +734,27 @@ int execute_switch_hv(int argc, char **argv){
 	return stat;
 }
 
+int execute_switch_com(int argc, char **argv){
+	//printf("%s\n", __func__);
+	int stat;
+	int state;
+
+	if (argc >= 3) {
+		state = (int)strtol(argv[2], NULL, 0);
+	}
+	else
+	{
+		return ERROR_ARGUMENT_COUNT_MISMATCH;
+	}
+
+	if (state < -1 || state > 1){
+		LOG("Given COM state (%d) not supported.", state);
+		return -1;
+	}
+	stat = switch_hv(state);
+	return stat;
+}
+
 int print_versionInfo(int argc, char **argv){
 	//printf("%s\n", __func__);
 	printf("epdc-app version = %s\n", VERSION_INFO);
@@ -707,8 +785,11 @@ int start_epdc(int load_nvm_content, int execute_clear)
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
 	sleep(1);
-	if (epdc->init(epdc, load_nvm_content))
+	stat = epdc->init(epdc, load_nvm_content);
+	if(stat){
+		LOG("EPDC-Init failed: %i\n", stat);
 		return -1;
+	}
 	if (execute_clear){
 		stat |= epdc->clear_init(epdc);
 	}
@@ -815,8 +896,14 @@ int get_vcom(void)
  */
 int get_waveform(void)
 {
-	//printf("%s\n", __func__);
-	LOG("Not implemented.");
+
+	int isPgm = 0;
+
+	if(epdc->nvm->read_header(epdc->nvm, &isPgm))
+		return -1;
+
+	printf("Waveform Version: %s\n", epdc->nvm->wfVers);
+
 	return 0;
 }
 
@@ -826,8 +913,16 @@ int get_waveform(void)
  */
 int get_temperature(void)
 {
-	//printf("%s\n", __func__);
-	LOG("Not implemented.");
+	if(epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL)
+		{
+		  printf("temperature %i\n", epdc->controller->manual_temp);
+		}
+	else
+		{
+		  LOG("Manual get temperature not possible.\n"
+			  "Temperature mode is not set to \"MANUAL\".");
+		  return -1;
+		}
 	return 0;
 }
 
@@ -852,7 +947,6 @@ int get_resolution(void)
  */
 int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		int vcomSwitchEnable, int updateCount, int waitTime) {
-	//printf("%s\n", __func__);
 
 	int cnt = 0;
 
@@ -873,7 +967,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 
 	if (epdc->hv->vcomSwitch != NULL){
 		if (vcomSwitchEnable == 0){
-			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 0);
+			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 1);
 		} else {
 			epdc->hv->vcomSwitch->disable_bypass_mode(epdc->hv->vcomSwitch);
 		}
@@ -885,6 +979,12 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 			return -1;
 
 		usleep(waitTime * 1000);
+	}
+
+	if (epdc->hv->vcomSwitch != NULL){
+		if (vcomSwitchEnable == 0){
+			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 0);
+		}
 	}
 
 	return 0;
@@ -913,6 +1013,19 @@ int read_register(regSetting_t regSetting){
 
 	free(regSetting.val);
 	return 0;
+}
+
+int fill(uint8_t gl, uint8_t wfid, int update_mode){
+	LOG("Fill: %x, %i, %i", gl, wfid, update_mode);
+	int x,y;
+		if(epdc->controller->get_resolution(epdc->controller, &x, &y))
+			return -1;
+	struct pl_area a = {0, 0, x, y};
+	LOG("FILL: %i, area: %i, %i, %i, %i", gl, a.width, a.height, a.top, a.left);
+
+	int stat = epdc->controller->fill(epdc->controller, &a, gl);
+	stat |= epdc->update(epdc, wfid, update_mode, &a);
+	return stat;
 }
 
 /**
@@ -998,6 +1111,33 @@ int switch_hv(int state){
 			stat = epdc->hv->vcomDriver->switch_off(epdc->hv->vcomDriver);
 		if ((epdc->hv->hvDriver != NULL) && (epdc->hv->hvDriver->switch_off != NULL))
 			stat = epdc->hv->hvDriver->switch_off(epdc->hv->hvDriver);
+	}
+
+	return stat;
+}
+
+/**
+ * switches the com voltage on/off.
+ * @param state 0=off, 1=on.
+ * @return status
+ */
+int switch_com(int state){
+	int stat = 0;
+
+	if (state == 1){
+		if (epdc->hv->vcomSwitch != NULL){
+			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 1);
+		}
+	}
+	else if(state == 0){
+		if (epdc->hv->vcomSwitch != NULL){
+			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 0);
+		}
+	}
+	else{
+		if (epdc->hv->vcomSwitch != NULL){
+			epdc->hv->vcomSwitch->disable_bypass_mode(epdc->hv->vcomSwitch);
+		}
 	}
 
 	return stat;
@@ -1355,30 +1495,23 @@ void printHelp_get_resolution(int identLevel){
 }
 
 void printHelp_get_vcom(int identLevel){
-	printf("%*s Sets the Vcom voltage.\n", identLevel, " ");
+	printf("%*s Gets the Vcom voltage.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -set_vcom <voltage>\n", identLevel, " ");
-	printf("\n");
-	printf("%*s \t<voltage>  : \tcom voltage in volts.\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -get_vcom\n", identLevel, " ");
 	printf("\n");
 }
 
 void printHelp_get_waveform(int identLevel){
-	printf("%*s Sets the waveform used for later update operations.\n", identLevel, " ");
+	printf("%*s Gets the waveform used for later update operations.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -set_waveform <waveform> <temp>\n", identLevel, " ");
-	printf("\n");
-	printf("%*s \t<waveform> : \tpath to the waveform file.\n", identLevel, " ");
-	printf("%*s \t<temp>     : \tTemperature in degree celsius.\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -get_waveform\n", identLevel, " ");
 	printf("\n");
 }
 
 void printHelp_get_temperature(int identLevel){
-	printf("%*s Sets the temperature.\n", identLevel, " ");
+	printf("%*s Gets the temperature.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -set_temperature <temp>\n", identLevel, " ");
-	printf("\n");
-	printf("%*s \t<temp>     : \tTemperature in degree celsius.\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -get_temperature \n", identLevel, " ");
 	printf("\n");
 }
 
@@ -1408,6 +1541,16 @@ void printHelp_write_reg(int identLevel){
 	printf("%*s \t<bitmask>  : \toptional parameter, which can mask out bits from write operation.\n", identLevel, " ");
 	printf("\n");
 
+}
+
+void printHelp_fill(int identLevel){
+	// TODO...
+	printf("%*s Fill the screen with a Greylevel.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -fill <GLx | y>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<GLy | y> : \toptional paraetmer, specifies the Greylevel to be used; GL0 to GL15 or integer from 0 to 255.\n", identLevel, " ");
+	printf("\n");
 }
 
 void printHelp_send_cmd(int identLevel){
@@ -1488,6 +1631,15 @@ void printHelp_info(int identLevel){
 	printf("%*s Displays general display informations.\n", identLevel, " ");
 	printf("\n");
 	printf("%*s Usage: epdc-app -info\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_switch_com(int identLevel){
+	printf("%*s Switches COMswitch on/off based on parameter.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -hv <state>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<state>  		: 0 = off; 1= on; -1= disable manual settings\n", identLevel, " ");
 	printf("\n");
 }
 

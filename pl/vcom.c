@@ -1,7 +1,7 @@
 /*
-  Plastic Logic EPD project on MSP430
+  Plastic Logic EPD project on BeagleBone
 
-  Copyright (C) 2013 Plastic Logic Limited
+  Copyright (C) 2018 Plastic Logic
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -47,7 +47,6 @@ int vcom_calculate(const struct vcom_cal *v, int input_mv)
 {
 	int32_t scaled_mv;
 	int dac_value;
-
 	assert(v != NULL);
 
 	scaled_mv = DIV_ROUND_CLOSEST(input_mv * v->swing, v->swing_ideal);
@@ -64,7 +63,6 @@ int vcom_calculate_dac(const struct vcom_cal *v, int dac_value)
 {
 	int32_t scaled_mv;
 	int mv;
-
 	assert(v != NULL);
 
 	scaled_mv = /*DIV_ROUND_CLOSEST*/(dac_value * v->dac_dy/ v->dac_dx) + v->dac_offset;

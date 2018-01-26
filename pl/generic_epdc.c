@@ -1,4 +1,22 @@
 /*
+  Plastic Logic EPD project on BeagleBone
+
+  Copyright (C) 2018 Plastic Logic
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*
  * generic_epdc.c
  *
  *  Created on: 23.03.2015
@@ -453,7 +471,9 @@ static int generic_update(struct pl_generic_epdc *p, int wfID, enum pl_update_mo
 	//read_stopwatch(&t,"update_temp",1);
 	stat |= controller->configure_update(controller, wfID, mode, area);
 	//read_stopwatch(&t,"configure_update",1);
-	stat |= switch_hvs_on(hv);
+	if(!nowait){
+		stat |= switch_hvs_on(hv);
+	}
 	//read_stopwatch(&t,"switch_hvs_on",1);
 	stat |= controller->trigger_update(controller);
 	//read_stopwatch(&t,"trigger_update",1);
@@ -584,15 +604,18 @@ static int switch_hvs_on(pl_hv_t *hv){
 	int stat = 0;
 
 
-	if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_on != NULL))
+	if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_on != NULL)){
 		stat |= hv->hvDriver->switch_on(hv->hvDriver);
-
-	if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_on != NULL))
+		//LOG("HV on");
+	}
+	if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_on != NULL)){
 		stat |= hv->vcomDriver->switch_on(hv->vcomDriver);
-
-	if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->close != NULL) && (!hv->vcomSwitch->is_bypass))
+		//LOG("Vcom on");
+	}
+	if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->close != NULL) && (!hv->vcomSwitch->is_bypass)){
 		hv->vcomSwitch->close(hv->vcomSwitch);
-
+		//LOG("ComSwitch on");
+	}
 	return stat;
 }
 
@@ -604,16 +627,18 @@ static int switch_hvs_on(pl_hv_t *hv){
  */
 static int switch_hvs_off(pl_hv_t *hv){
 	int stat = 0;
-
-	if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->open != NULL) && (!hv->vcomSwitch->is_bypass))
+	if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->open != NULL) && (!hv->vcomSwitch->is_bypass)){
 		hv->vcomSwitch->open(hv->vcomSwitch);
-
-	if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_off != NULL))
+		//LOG("ComSwitch off\n");
+	}
+	if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_off != NULL)){
 		stat |= hv->vcomDriver->switch_off(hv->vcomDriver);
-
-	if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_off != NULL))
+		//LOG("Vcom off\n");
+	}
+	if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_off != NULL)){
 		stat |= hv->hvDriver->switch_off(hv->hvDriver);
-
+		//LOG("HV off\n");
+	}
 	return stat;
 }
 

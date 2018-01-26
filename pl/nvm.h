@@ -1,3 +1,21 @@
+/*
+  Plastic Logic EPD project on BeagleBone
+
+  Copyright (C) 2018 Plastic Logic
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef INCLUDE_PL_NVM_H
 #define INCLUDE_PL_NVM_H 1
@@ -66,6 +84,7 @@ typedef struct pl_nvm {
 //	int (*pgm_header_and_wfdata)(struct pl_nvm *nvm, uint8_t *data, int count);
 
 	int (*read)(struct pl_nvm *nvm, unsigned int addr, uint8_t *data, int count);
+
 	int (*read_wfdata)(struct pl_nvm *nvm, uint8_t **data, int *count);
 	int (*read_header)(struct pl_nvm *nvm, int *isPgm);
 

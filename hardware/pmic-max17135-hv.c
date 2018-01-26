@@ -1,4 +1,22 @@
 /*
+  Plastic Logic EPD project on BeagleBone
+
+  Copyright (C) 2018 Plastic Logic
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*
  * pmic-max17135-hv.c
  *
  *  Created on: 24.03.2015
@@ -34,7 +52,7 @@ pl_hv_driver_t *max17135_get_hv_driver(pl_pmic_t *max17135){
 	assert(max17135 != NULL);
 
 	struct pl_hv_driver *p = hv_driver_new();
-
+	LOG("%s", __func__);
 	p->hw_ref = max17135;
 	p->switch_on = max17135_hv_driver_on;
 	p->switch_off = max17135_hv_driver_off;
@@ -52,6 +70,7 @@ pl_hv_driver_t *max17135_get_hv_driver(pl_pmic_t *max17135){
  */
 static int max17135_hv_driver_on(struct pl_hv_driver *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 
@@ -69,9 +88,9 @@ static int max17135_hv_driver_on(struct pl_hv_driver *p){
  */
 static int max17135_hv_driver_off(struct pl_hv_driver *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
-
 	return max17135->hv_disable(max17135);
 }
 
@@ -149,7 +168,7 @@ static int hv_config_init(pl_hv_config_t *p){
 // ------------------------------
 pl_hv_timing_t *max17135_get_hv_timing(pl_pmic_t *max17135){
 	assert(max17135 != NULL);
-
+	LOG("%s", __func__);
 	pl_hv_timing_t *p = hv_timing_new();
 
 	p->hw_ref = max17135;
@@ -169,6 +188,7 @@ pl_hv_timing_t *max17135_get_hv_timing(pl_pmic_t *max17135){
  */
 static int set_hv_timings(struct pl_hv_timing *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 
@@ -193,6 +213,7 @@ static int set_hv_timings(struct pl_hv_timing *p){
  */
 static int hv_timing_init(pl_hv_timing_t *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 
@@ -206,7 +227,7 @@ static int hv_timing_init(pl_hv_timing_t *p){
 // ------------------------------
 pl_vcom_config_t *max17135_get_vcom_config(pl_pmic_t *max17135){
 	assert(max17135 != NULL);
-
+	LOG("%s", __func__);
 	struct pl_vcom_config *p = vcom_config_new();
 	p->hw_ref = max17135;
 	p->set_vcom = max17135_vcom_config_set;
@@ -217,6 +238,7 @@ pl_vcom_config_t *max17135_get_vcom_config(pl_pmic_t *max17135){
 
 static int max17135_vcom_config_set(struct pl_vcom_config *p, double vcomInMillivolt){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 
@@ -225,6 +247,7 @@ static int max17135_vcom_config_set(struct pl_vcom_config *p, double vcomInMilli
 
 static int max17135_vcom_config_get(struct pl_vcom_config *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 
@@ -238,6 +261,7 @@ static int max17135_vcom_config_get(struct pl_vcom_config *p){
  */
 static int vcom_config_init(pl_vcom_config_t *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 
@@ -248,7 +272,7 @@ static int vcom_config_init(pl_vcom_config_t *p){
 // ------------------------------
 pl_vcom_driver_t *max17135_get_vcom_driver(pl_pmic_t *max17135){
 	assert(max17135 != NULL);
-
+	LOG("%s", __func__);
 	pl_vcom_driver_t *p = vcom_driver_new();
 	p->hw_ref = max17135;
 	p->switch_on = vcom_driver_on;
@@ -260,6 +284,7 @@ pl_vcom_driver_t *max17135_get_vcom_driver(pl_pmic_t *max17135){
 
 static int vcom_driver_on(pl_vcom_driver_t *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 
@@ -268,6 +293,7 @@ static int vcom_driver_on(pl_vcom_driver_t *p){
 
 static int vcom_driver_off(pl_vcom_driver_t *p){
 	assert(p != NULL);
+	LOG("%s", __func__);
 	pl_pmic_t *max17135 = (pl_pmic_t*)p->hw_ref;
 	assert(max17135 != NULL);
 

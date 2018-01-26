@@ -1,14 +1,7 @@
 /*
- * text.c
- *
- *  Created on: 18.10.2016
- *      Author: robert.pohlink
- */
+  Plastic Logic EPD project on BeagleBone
 
-/*
-  Plastic Logic EPD project on RaspberryPi
-
-  Copyright (C) 2014 Plastic Logic Limited
+  Copyright (C) 2018 Plastic Logic
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -22,7 +15,8 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
+
 /*
  * text.c -- plain text print app
  *

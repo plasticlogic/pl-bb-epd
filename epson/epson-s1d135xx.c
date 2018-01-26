@@ -1,7 +1,7 @@
 /*
-  Plastic Logic EPD project on MSP430
+  Plastic Logic EPD project on BeagleBone
 
-  Copyright (C) 2014 Plastic Logic Limited
+  Copyright (C) 2018 Plastic Logic
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ static int s1d135xx_configure_update(struct s1d135xx *p, int wfid, enum pl_updat
 static int s1d135xx_execute_update(struct s1d135xx *p);
 static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t mode,unsigned bpp, const struct pl_area *area, int left,int top);
 static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_t mode,
-		unsigned bpp, const struct pl_area *area, int left,
+		unsigned bpp, struct pl_area *area, int left,
 		int top);
 static int s1d135xx_pattern_check(struct s1d135xx *p, uint16_t height, uint16_t width, uint16_t checker_size, uint16_t mode);
 static int s1d135xx_fill(struct s1d135xx *p, uint16_t mode, unsigned bpp,
@@ -281,9 +281,7 @@ static int s1d135xx_soft_reset(struct s1d135xx *p)
  */
 static int s1d135xx_wait_idle(struct s1d135xx *p)
 {
-
 	unsigned long timeout = 50000; // ca. 20s
-
 	while (!get_hrdy(p)){
 		--timeout;
 		if (timeout == 0){
@@ -291,7 +289,6 @@ static int s1d135xx_wait_idle(struct s1d135xx *p)
 			return -1;
 		}
 	}
-
 	return 0;
 }
 
@@ -469,8 +466,8 @@ static void s1d135xx_cmd(struct s1d135xx *p, uint16_t cmd, const uint16_t *param
 static int s1d135xx_set_epd_power(struct s1d135xx *p, int on)
 {
 	uint16_t arg = on ? S1D135XX_PWR_CTRL_UP : S1D135XX_PWR_CTRL_DOWN;
-	uint16_t tmp;
-
+	uint16_t tmp, i = 0, timeout = 1000;
+	LOG("%s %i", __func__, i++);
 #if VERBOSE
 	LOG("EPD power o%s", on ? "n" : "ff");
 #endif
@@ -478,18 +475,24 @@ static int s1d135xx_set_epd_power(struct s1d135xx *p, int on)
 	if (s1d135xx_wait_idle(p))
 		return -1;
 
+	LOG("%s %i", __func__, i++);
 	s1d135xx_write_reg(p, S1D135XX_REG_PWR_CTRL, arg);
 
+	LOG("%s %i", __func__, i++);
 	do {
 		tmp = s1d135xx_read_reg(p, S1D135XX_REG_PWR_CTRL);
-	} while (tmp & S1D135XX_PWR_CTRL_BUSY);
+		timeout--;
+		LOG("%s %x", __func__, tmp);
+	} while ((tmp & S1D135XX_PWR_CTRL_BUSY) && timeout);
 
+	LOG("%s %i", __func__, i++);
 	if (on && ((tmp & S1D135XX_PWR_CTRL_CHECK_ON) !=
 		   S1D135XX_PWR_CTRL_CHECK_ON)) {
 		LOG("Failed to turn the EPDC power on");
 		return -1;
 	}
 
+	LOG("%s %i", __func__, i++);
 	return 0;
 }
 
@@ -589,12 +592,9 @@ static int s1d135xx_wait_update_end(struct s1d135xx *p)
 {
 	if (p->wait_for_idle(p))
 		return -1;
-
 	if (s1d135xx_wait_dspe_trig(p))
 		return -1;
-
 	send_cmd_cs(p, S1D135XX_CMD_WAIT_DSPE_FREND);
-
 	return p->wait_for_idle(p);
 }
 
@@ -736,7 +736,7 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 }
 
 static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_t mode,
-		unsigned bpp, const struct pl_area *area, int left,
+		unsigned bpp, struct pl_area *area, int left,
 		int top)
 {
 	assert(p != NULL);
@@ -748,7 +748,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	int stat = 0;
 	int memorySize = p->yres*p->xres;
 	uint8_t *scrambledPNG;
-
+	//LOG("p->yres: %i, p->xres: %i", p->yres, p->xres);
 	if(p->cfa_overlay.r_position == -1){
 		LOG("BW");
 		uint8_t *pngBuffer;
@@ -757,7 +757,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 			return -1;
 
 		// scramble image
-		scrambledPNG = malloc(height*width);
+		scrambledPNG = malloc(max(height, p->yres)*max(width, p->xres));
 		scramble_array(pngBuffer, scrambledPNG, &height, &width,  p->display_scrambling);
 		if(pngBuffer)
 			free(pngBuffer);
@@ -769,19 +769,35 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 			return -1;
 
 		// scramble image
-		scrambledPNG = malloc(2*2*height*width);
-		uint8_t *colorBuffer = malloc(2*height*2*width);
-		rgbw_processing(&width, &height, pngBuffer, colorBuffer, (struct pl_area*) area, p->cfa_overlay);
+		scrambledPNG = malloc(4*max(height, p->yres)*max(width, p->xres));
+		uint8_t *colorBuffer = malloc(4*max(height, p->yres)*max(width, p->xres));
+		rgbw_processing((uint32_t*) &width, (uint32_t*) &height, pngBuffer, colorBuffer, (struct pl_area*) area, p->cfa_overlay);
 		scramble_array(colorBuffer, scrambledPNG, &height, &width,  p->display_scrambling);
 		free(colorBuffer);
 		if(pngBuffer)
 			free(pngBuffer);
 	}
-
+//*
+	if((height > p->yres || width > p->xres) && (area == NULL)){
+		area = malloc(sizeof(struct pl_area));
+		area->height = min(height, p->yres);
+		area->width = min(width, p->xres);
+		area->left = ((int) (p->xres - width)<0)?0:p->xres - width;
+		area->top = ((int) (p->yres - height)<0)?0:p->yres - height;
+	}
+//*/
+/*
+	if(area)
+		LOG("AREA: L: %i, T: %i, H: %i, W: %i", area->left, area->top, area->height, area->width);
+	LOG("x: %i", ((int) (p->xres - width)<0)?0:p->xres - width);
+	LOG("y: %i", ((int) (p->yres - height)<0)?0:p->yres - height);
+*/
 	// adapt image to memory
 
-	uint8_t *memoryBuffer = malloc(p->yres*p->xres);
-	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
+	uint8_t *memoryBuffer = malloc(max(height, p->yres)*max(width, p->xres));
+	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres,	p->yoffset,	p->xoffset);
+	//memory_padding(scrambledPNG, memoryBuffer, min(height, p->yres), min(width, p->xres),min(height, p->yres), min(width, p->xres),  p->yoffset, p->xoffset);
+
 	// memory optimisation - if 4 bit per pixel mode is used
 	if (bpp == 4){
 		memorySize /= 2;
@@ -809,7 +825,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	send_cmd(p, S1D135XX_CMD_WRITE_REG);
 	send_param(p->interface, S1D135XX_REG_HOST_MEM_PORT);
 
-	if (area == NULL)
+	//if (area == NULL)
 		transfer_data(p->interface, memoryBuffer, memorySize);
 
 	set_cs(p, 1);
@@ -871,11 +887,15 @@ static void memory_padding(uint8_t *source, uint8_t *target,  int s_gl, int s_sl
 	else
 		_sl_offset = t_sl - s_sl;
 
-
 	for (gl=0; gl<s_gl; gl++)
 		for(sl=0; sl<s_sl; sl++)
 		{
-			target [(gl+_gl_offset)*t_sl+(sl+_sl_offset)] = source [gl*s_sl+sl];
+			int s_idx = gl*s_sl+sl;
+			int t_idx = (gl+_gl_offset)*t_sl+(sl+_sl_offset);
+			if(!(s_idx < 0 || t_idx < 0 )){
+				target [t_idx] = source [s_idx];
+				source [s_idx] = 0x00;
+			}
 		}
 }
 #endif
@@ -1187,7 +1207,6 @@ static int do_fill(struct s1d135xx *p, const struct pl_area *area,
 	uint16_t val16 = 0;
 	uint16_t lines;
 	uint16_t pixels = 0;
-
 	// Only 16-bit transfers for now...
 	assert(!(area->width % 2));
 
@@ -1275,10 +1294,11 @@ static int transfer_file(struct pl_generic_interface *interface, FILE *file)
 
 static void transfer_data(struct pl_generic_interface *interface, const uint8_t *data, size_t n)
 {
-	//	struct timespec t;
-	//	start_stopwatch(&t);
+
+	uint16_t *data16 = (uint16_t *)data;
+
 	if(interface->mSpi){
-		uint16_t *data16 = (uint16_t *)data;
+
 		const unsigned int chunkSize = 4096;
 
 		unsigned int wordIdx;
@@ -1288,7 +1308,7 @@ static void transfer_data(struct pl_generic_interface *interface, const uint8_t 
 
 		// transfer full chunks of data
 		while (n > chunkSize){
-			interface->write_bytes(interface, data, sizeof(uint8_t)*chunkSize);
+			interface->write_bytes(interface, (uint8_t*) data16, sizeof(uint8_t)*chunkSize);
 			data+=chunkSize;
 			n -= chunkSize;
 		}
@@ -1296,9 +1316,8 @@ static void transfer_data(struct pl_generic_interface *interface, const uint8_t 
 	}
 	// transfer rest bytes
 	if (n){
-		interface->write_bytes(interface, data, sizeof(uint8_t)*n);
+		interface->write_bytes(interface, (uint8_t*) data16, sizeof(uint8_t)*n);
 	}
-//		read_stopwatch(&t, "SPI_WRITE", 1);
 }
 
 static void send_cmd_area(struct s1d135xx *p, uint16_t cmd, uint16_t mode,
