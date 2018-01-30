@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pl/assert.h>
-
+#include <unistd.h>
 
 #define LOG_TAG "s1d135xx"
 #include <pl/utils.h>
@@ -466,8 +466,8 @@ static void s1d135xx_cmd(struct s1d135xx *p, uint16_t cmd, const uint16_t *param
 static int s1d135xx_set_epd_power(struct s1d135xx *p, int on)
 {
 	uint16_t arg = on ? S1D135XX_PWR_CTRL_UP : S1D135XX_PWR_CTRL_DOWN;
-	uint16_t tmp, i = 0, timeout = 1000;
-	LOG("%s %i", __func__, i++);
+	uint16_t tmp, timeout = 400;
+
 #if VERBOSE
 	LOG("EPD power o%s", on ? "n" : "ff");
 #endif
@@ -475,24 +475,21 @@ static int s1d135xx_set_epd_power(struct s1d135xx *p, int on)
 	if (s1d135xx_wait_idle(p))
 		return -1;
 
-	LOG("%s %i", __func__, i++);
 	s1d135xx_write_reg(p, S1D135XX_REG_PWR_CTRL, arg);
 
-	LOG("%s %i", __func__, i++);
 	do {
 		tmp = s1d135xx_read_reg(p, S1D135XX_REG_PWR_CTRL);
+		usleep(250);
 		timeout--;
-		LOG("%s %x", __func__, tmp);
 	} while ((tmp & S1D135XX_PWR_CTRL_BUSY) && timeout);
 
-	LOG("%s %i", __func__, i++);
+
 	if (on && ((tmp & S1D135XX_PWR_CTRL_CHECK_ON) !=
 		   S1D135XX_PWR_CTRL_CHECK_ON)) {
 		LOG("Failed to turn the EPDC power on");
 		return -1;
 	}
 
-	LOG("%s %i", __func__, i++);
 	return 0;
 }
 
@@ -748,13 +745,28 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	int stat = 0;
 	int memorySize = p->yres*p->xres;
 	uint8_t *scrambledPNG;
-	//LOG("p->yres: %i, p->xres: %i", p->yres, p->xres);
 	if(p->cfa_overlay.r_position == -1){
 		LOG("BW");
 		uint8_t *pngBuffer;
 		// read png image
 		if (read_png(path, &pngBuffer, &width, &height))
 			return -1;
+		//if the image does not fit the screen, rotate
+		if(!p->display_scrambling){
+			if(height == p->xres && width == p->yres){
+				rotate_8bit_image(&height, &width, pngBuffer);
+			}
+		}else{
+			if(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK){
+				if(height == (p->xres * 2) && width == (p->yres / 2)){
+					rotate_8bit_image(&height, &width, pngBuffer);
+				}
+			}else if(p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK){
+				if(height == (p->xres / 2) && width == (p->yres * 2)){
+					rotate_8bit_image(&height, &width, pngBuffer);
+				}
+			}
+		}
 
 		// scramble image
 		scrambledPNG = malloc(max(height, p->yres)*max(width, p->xres));
@@ -767,6 +779,24 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		// read png image
 		if (read_rgbw_png(path, &pngBuffer, &width, &height))
 			return -1;
+
+		if(!p->display_scrambling){
+			if(height == p->xres/2 && width == p->yres/2){
+				rotate_rgbw_image(&height, &width, (char*) pngBuffer);
+				LOG("CFA %ix%i -> %ix%i", height, width, p->yres, p->xres);
+			}
+		}else{
+			if(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK){
+				if(height == (p->xres * 2) && width == (p->yres / 2)){
+					rotate_rgbw_image(&height, &width, (char*) pngBuffer);
+				}
+			}else if(p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK){
+				if(height == (p->xres / 2) && width == (p->yres * 2)){
+					rotate_rgbw_image(&height, &width, (char*) pngBuffer);
+				}
+			}
+		}
+
 
 		// scramble image
 		scrambledPNG = malloc(4*max(height, p->yres)*max(width, p->xres));
@@ -786,12 +816,6 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		area->top = ((int) (p->yres - height)<0)?0:p->yres - height;
 	}
 //*/
-/*
-	if(area)
-		LOG("AREA: L: %i, T: %i, H: %i, W: %i", area->left, area->top, area->height, area->width);
-	LOG("x: %i", ((int) (p->xres - width)<0)?0:p->xres - width);
-	LOG("y: %i", ((int) (p->yres - height)<0)?0:p->yres - height);
-*/
 	// adapt image to memory
 
 	uint8_t *memoryBuffer = malloc(max(height, p->yres)*max(width, p->xres));

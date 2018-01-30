@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <libpng-1.2.51/png.h>
 #include "types.h"
@@ -103,6 +104,9 @@ uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, 
 /** loads a file with register settings and supplies a vector containing all settings */
 int read_register_settings_from_file(const char* filename, regSetting_t** settings);
 void dump_register_settings(regSetting_t *settings, int n);
+
+void rotate_8bit_image(int *height, int *width, char * data);
+void rotate_rgba_image(int *height, int *width, rgbw_pixel_t * data);
 
 int maxstrcpy(char* to, char* from, size_t max);
 int maxstr2memcpy(char* to, char* from, size_t maxMemSize);

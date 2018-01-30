@@ -35,6 +35,7 @@
 #include "parser.h"
 #include <libpng-1.2.51/png.h>
 
+
 void swap32(void *x)
 {
 	uint8_t *b = x;
@@ -681,3 +682,58 @@ uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, 
 		return pixel.w;
 	return -1;
 }
+
+void rotate_8bit_image(int *h, int *w, char* data){
+	int row, col, height, width, i;
+	char new[*h * *w];
+
+	height = *h;
+	width = *w;
+	for(row=0; row<height; row++){
+		for(col=0; col<width; col++){
+			new[col*height+height-row] = data[row*width+col];
+		}
+	}
+
+	for(i=0;i<height*width;i++){
+		data[i] = new[i];
+	}
+
+	*h = width;
+	*w = height;
+}
+
+void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data){
+
+	int row, col, height, width, i, oldpos, newpos;
+	rgbw_pixel_t new[*h * *w];
+
+	height = *h;
+	width = *w;
+	LOG("%s %ix%i", __func__, height, width);
+	for(row=0; row<height; row++){
+		for(col=0; col<width; col++){
+			newpos = col*height+height-row;
+			oldpos = row*width+col;
+			new[newpos].r = data[oldpos].r;
+			new[newpos].g = data[oldpos].g;
+			new[newpos].b = data[oldpos].b;
+			new[newpos].w = data[oldpos].w;
+		}
+	}
+	LOG("%s", __func__);
+
+	for(i=0;i<height*width;i++){
+		data[i].r = new[i].r;
+		data[i].g = new[i].g;
+		data[i].b = new[i].b;
+		data[i].w = new[i].w;
+	}
+	LOG("%s", __func__);
+
+	*h = width;
+	*w = height;
+
+
+}
+
