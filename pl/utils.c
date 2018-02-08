@@ -683,7 +683,7 @@ uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, 
 	return -1;
 }
 
-void rotate_8bit_image(int *h, int *w, char* data){
+void rotate_8bit_image(int *h, int *w, uint8_t* data){
 	int row, col, height, width, i;
 	char new[*h * *w];
 
@@ -721,7 +721,6 @@ void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data){
 			new[newpos].w = data[oldpos].w;
 		}
 	}
-	LOG("%s", __func__);
 
 	for(i=0;i<height*width;i++){
 		data[i].r = new[i].r;
@@ -729,7 +728,6 @@ void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data){
 		data[i].b = new[i].b;
 		data[i].w = new[i].w;
 	}
-	LOG("%s", __func__);
 
 	*h = width;
 	*w = height;

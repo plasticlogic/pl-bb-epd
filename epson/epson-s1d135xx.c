@@ -656,79 +656,77 @@ static int s1d135xx_execute_update(struct s1d135xx *p)
 static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t mode,
 		unsigned bpp, const struct pl_area *area, int left,
 		int top){
-		assert(p != NULL);
-		LOG("%s", __func__);
-		int stat = 0;
+	assert(p != NULL);
+	int stat = 0;
 
-		int height = 0;
-		int width = 0;
+	int height = 0;
+	int width = 0;
 
-		int memorySize;
+	int memorySize;
 
-		if(area==NULL){
-			height = p->xres;
-			width = p->yres;
-			memorySize = p->yres*p->xres;
-		}else{
-			memorySize = area->width * area->height;
-			height = area->height;
-			width = area->width;
+	if(area==NULL){
+		height = p->xres;
+		width = p->yres;
+		memorySize = p->yres*p->xres;
+	}else{
+		memorySize = area->width * area->height;
+		height = area->height;
+		width = area->width;
+	}
+	// scramble image
+	if(area)
+		LOG("AREA: L: %i, T: %i, H: %i, W: %i", area->left, area->top, area->height, area->width);
+	uint8_t *scrambledPNG = malloc(height*width);
+	scramble_array((uint8_t*) buffer, scrambledPNG, &height, &width,  p->display_scrambling);
+
+	// adapt image to memory
+
+	uint8_t *memoryBuffer = malloc(p->yres*p->xres);
+	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
+
+
+	// memory optimisation - if 4 bit per pixel mode is used
+	if (bpp == 4){
+		memorySize /= 2;
+		int bitIdx;
+		for(bitIdx = 0; bitIdx < memorySize; bitIdx++){
+			memoryBuffer[bitIdx] = (memoryBuffer[bitIdx*2+1] & 0xF0) | (memoryBuffer[bitIdx*2] >> 4);
 		}
-		// scramble image
-		if(area)
-			LOG("AREA: L: %i, T: %i, H: %i, W: %i", area->left, area->top, area->height, area->width);
-		uint8_t *scrambledPNG = malloc(height*width);
-		scramble_array((uint8_t*) buffer, scrambledPNG, &height, &width,  p->display_scrambling);
+	}
 
-		// adapt image to memory
+	set_cs(p, 0);
 
-		uint8_t *memoryBuffer = malloc(p->yres*p->xres);
-		memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
+	if (area != NULL) {
+		send_cmd_area(p, S1D135XX_CMD_LD_IMG_AREA, mode, area);
+	} else {
+		send_cmd(p, S1D135XX_CMD_LD_IMG);
+		send_param(p->interface, mode);
+	}
 
-
-		// memory optimisation - if 4 bit per pixel mode is used
-		if (bpp == 4){
-			memorySize /= 2;
-			int bitIdx;
-			for(bitIdx = 0; bitIdx < memorySize; bitIdx++){
-				memoryBuffer[bitIdx] = (memoryBuffer[bitIdx*2+1] & 0xF0) | (memoryBuffer[bitIdx*2] >> 4);
-			}
-		}
-
-		set_cs(p, 0);
-
-		if (area != NULL) {
-			send_cmd_area(p, S1D135XX_CMD_LD_IMG_AREA, mode, area);
-		} else {
-			send_cmd(p, S1D135XX_CMD_LD_IMG);
-			send_param(p->interface, mode);
-		}
-
-		set_cs(p, 1);
+	set_cs(p, 1);
 	/*
 		if (p->wait_for_idle(p))
 			return -1;
 	//*/
-		set_cs(p, 0);
-		send_cmd(p, S1D135XX_CMD_WRITE_REG);
-		send_param(p->interface, S1D135XX_REG_HOST_MEM_PORT);
+	set_cs(p, 0);
+	send_cmd(p, S1D135XX_CMD_WRITE_REG);
+	send_param(p->interface, S1D135XX_REG_HOST_MEM_PORT);
 
-		transfer_data(p->interface, memoryBuffer, memorySize);
+	transfer_data(p->interface, memoryBuffer, memorySize);
 
-		set_cs(p, 1);
+	set_cs(p, 1);
 
-		if(memoryBuffer)
-			free(memoryBuffer);
+	if(memoryBuffer)
+		free(memoryBuffer);
 
-		if (stat)
-			return -1;
+	if (stat)
+		return -1;
 	/*
 		if (p->wait_for_idle(p))
 			return -1;
 	//*/
-		send_cmd_cs(p, S1D135XX_CMD_LD_IMG_END);
-		return p->wait_for_idle(p);
-
+	send_cmd_cs(p, S1D135XX_CMD_LD_IMG_END);
+	return p->wait_for_idle(p);
 
 }
 
@@ -740,7 +738,6 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 
 	int height = 0;
 	int width = 0;
-
 
 	int stat = 0;
 	int memorySize = p->yres*p->xres;
@@ -754,16 +751,19 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		//if the image does not fit the screen, rotate
 		if(!p->display_scrambling){
 			if(height == p->xres && width == p->yres){
+				//LOG("BW %ix%i -> %ix%i", height, width, p->yres, p->xres);
 				rotate_8bit_image(&height, &width, pngBuffer);
 			}
 		}else{
 			if(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK){
 				if(height == (p->xres * 2) && width == (p->yres / 2)){
 					rotate_8bit_image(&height, &width, pngBuffer);
+					//LOG("BWS %ix%i -> %ix%i", height, width, p->yres, p->xres);
 				}
 			}else if(p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK){
 				if(height == (p->xres / 2) && width == (p->yres * 2)){
 					rotate_8bit_image(&height, &width, pngBuffer);
+					//LOG("BWS2 %ix%i -> %ix%i", height, width, p->yres, p->xres);
 				}
 			}
 		}
@@ -782,17 +782,17 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 
 		if(!p->display_scrambling){
 			if(height == p->xres/2 && width == p->yres/2){
-				rotate_rgbw_image(&height, &width, (char*) pngBuffer);
+				rotate_rgbw_image(&height, &width, pngBuffer);
 				LOG("CFA %ix%i -> %ix%i", height, width, p->yres, p->xres);
 			}
 		}else{
 			if(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK){
 				if(height == (p->xres * 2) && width == (p->yres / 2)){
-					rotate_rgbw_image(&height, &width, (char*) pngBuffer);
+					rotate_rgbw_image(&height, &width, pngBuffer);
 				}
 			}else if(p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK){
 				if(height == (p->xres / 2) && width == (p->yres * 2)){
-					rotate_rgbw_image(&height, &width, (char*) pngBuffer);
+					rotate_rgbw_image(&height, &width, pngBuffer);
 				}
 			}
 		}
@@ -1319,20 +1319,18 @@ static int transfer_file(struct pl_generic_interface *interface, FILE *file)
 static void transfer_data(struct pl_generic_interface *interface, const uint8_t *data, size_t n)
 {
 
-	uint16_t *data16 = (uint16_t *)data;
-
 	if(interface->mSpi){
-
+		uint16_t *data16 = (uint16_t *)data;
 		const unsigned int chunkSize = 4096;
-
 		unsigned int wordIdx;
+
 		for (wordIdx = 0; wordIdx < n/2; wordIdx++){
 			data16[wordIdx] = htobe16(data16[wordIdx]);
 		}
-
+		wordIdx = 0;
 		// transfer full chunks of data
 		while (n > chunkSize){
-			interface->write_bytes(interface, (uint8_t*) data16, sizeof(uint8_t)*chunkSize);
+			interface->write_bytes(interface, (uint8_t*) data, sizeof(uint8_t)*chunkSize);
 			data+=chunkSize;
 			n -= chunkSize;
 		}
@@ -1340,7 +1338,7 @@ static void transfer_data(struct pl_generic_interface *interface, const uint8_t 
 	}
 	// transfer rest bytes
 	if (n){
-		interface->write_bytes(interface, (uint8_t*) data16, sizeof(uint8_t)*n);
+		interface->write_bytes(interface, (uint8_t*) data, sizeof(uint8_t)*n);
 	}
 }
 

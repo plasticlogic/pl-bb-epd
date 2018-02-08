@@ -353,7 +353,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,  const s
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_FRAME_DATA_LENGTH);
 
-	return s1d135xx->load_png_image(s1d135xx, path, S1D13541_LD_IMG_8BPP, 8, area, left, top);
+	return s1d135xx->load_png_image(s1d135xx, path, S1D13541_LD_IMG_8BPP, 8, (struct pl_area *) area, left, top);
 }
 /* -- initialisation -- */
 
@@ -436,10 +436,10 @@ static void update_temp(struct s1d135xx *p, uint16_t reg)
 
 	p->measured_temp = regval;
 }
-
+#if 0
 static void get_temp(struct s1d135xx *p, int* temperature)
 {
-#if 0
+
 	uint16_t regval;
 
 	regval = p->read_reg(p, S1D135XX_REG_INT_RAW_STAT);
@@ -455,8 +455,9 @@ static void get_temp(struct s1d135xx *p, int* temperature)
 #endif
 
 	p->measured_temp = regval;
-#endif
+
 }
+#endif
 
 static int update_temp_manual(struct s1d135xx *p, int manual_temp)
 {

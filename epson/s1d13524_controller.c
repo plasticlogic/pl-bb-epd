@@ -206,7 +206,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_FRAME_DATA_LENGTH);
 
-	return s1d135xx->load_png_image(s1d135xx, path, S1D13524_LD_IMG_4BPP, 4, area, left, top);
+	return s1d135xx->load_png_image(s1d135xx, path, S1D13524_LD_IMG_4BPP, 4, (struct pl_area *) area, left, top);
 }
 static int load_buffer(pl_generic_controller_t *p, const char *buffer, const struct pl_area *area, int left, int top)
 {

@@ -89,8 +89,8 @@ static const struct pl_gpio_config g_chiffchaff_gpios[] = {
 };
 
 static const struct pl_gpio_config g_ruddock_gpios[] = {
-	{ VCOM_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ PMIC_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ VCOM_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ PMIC_EN,    PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ PMIC_POK,   PL_GPIO_INPUT                   },
 	{ PMIC_FLT,   PL_GPIO_INPUT                   },
 	{ RUDDOCK_5V_EN,  		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },

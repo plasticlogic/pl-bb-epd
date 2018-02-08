@@ -121,7 +121,7 @@ typedef struct s1d135xx {
 	int (*wait_update_end)(struct s1d135xx *p);
 	int (*configure_update)(struct s1d135xx *p, int wfid, enum pl_update_mode mode, const struct pl_area *area);
 	int (*execute_update)(struct s1d135xx *p);
-	int (*load_png_image)(struct s1d135xx *p, const char *path, uint16_t mode, unsigned bpp, const struct pl_area *area, int left, int top);
+	int (*load_png_image)(struct s1d135xx *p, const char *path, uint16_t mode, unsigned bpp, struct pl_area *area, int left, int top);
 	int (*load_buffer)(struct s1d135xx *p, const char *buffer, uint16_t mode, unsigned bpp, const struct pl_area *area, int left, int top);
 	int (*pattern_check)(struct s1d135xx *p, uint16_t height, uint16_t width, uint16_t checker_size, uint16_t mode);
 	int (*fill)(struct s1d135xx *p, uint16_t mode, unsigned bpp, const struct pl_area *a, uint8_t grey);
