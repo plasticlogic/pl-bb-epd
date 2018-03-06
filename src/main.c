@@ -62,7 +62,7 @@
 #include "text.h"
 
 #define INTERNAL_USAGE
-#define VERSION_INFO		"v1.0"
+#define VERSION_INFO		"v1.1"
 
 
 // ----------------------------------------------------------------------
