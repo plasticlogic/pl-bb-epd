@@ -109,13 +109,27 @@ int calcScrambledIndex(int scramblingMode, int gl, int sl, int *glCount, int *sl
 		}
 	}
 
-	// check for difference in source interlaced setting
-	if (scramblingMode & SCRAMBLING_SOURCE_INTERLACED_MASK){
-		if(scramblingMode & SCRAMBLING_SOURCE_INTERLACED_FIRST_ODD_LINE_MASK){
-			newSlIdx = ((newSlIdx+1) % 2) ? ((newSlIdx/2)+_slCount/2) : (newSlIdx/2);
+	if(scramblingMode & SCRAMBLING_GATE_INTERLACED_MASK){
+		if(scramblingMode & SCRAMBLING_GATE_INTERLACED_FIRST_ODD_LINE_MASK){
+			newGlIdx = ((newGlIdx+1) % 2) ? ((newGlIdx/2)+_glCount/2) : (newGlIdx/2);
 		}
 		else{
-			newSlIdx = ((newSlIdx) % 2) ? ((newSlIdx/2)+_slCount/2) : (newSlIdx/2);
+			newGlIdx = ((newGlIdx) % 2) ? ((newGlIdx/2)+_glCount/2) : (newGlIdx/2);
+		}
+		if(scramblingMode & SCRAMBLING_GATE_INTERLACED_MIRROW_MASK){
+			if(newGlIdx >= _glCount/2){
+				newGlIdx = (_glCount-1) - (newGlIdx - (_glCount/2)) ;
+			}
+		}
+	}else{
+		// check for difference in source interlaced setting
+		if (scramblingMode & SCRAMBLING_SOURCE_INTERLACED_MASK){
+			if(scramblingMode & SCRAMBLING_SOURCE_INTERLACED_FIRST_ODD_LINE_MASK){
+				newSlIdx = ((newSlIdx+1) % 2) ? ((newSlIdx/2)+_slCount/2) : (newSlIdx/2);
+			}
+			else{
+				newSlIdx = ((newSlIdx) % 2) ? ((newSlIdx/2)+_slCount/2) : (newSlIdx/2);
+			}
 		}
 	}
 
