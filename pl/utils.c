@@ -89,7 +89,7 @@ int open_image(const char *dir, const char *file, FILE *f,
 
 	if (snprintf(path, MAX_PATH_LEN, "%s/%s", dir, file) >= MAX_PATH_LEN) {
 		LOG("File path is too long, max=%d", MAX_PATH_LEN);
-		return -1;
+		return -ENAMETOOLONG;
 	}
 
 /**
@@ -257,7 +257,7 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * he
   FILE *fp;
 
   if ((fp = fopen(file_name, "rb")) == NULL)
-     return (ERROR);
+     return (-errno);
 
   /* Create and initialize the png_struct with the desired error handler
     * functions.  If you want to use the default stderr and longjump method,
@@ -271,7 +271,7 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * he
    if (png_ptr == NULL)
    {
       fclose(fp);
-      return (ERROR);
+      return (-ENOMEM);
    }
 
    /* Allocate/initialize the memory for image information.  REQUIRED. */
@@ -280,7 +280,7 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * he
    {
       fclose(fp);
       png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
-      return (ERROR);
+      return (-ENOMEM);
    }
 
    /* Set error handling if you are using the setjmp/longjmp method (this is
@@ -294,7 +294,7 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * he
       png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
       fclose(fp);
       /* If we get here, we had a problem reading the file */
-      return (ERROR);
+      return (-EINVAL);
    }
 
    /* Set up the input control if you are using standard C streams */
@@ -361,7 +361,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
   FILE *fp;
 
   if ((fp = fopen(file_name, "rb")) == NULL)
-     return (ERROR);
+     return (-errno);
 
   /* Create and initialize the png_struct with the desired error handler
     * functions.  If you want to use the default stderr and longjump method,
@@ -375,7 +375,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
    if (png_ptr == NULL)
    {
       fclose(fp);
-      return (ERROR);
+      return (-ENOMEM);
    }
 
    /* Allocate/initialize the memory for image information.  REQUIRED. */
@@ -384,7 +384,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
    {
       fclose(fp);
       png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
-      return (ERROR);
+      return (-ENOMEM);
    }
 
    /* Set error handling if you are using the setjmp/longjmp method (this is
@@ -398,7 +398,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
       png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
       fclose(fp);
       /* If we get here, we had a problem reading the file */
-      return (ERROR);
+      return (-EINVAL);
    }
 
    /* Set up the input control if you are using standard C streams */
@@ -501,7 +501,7 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 	file = fopen(filename, "r");
 	if (file == NULL) {
 		printf("Specified register override file '%s' could not be opened.\n", filename);
-		return -1;
+		return -ENOENT;
 	}
 
 	size_t count = 81;
@@ -511,7 +511,7 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 	regSetting_t *settings = (regSetting_t *)calloc(mem_alloc_item_count, sizeof(regSetting_t));
 	if (settings==NULL){
 		printf("Couldn't allocate enough memory.\n");
-		return -2;
+		return -ENOMEM;
 	}
 
 	while ((len = getline(&line, &count, file))>=0) {
@@ -535,7 +535,7 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 			settings = (regSetting_t *)realloc(settings, mem_alloc_item_count*sizeof(regSetting_t));
 			if (settings==NULL){
 				printf("Couldn't allocate enough memory.\n");
-				return -2;
+				return -ENOMEM;
 			}
 		}
 
@@ -543,14 +543,14 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 		int positionInLine = len;
 		if (len <= 0){
 			printf("Error reading address.\n");
-			return -3;
+			return -ENXIO;
 		}
 
 		len = parser_read_word(line + positionInLine, sep, &(settings[settingsCount].valCount));
 		positionInLine += len;
 		if (len <= 0){
 			printf("Error reading value count.\n");
-			return -3;
+			return len;
 		}
 
 		uint16_t *data = malloc(settings[settingsCount].valCount*sizeof(uint16_t));
@@ -560,7 +560,7 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 			positionInLine += len;
 			if (len <= 0){
 				printf("Error reading value.\n");
-				return -3;
+				return len;
 			}
 
 			data[currentValueCount] =  val;
@@ -680,7 +680,7 @@ uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, 
 		return pixel.b;
 	if(cfa_overlay.w_position == pixel_position)
 		return pixel.w;
-	return -1;
+	return -EINVAL;
 }
 
 void rotate_8bit_image(int *h, int *w, uint8_t* data){

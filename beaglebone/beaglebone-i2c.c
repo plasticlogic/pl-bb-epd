@@ -62,7 +62,7 @@ int beaglebone_i2c_init(uint8_t channel, struct pl_i2c *i2c)
 		char errorStr[bufferSize];
 		snprintf(errorStr, bufferSize, "Failed to open userland spi device (%s)\n", userlandI2CDevice);
 		fprintf( stderr,  errorStr);
-		return -1;
+		return -EPERM;
 	}
 
 	i2c->read = beaglebone_i2c_read;
@@ -87,12 +87,12 @@ static int beaglebone_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 	if (ioctl(i2c->priv, I2C_SLAVE, i2c_addr) < 0) {
 	        LOG("Failed to acquire bus access and/or talk to slave.\n");
 	        /* ERROR HANDLING; you can check errno to see what went wrong */
-	        return -1;
+	        return -errno;
 	}
 
 	int result = write(i2c->priv, data, count);
 	if (result != count){
-		return -1;
+		return -errno;
 	}
 	return 0;
 }
@@ -116,12 +116,12 @@ static int beaglebone_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr, uint8_t *da
 	if (ioctl(i2c->priv, I2C_SLAVE, i2c_addr) < 0) {
 	        LOG("Failed to acquire bus access and/or talk to slave.\n");
 	        /* ERROR HANDLING; you can check errno to see what went wrong */
-	        return -1;
+	        return -errno;
 	}
 
 	int result = read(i2c->priv, data, count);
 	if (result != count){
-		return -1;
+		return -errno;
 	}
 	return 0;
 

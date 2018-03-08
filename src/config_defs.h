@@ -27,6 +27,7 @@
 #define CONFIG_DEFS_H_
 
 #include "pl/types.h"
+#include <errno.h>
 
 enum epd_controller_type {
 	S1D13524,

@@ -39,6 +39,7 @@
 #include "pl/hv.h"
 #include "pl/generic_controller.h"
 #include "pl/generic_interface.h"
+#include <errno.h>
 
 typedef struct hw_setup {
 	char* boardname;

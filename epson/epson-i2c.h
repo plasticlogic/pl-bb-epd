@@ -29,7 +29,7 @@
 #define EPSON_I2C_H 1
 
 #include <epson/epson-s1d135xx.h>
-
+#include <errno.h>
 struct s1d135xx;
 struct pl_i2c;
 

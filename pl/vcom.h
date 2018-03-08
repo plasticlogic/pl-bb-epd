@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <pl/hwinfo.h>
+#include <errno.h>
 
 struct vcom_cal {
 	int32_t swing;

@@ -68,7 +68,7 @@ int parser_find_str(const char *str, const char *sep, int skip)
 			return i;
 	}
 
-	return -1;
+	return -ENODATA;
 }
 
 int parser_read_str(const char *str, const char *sep, char *out, int out_len)
@@ -84,7 +84,7 @@ int parser_read_str(const char *str, const char *sep, char *out, int out_len)
 		while (str[++len]);
 
 	if (len >= out_len)
-		return -1;
+		return -EINVAL;
 
 	memcpy(out, str, len);
 	out[len] = '\0';
@@ -152,7 +152,7 @@ int parser_read_file_line(FILE *f, char *buffer, int max_length)
 		//printf("count: %i\n", count);
 		if (count != 1){
 
-			return -1;
+			return -ENODATA;
 		}
 
 
@@ -164,7 +164,7 @@ int parser_read_file_line(FILE *f, char *buffer, int max_length)
 	}
 
 	if (i == max_length)
-		return -1;
+		return -ENODATA;
 
 	*out = '\0';
 	return !!count;

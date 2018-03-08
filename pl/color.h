@@ -27,6 +27,7 @@
 #define PL_COLOR_H_
 
 #include <pl/utils.h>
+#include <errno.h>
 
 int rgbw_processing(uint32_t *src_width, uint32_t *src_height,
 			      void *src_buf_virt, uint8_t *dst_buf_virt,

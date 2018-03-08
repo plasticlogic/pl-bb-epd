@@ -269,7 +269,7 @@ static int spi_write_bytes(struct pl_spi *psSPI, uint8_t *buff, size_t size){
 	  if ( iResult < 1 )
 	  {
 		fprintf( stderr, "Can't write SPI transaction in %d parts (%d)\n", i, iResult );
-		return -1;
+		return -EIO;
 	  }
 	  return iResult;
 }

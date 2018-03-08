@@ -69,7 +69,7 @@ static int set_temp_mode(pl_generic_controller_t *p, enum pl_epdc_temp_mode mode
 static int s1d13541_update_temp(pl_generic_controller_t *p);
 static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t grey);
 
-static int load_png_image(pl_generic_controller_t *p, const char *path,  const struct pl_area *area, int left, int top);
+static int load_png_image(pl_generic_controller_t *p, const char *path,  const struct pl_area *area);
 static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm);
 static int s1d13541_update_temp(pl_generic_controller_t *p);
 
@@ -141,7 +141,7 @@ static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres){
 		*yres = y;
 		return 0;
 	}
-	return -1;
+	return -EINVAL;
 }
 
 static int configure_update(pl_generic_controller_t *p, int wfid, enum pl_update_mode mode, const struct pl_area *area)
@@ -162,13 +162,22 @@ static int trigger_update(pl_generic_controller_t *p)
 
 static int clear_update(pl_generic_controller_t *p){
 	s1d135xx_t *s1d135xx = p->hw_ref;
+	int stat;
 	assert(s1d135xx != NULL);
 
-	if (p->configure_update(p, 0, PL_FULL_UPDATE, NULL))
-		return -1;
+	stat = p->configure_update(p, 0, PL_FULL_UPDATE, NULL);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
-	if (p->trigger_update(p))
-		return -1;
+	stat = p->trigger_update(p);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
 	return 0;
 }
@@ -197,11 +206,14 @@ static int write_register(pl_generic_controller_t *p, const regSetting_t setting
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
-	int stat = -1;
+	int stat = -EINVAL;
 
 	s1d135xx->update_reg(s1d135xx, setting.addr, *(setting.val), bitmask);
 	if ((*(setting.val) & bitmask) == (s1d135xx->read_reg(s1d135xx, setting.addr) & bitmask)) {
 		stat = 0;	// success
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	}
 
 	return stat;
@@ -241,10 +253,15 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting)
 static int load_wflib(pl_generic_controller_t *p, const char *filename)
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
+	int stat = 0;
 	assert(s1d135xx != NULL);
 
-	if (s1d135xx->load_wflib(s1d135xx, filename, S1D13541_WF_ADDR))
-		return -1;
+	stat = s1d135xx->load_wflib(s1d135xx, filename, S1D13541_WF_ADDR);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
 	p->waveform_file_path = (char*) filename;
 
@@ -258,7 +275,7 @@ static int load_wflib(pl_generic_controller_t *p, const char *filename)
 		sprintf(command, "ln -f -s %s %s", absolute_filename, standard_waveform_filename);
 		if (system(command)){
 			LOG("failed to set symlink for given waveform file...");
-			return -1;
+			return -ENOENT;
 		}
 	}
 
@@ -323,14 +340,15 @@ static int s1d13541_update_temp(pl_generic_controller_t *p)
 	}
 
 	if (stat)
-		return -1;
+		return stat;
 
 	if (s1d135xx->flags.needs_update) {
 #if VERBOSE_TEMPERATURE
 		LOG("Updating waveform table");
 #endif
-		if (p->load_wflib(p, standard_waveform_filename))
-			return -1;
+		stat = p->load_wflib(p, standard_waveform_filename);
+		if (stat)
+			return stat;
 	}
 
 	return 0;
@@ -344,7 +362,7 @@ static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t 
 	return s1d135xx->fill(s1d135xx, S1D13541_LD_IMG_8BPP, 8, area, grey);
 }
 
-static int load_png_image(pl_generic_controller_t *p, const char *path,  const struct pl_area *area, int left, int top)
+static int load_png_image(pl_generic_controller_t *p, const char *path,  const struct pl_area *area)
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
@@ -353,23 +371,33 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,  const s
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_FRAME_DATA_LENGTH);
 
-	return s1d135xx->load_png_image(s1d135xx, path, S1D13541_LD_IMG_8BPP, 8, (struct pl_area *) area, left, top);
+	return s1d135xx->load_png_image(s1d135xx, path, S1D13541_LD_IMG_8BPP, 8, (struct pl_area *) area);
 }
 /* -- initialisation -- */
 
 static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 	s1d135xx_t *s1d135xx = p->hw_ref;
+	int stat = 0;
 	assert(s1d135xx != NULL);
 
 	// enable external 32MHz clock for s1d13524
 	pl_gpio_set(s1d135xx->gpio, CHIFFCHAFF_32MHZ_EN, 1);
 
-	if (s1d135xx->init(s1d135xx))
-		return -1;
+	stat = s1d135xx->init(s1d135xx);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
-	if (s1d135xx->load_init_code(s1d135xx, p->instruction_code_path)) {
+	stat =s1d135xx->load_init_code(s1d135xx, p->instruction_code_path);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat){
 		LOG("Failed to load init code");
-		return -1;
+
+			return stat;
 	}
 
 	s1d135xx->set_registers(s1d135xx, p->regDefaults, p->regDefaultsCount);
@@ -377,25 +405,45 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 	s1d135xx->write_reg(s1d135xx, S1D13541_REG_PROT_KEY_1, S1D13541_PROT_KEY_1);
 	s1d135xx->write_reg(s1d135xx, S1D13541_REG_PROT_KEY_2, S1D13541_PROT_KEY_2);
 
-	if (s1d135xx->wait_for_idle(s1d135xx))
-		return -1;
+	stat = s1d135xx->wait_for_idle(s1d135xx);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
-	if (set_power(p, PL_EPDC_RUN))
-		return -1;
+	stat = set_power(p, PL_EPDC_RUN);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
-	if (s1d135xx->init_gate_drv(s1d135xx))
-		return -1;
+	stat = s1d135xx->init_gate_drv(s1d135xx);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
-	if (s1d135xx->wait_dspe_trig(s1d135xx))
-		return -1;
+	stat = s1d135xx->wait_dspe_trig(s1d135xx);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
 	p->xres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
 	p->yres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_FRAME_DATA_LENGTH);
 	s1d135xx->xres = p->xres;
 	s1d135xx->yres = p->yres;
 
-	if (p->set_temp_mode(p, p->temp_mode))
-		return -1;
+	stat = p->set_temp_mode(p, p->temp_mode);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
 	LOG("Ready %dx%d", p->xres, p->yres);
 
@@ -405,10 +453,15 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 static int set_power(pl_generic_controller_t *p, enum pl_epdc_power_state state)
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
+	int stat = 0;
 	assert(s1d135xx != NULL);
 
-	if (s1d135xx->set_power_state(s1d135xx, state))
-		return -1;
+	stat = s1d135xx->set_power_state(s1d135xx, state);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
 	p->power_state = state;
 
@@ -469,7 +522,7 @@ static int update_temp_manual(struct s1d135xx *p, int manual_temp)
 	p->write_reg(p, S1D13541_REG_GENERIC_TEMP_CONFIG, regval);
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	update_temp(p, S1D13541_REG_GENERIC_TEMP_CONFIG);
 
@@ -478,16 +531,21 @@ static int update_temp_manual(struct s1d135xx *p, int manual_temp)
 
 static int update_temp_auto(struct s1d135xx *p, uint16_t temp_reg)
 {
-	if (p->set_power_state(p, PL_EPDC_STANDBY))
-		return -1;
+	int stat =p->set_power_state(p, PL_EPDC_STANDBY);
+	if (stat)
+		return stat;
 
 	p->send_cmd_with_params(p, S1D13541_CMD_RD_TEMP, NULL, 0);
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
-	if (p->set_power_state(p, PL_EPDC_RUN))
-		return -1;
+	stat = p->set_power_state(p, PL_EPDC_RUN);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
 	update_temp(p, temp_reg);
 

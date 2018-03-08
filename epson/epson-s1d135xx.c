@@ -42,7 +42,7 @@
 #include <pl/color.h>
 
 /* Set to 1 to enable verbose update and EPD power on/off log messages */
-#define VERBOSE 0
+#define VERBOSE 1
 
 #define DATA_BUFFER_LENGTH              0x4B000 //512 //
 
@@ -94,10 +94,9 @@ static int s1d135xx_load_init_code(struct s1d135xx *p, const char *filename);
 static int s1d135xx_wait_update_end(struct s1d135xx *p);
 static int s1d135xx_configure_update(struct s1d135xx *p, int wfid, enum pl_update_mode mode, const struct pl_area *area);
 static int s1d135xx_execute_update(struct s1d135xx *p);
-static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t mode,unsigned bpp, const struct pl_area *area, int left,int top);
+static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t mode,unsigned bpp, const struct pl_area *area);
 static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_t mode,
-		unsigned bpp, struct pl_area *area, int left,
-		int top);
+		unsigned bpp, struct pl_area *area);
 static int s1d135xx_pattern_check(struct s1d135xx *p, uint16_t height, uint16_t width, uint16_t checker_size, uint16_t mode);
 static int s1d135xx_fill(struct s1d135xx *p, uint16_t mode, unsigned bpp,
 		  const struct pl_area *a, uint8_t grey);
@@ -282,11 +281,12 @@ static int s1d135xx_soft_reset(struct s1d135xx *p)
 static int s1d135xx_wait_idle(struct s1d135xx *p)
 {
 	unsigned long timeout = 50000; // ca. 20s
+	LOG(".");
 	while (!get_hrdy(p)){
 		--timeout;
 		if (timeout == 0){
 			LOG("HRDY timeout");
-			return -1;
+			return -ETIME;
 		}
 	}
 	return 0;
@@ -473,7 +473,7 @@ static int s1d135xx_set_epd_power(struct s1d135xx *p, int on)
 #endif
 
 	if (s1d135xx_wait_idle(p))
-		return -1;
+		return -ETIME;
 
 	s1d135xx_write_reg(p, S1D135XX_REG_PWR_CTRL, arg);
 
@@ -487,7 +487,7 @@ static int s1d135xx_set_epd_power(struct s1d135xx *p, int on)
 	if (on && ((tmp & S1D135XX_PWR_CTRL_CHECK_ON) !=
 		   S1D135XX_PWR_CTRL_CHECK_ON)) {
 		LOG("Failed to turn the EPDC power on");
-		return -1;
+		return -EEPDC;
 	}
 
 	return 0;
@@ -504,7 +504,7 @@ static int s1d135xx_set_power_state(struct s1d135xx *p, enum pl_epdc_power_state
 	pl_gpio_set(p->gpio, pins->clk_en, 1);
 
 	if (s1d135xx_wait_idle(p))
-		return -1;
+		return -ETIME;
 
 	switch (state) {
 	case PL_EPDC_RUN:
@@ -545,11 +545,11 @@ static int s1d135xx_load_init_code(struct s1d135xx *p, const char *init_code_pat
 
 	if (init_code_file == NULL){
 		LOG("Couldn't open initialization code file.");
-		return -1;
+		return -ENOENT;
 	}
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	set_cs(p, 0);
 	send_cmd(p, S1D135XX_CMD_INIT_SET);
@@ -559,11 +559,11 @@ static int s1d135xx_load_init_code(struct s1d135xx *p, const char *init_code_pat
 
 	if (stat) {
 		LOG("Failed to transfer init code file");
-		return -1;
+		return -ECOMM;
 	}
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	set_cs(p, 0);
 	send_cmd(p, S1D135XX_CMD_INIT_STBY);
@@ -573,13 +573,13 @@ static int s1d135xx_load_init_code(struct s1d135xx *p, const char *init_code_pat
 
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	checksum = p->read_reg(p, S1D135XX_REG_SEQ_AUTOBOOT_CMD);
 
 	if (!(checksum & (uint16_t)S1D135XX_INIT_CODE_CHECKSUM_OK)) {
 		LOG("Init code checksum error");
-		return -1;
+		return -EEPDC;
 	}
 
 	return 0;
@@ -588,9 +588,9 @@ static int s1d135xx_load_init_code(struct s1d135xx *p, const char *init_code_pat
 static int s1d135xx_wait_update_end(struct s1d135xx *p)
 {
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 	if (s1d135xx_wait_dspe_trig(p))
-		return -1;
+		return -ETIME;
 	send_cmd_cs(p, S1D135XX_CMD_WAIT_DSPE_FREND);
 	return p->wait_for_idle(p);
 }
@@ -635,8 +635,11 @@ static int s1d135xx_configure_update(struct s1d135xx *p, int wfid, enum pl_updat
 	else
 	{
 		abort_msg("Area update is selected but no area coordinates specified!", ABORT_APPLICATION);
-		return -1;
+		return -EINVAL;
 	}
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, 0);
+#endif
 
 	return 0;
 
@@ -646,16 +649,17 @@ static int s1d135xx_execute_update(struct s1d135xx *p)
 {
 	assert(p != NULL);
 	struct s1d135xx_update_cmd *cmd = &p->next_update_cmd;
-
 	int stat = 0;
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	p->send_cmd_with_params(p, cmd->cmd_code, cmd->params, cmd->param_count);
 
 	return stat;
 }
 
 static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t mode,
-		unsigned bpp, const struct pl_area *area, int left,
-		int top){
+		unsigned bpp, const struct pl_area *area){
 	assert(p != NULL);
 	int stat = 0;
 
@@ -706,7 +710,7 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 	set_cs(p, 1);
 	/*
 		if (p->wait_for_idle(p))
-			return -1;
+			return -ETIME;
 	//*/
 	set_cs(p, 0);
 	send_cmd(p, S1D135XX_CMD_WRITE_REG);
@@ -720,7 +724,7 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 		free(memoryBuffer);
 
 	if (stat)
-		return -1;
+		return -EEPDC;
 	/*
 		if (p->wait_for_idle(p))
 			return -1;
@@ -731,8 +735,7 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 }
 
 static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_t mode,
-		unsigned bpp, struct pl_area *area, int left,
-		int top)
+		unsigned bpp, struct pl_area *area)
 {
 	assert(p != NULL);
 
@@ -747,7 +750,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		uint8_t *pngBuffer;
 		// read png image
 		if (read_png(path, &pngBuffer, &width, &height))
-			return -1;
+			return -ENOENT;
 		//if the image does not fit the screen, rotate
 		if(!p->display_scrambling){
 			if(height == p->xres && width == p->yres){
@@ -778,7 +781,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		rgbw_pixel_t *pngBuffer;
 		// read png image
 		if (read_rgbw_png(path, &pngBuffer, &width, &height))
-			return -1;
+			return -ENOENT;
 
 		if(!p->display_scrambling){
 			if(height == p->xres/2 && width == p->yres/2){
@@ -808,12 +811,21 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 			free(pngBuffer);
 	}
 //*
-	if((height > p->yres || width > p->xres) && (area == NULL)){
-		area = malloc(sizeof(struct pl_area));
-		area->height = min(height, p->yres);
-		area->width = min(width, p->xres);
-		area->left = ((int) (p->xres - width)<0)?0:p->xres - width;
-		area->top = ((int) (p->yres - height)<0)?0:p->yres - height;
+	if(area == NULL){
+		if(height > p->yres || width > p->xres){
+			area = malloc(sizeof(struct pl_area));
+			area->height = min(height, p->yres);
+			area->width = min(width, p->xres);
+			area->left = ((int) (p->xres - width)<0)?0:p->xres - width;
+			area->top = ((int) (p->yres - height)<0)?0:p->yres - height;
+		}
+	}else{
+		if(area->height+area->top > p->yres || area->width+area->left > p->xres){
+			area->height = min(height, p->yres);
+			area->width = min(width, p->xres);
+			//area->left = ((int) (p->xres - width)<0)?0:p->xres - width;
+			//area->top = ((int) (p->yres - height)<0)?0:p->yres - height;
+		}
 	}
 //*/
 	// adapt image to memory
@@ -843,7 +855,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	set_cs(p, 1);
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	set_cs(p, 0);
 	send_cmd(p, S1D135XX_CMD_WRITE_REG);
@@ -861,10 +873,10 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 
 
 	if (stat)
-		return -1;
+		return -EEPDC;
 //*
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 //*/
 	send_cmd_cs(p, S1D135XX_CMD_LD_IMG_END);
 
@@ -936,7 +948,7 @@ static int s1d135xx_pattern_check(struct s1d135xx *p, uint16_t height, uint16_t 
 	set_cs(p, 1);
 
 	if (s1d135xx_wait_idle(p))
-		return -1;
+		return -ETIME;
 
 	set_cs(p, 0);
 	send_cmd(p, S1D135XX_CMD_WRITE_REG);
@@ -953,7 +965,7 @@ static int s1d135xx_pattern_check(struct s1d135xx *p, uint16_t height, uint16_t 
 	set_cs(p, 1);
 
 	if (s1d135xx_wait_idle(p))
-		return -1;
+		return -ETIME;
 
 	send_cmd_cs(p, S1D135XX_CMD_LD_IMG_END);
 
@@ -966,7 +978,7 @@ static int s1d135xx_load_wflib(struct s1d135xx *p, const char *filename, uint32_
 	file=fopen(filename, "rb");
 	if(file==NULL){
 		LOG("Error during waveform file loading.");
-		return -1;
+		return -ENOENT;
 	}
 
 	uint16_t params[4];
@@ -975,7 +987,7 @@ static int s1d135xx_load_wflib(struct s1d135xx *p, const char *filename, uint32_
 	fseek(file, 0, SEEK_SET);
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	params[0] = addr & 0xFFFF;
 	params[1] = (addr >> 16) & 0xFFFF;
@@ -996,7 +1008,7 @@ static int s1d135xx_load_wflib(struct s1d135xx *p, const char *filename, uint32_
 	}
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	send_cmd_cs(p, S1D135XX_CMD_BST_END_SDR);
 	fclose(file);
@@ -1041,7 +1053,7 @@ static int s1d135xx_fill(struct s1d135xx *p, uint16_t mode, unsigned bpp,
 	set_cs(p, 1);
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	return do_fill(p, fill_area, bpp, grey);
 }
@@ -1059,9 +1071,14 @@ static int s1d13524_check_prod_code(struct s1d135xx *p, uint16_t ref_code)
 {
 	uint16_t rev;
 	uint16_t conf;
+	int stat = 0;
 	set_cs(p, 0);
-	if (check_prod_code(p, ref_code))
-		return -1;
+	stat = check_prod_code(p, ref_code);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 	set_cs(p, 1);
 	rev = p->read_reg(p, 0x0000);
 	conf = p->read_reg(p, 0x0004);
@@ -1072,7 +1089,7 @@ static int s1d13524_check_prod_code(struct s1d135xx *p, uint16_t ref_code)
 
 	if ((rev != 0x0100) || (conf != expected_conf /*001F for serial connection/1E for parallel */)) {
 		LOG("Invalid rev/conf values");
-		return -1;
+		return -EEPDC;
 	}
 
 	return 0;
@@ -1083,7 +1100,7 @@ static int s1d13541_clear_init(struct s1d135xx *p)
 	send_cmd_cs(p, S1D135XX_CMD_UPD_INIT);
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	return s1d135xx_wait_dspe_trig(p);
 }
@@ -1091,17 +1108,27 @@ static int s1d13541_clear_init(struct s1d135xx *p)
 static int s1d13524_clear_init(struct s1d135xx *p)
 {
 	static const uint16_t params[] = { 0x0500 };
+	int stat = 0;
 	p->send_cmd_with_params(p, 0x32, params, ARRAY_SIZE(params));
 
-	if (p->wait_for_idle(p))
-		return -1;
+	stat = p->wait_for_idle(p);
+	if (stat)
+		return stat;
 
-	if (s1d13524_init_ctlr_mode(p))
-		return -1;
+	stat = s1d13524_init_ctlr_mode(p);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 
 #if 1 /* ToDo: find out why the first image state goes away */
-	if (p->fill(p, S1D13524_LD_IMG_4BPP, 4, NULL, 0xFF))
-		return -1;
+	stat = p->fill(p, S1D13524_LD_IMG_4BPP, 4, NULL, 0xFF);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if (stat)
+		return stat;
 #endif
 
 	return 0;
@@ -1109,38 +1136,60 @@ static int s1d13524_clear_init(struct s1d135xx *p)
 
 static int s1d13541_init_controller(struct s1d135xx *p)
 {
+	int stat = 0;
 	p->hrdy_mask = S1D13541_STATUS_HRDY;
 	p->hrdy_result = S1D13541_STATUS_HRDY;
 	p->measured_temp = -127;
 	p->hard_reset(p);
 
-	if (p->soft_reset(p))
-		return -1;
+	stat = p->soft_reset(p);
+	if(stat)
+		return stat;
 
-	if (p->check_prod_code(p, S1D13541_PROD_CODE))
-		return -1;
+	stat = p->check_prod_code(p, S1D13541_PROD_CODE);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if(stat)
+		return stat;
 
-	if (s1d13541_init_clocks(p))
-		return -1;
+	stat = s1d13541_init_clocks(p);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if(stat)
+		return stat;
 
 	return 0;
 }
 
 static int s1d13524_init_controller(struct s1d135xx *p)
 {
-
+	int stat = 0;
 	p->hard_reset(p);
 
-	if (p->soft_reset(p))
-		return -1;
+	stat = p->soft_reset(p);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if(stat)
+		return stat;
 
-	if (p->check_prod_code(p, S1D13524_PROD_CODE))
-		return -1;
+	stat = p->check_prod_code(p, S1D13524_PROD_CODE);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if(stat)
+		return stat;
 
 	p->write_reg(p, S1D135XX_REG_I2C_STATUS, S1D13524_I2C_DELAY);
 
-	if (s1d13524_init_clocks(p))
-		return -1;
+	stat = s1d13524_init_clocks(p);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if(stat)
+		return stat;
 
 	return 0;
 }
@@ -1166,7 +1215,7 @@ static int s1d13524_init_clocks(struct s1d135xx *p)
 	p->send_cmd_with_params(p, S1D13524_CMD_INIT_PLL, params, ARRAY_SIZE(params));
 
 	if (p->wait_for_idle(p))
-		return -1;
+		return -ETIME;
 
 	p->write_reg(p, S1D13524_REG_POWER_SAVE_MODE, 0x0);
 	p->write_reg(p, S1D135XX_REG_I2C_CLOCK, S1D13524_I2C_CLOCK_DIV);
@@ -1205,7 +1254,7 @@ static int check_prod_code(struct s1d135xx *p, uint16_t ref_code)
 
 	if (prod_code != ref_code) {
 		LOG("Invalid product code, expected 0x%04X", ref_code);
-		return -1;
+		return -EEPDC;
 	}
 
 	return 0;
@@ -1238,7 +1287,7 @@ static int do_fill(struct s1d135xx *p, const struct pl_area *area,
 	case 1:
 	case 2:
 		LOG("Unsupported bpp");
-		return -1;
+		return -EINVAL;
 	case 4:
 		val16 = g & 0xF0;
 		val16 |= val16 >> 4;
@@ -1256,7 +1305,7 @@ static int do_fill(struct s1d135xx *p, const struct pl_area *area,
 	lines = area->height;
 
 	if (s1d135xx_wait_idle(p))
-		return -1;
+		return -ETIME;
 
 	set_cs(p, 0);
 	send_cmd(p, S1D135XX_CMD_WRITE_REG);
@@ -1272,7 +1321,7 @@ static int do_fill(struct s1d135xx *p, const struct pl_area *area,
 	set_cs(p, 1);
 
 	if (s1d135xx_wait_idle(p))
-		return -1;
+		return -ETIME;
 
 	send_cmd_cs(p, S1D135XX_CMD_LD_IMG_END);
 
@@ -1304,7 +1353,7 @@ static int transfer_file(struct pl_generic_interface *interface, FILE *file)
 		if ((count=fread(data, sizeof(uint8_t), DATA_BUFFER_LENGTH, file)) < 0){
 			if (ferror(file)){
 				LOG("Error during instruction code file reading.");
-				return -2;
+				return -ENOENT;
 			}
 		}
 		if (!count)

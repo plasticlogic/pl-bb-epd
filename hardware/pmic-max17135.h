@@ -32,6 +32,7 @@
 #include <pl/i2c.h>
 #include <pl/vcom.h>
 #include <pl/pmic.h>
+#include <errno.h>
 
 #define HVPMIC_NB_TIMINGS 8
 

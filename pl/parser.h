@@ -28,6 +28,7 @@
 #define INCLUDE_APP_PARSER_H 1
 
 #include <stdio.h>
+#include <errno.h>
 
 struct pl_area;
 

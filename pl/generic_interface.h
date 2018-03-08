@@ -28,6 +28,7 @@
 
 #include <beaglebone/beaglebone-spi.h>
 #include <beaglebone/beaglebone-parallel.h>
+#include <errno.h>
 
 enum interfaceType{
 	PARALLEL = 0,

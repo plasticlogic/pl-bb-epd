@@ -120,7 +120,7 @@ static int dac_max5820_set_vcom_voltage(dac_max5820_t *p, int mv){
 	xferBytes[1] = (dac_value << 4);
 
 	if (pl_i2c_reg_write_8(p->i2c, p->i2c_addr, xferBytes[0], xferBytes[1]))
-		return -1;
+		return -EINVAL;
 
 	return 0;
 }
@@ -143,7 +143,7 @@ static int dac_max5820_get_vcom_register(dac_max5820_t *p, int *dac_value)
 
 	uint8_t data[2];
 	if (pl_i2c_reg_read_16be(p->i2c, p->i2c_addr, MAX5820_READ_A, (uint16_t*)data))
-		return -1;
+		return -EINVAL;
 
 	uint8_t val = (data[1] << 4) | (data[0] >> 4);
 	*dac_value = val;

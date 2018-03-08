@@ -29,6 +29,7 @@
 #include <pl/hv.h>
 #include <pl/nvm.h>
 #include <pl/generic_controller.h>
+#include <errno.h>
 
 typedef struct pl_generic_epdc{
 	int default_vcom;

@@ -23,6 +23,7 @@
  *      Author: sebastian.friebe
  */
 
+#include <errno.h>
 #ifndef SCRAMBLE_H_
 #define SCRAMBLE_H_
 

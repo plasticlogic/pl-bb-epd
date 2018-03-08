@@ -29,6 +29,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
 
 /**
    @file pl/gpio.h

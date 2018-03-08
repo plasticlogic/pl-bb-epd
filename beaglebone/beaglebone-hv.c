@@ -72,7 +72,7 @@ static int beaglebone_wait_pok(struct pl_gpio *gpio)
 
 			if (!pok) {
 				LOG("POK timeout");
-				return -1;
+				return -ETIME;
 			}
 		}
 	}
@@ -121,7 +121,7 @@ static void delete_hv_driver(pl_hv_driver_t *p){
  * @param p expects the pl_hv_driver structure
  */
 static int beaglebone_hv_driver_on(struct pl_hv_driver *p){
-	if (p == NULL) return -1;
+	if (p == NULL) return -EINVAL;
 
 	struct pl_gpio *gpio = (struct pl_gpio *)p->hw_ref;
 	pl_gpio_set(gpio, PMIC_EN, 1);
@@ -137,7 +137,7 @@ static int beaglebone_hv_driver_on(struct pl_hv_driver *p){
  * @param p expects the pl_hv_driver structure
  */
 static int beaglebone_hv_driver_off(struct pl_hv_driver *p){
-	if (p == NULL) return -1;
+	if (p == NULL) return -EINVAL;
 
 	struct pl_gpio *gpio = (struct pl_gpio *)p->hw_ref;
 	pl_gpio_set(gpio, PMIC_EN, 0);

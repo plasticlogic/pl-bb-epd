@@ -34,6 +34,7 @@
 #define LOG_TAG "max17135"
 #include "pl/utils.h"
 
+#define EPMIC 199
 /* problems with temperature sensor return magic temperature value */
 #define	HVPMIC_TEMP_INVALID	0x7FC0
 #define	HVPMIC_TEMP_DEFAULT	20
@@ -215,16 +216,16 @@ static int max17135_check_revision(pl_pmic_t *pmic)
 	uint8_t prod_id;
 
 	if (pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_PROD_REV, &prod_rev))
-		return -1;
+		return -EPMIC;
 
 	if (pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr, HVPMIC_REG_PROD_ID, &prod_id))
-		return -1;
+		return -EPMIC;
 
 	LOG("rev 0x%02X, id 0x%02X", prod_rev, prod_id);
 
 	if (prod_id != MAX17135_PROD_ID) {
 		LOG("Invalid product ID");
-		return -1;
+		return -EPMIC;
 	}
 
 	return 0;
@@ -294,7 +295,7 @@ static int max17135_wait_pok(pl_pmic_t *pmic)
 		if (pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr,
 				      HVPMIC_REG_FAULT, &fault.byte)) {
 			LOG("Failed to read HVPMIC POK");
-			return -1;
+			return -ETIME;
 		}
 
 		pok = fault.pok;
@@ -306,7 +307,7 @@ static int max17135_wait_pok(pl_pmic_t *pmic)
 
 			if (!pok) {
 				LOG("POK timeout");
-				return -1;
+				return -ETIME;
 			}
 		}
 	}

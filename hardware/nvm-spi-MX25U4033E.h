@@ -29,6 +29,7 @@
 
 #include <pl/nvm.h>
 #include <pl/spi.h>
+#include <errno.h>
 
 // Size
 #define MX25U4033E_SIZE		(0x80000)	// max size

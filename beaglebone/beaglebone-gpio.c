@@ -73,7 +73,7 @@ static int beaglebone_gpio_export(unsigned gpio, uint16_t flags)
 
 #if GPIO_CHECK_PARAMETERS
 	if (pl_gpio_check_flags(flags))
-		return -1;
+		return -EINVAL;
 #endif
 
 	static const char GPIO_SYSFS[] = "/sys/class/gpio";
@@ -103,7 +103,7 @@ static int beaglebone_gpio_export(unsigned gpio, uint16_t flags)
 
 			if (f == NULL) {
 				LOG("Failed to open GPIO export file");
-				return -1;
+				return -EPERM;
 			}
 
 			len = snprintf(buf, BUFFER_SIZE, "%d", gpio);
@@ -112,7 +112,7 @@ static int beaglebone_gpio_export(unsigned gpio, uint16_t flags)
 
 			if (n_wr != 1) {
 				LOG("Failed to write to GPIO file");
-				return -1;
+				return -EIO;
 			}
 		}
 		else {
@@ -129,7 +129,7 @@ static int beaglebone_gpio_export(unsigned gpio, uint16_t flags)
 
 		if (f == NULL) {
 			LOG("Failed to open GPIO direction file");
-			return -1;
+			return -ENOENT;
 		}
 
 		if (flags & PL_GPIO_OUTPUT){
@@ -142,7 +142,7 @@ static int beaglebone_gpio_export(unsigned gpio, uint16_t flags)
 
 		if (n_wr != 1) {
 			//LOG_ERRNO("Failed to write to GPIO direction file");
-			return -1;
+			return -EIO;
 		}
 
 		/* set active high/low */
@@ -151,7 +151,7 @@ static int beaglebone_gpio_export(unsigned gpio, uint16_t flags)
 
 		if (f == NULL) {
 			LOG("Failed to open GPIO active_low file");
-			return -1;
+			return -EIO;
 		}
 
 		if (flags & PL_GPIO_INIT_L){
@@ -199,7 +199,7 @@ int beaglebone_gpio_unexport(unsigned gpio){
 
 		if (f == NULL) {
 			LOG("Failed to open GPIO export file");
-			return -1;
+			return -EPERM;
 		}
 
 		len = snprintf(buf, BUFFER_SIZE, "%d", gpio);
@@ -208,7 +208,7 @@ int beaglebone_gpio_unexport(unsigned gpio){
 
 		if (n_wr != 1) {
 			LOG("Failed to write to GPIO file");
-			return -1;
+			return -EIO;
 		}
 	}
 

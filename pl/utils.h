@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <libpng-1.2.51/png.h>
 #include "types.h"

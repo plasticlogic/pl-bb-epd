@@ -30,6 +30,7 @@
 #define INCLUDE_PL_HWINFO_H 1
 
 #include <stdint.h>
+#include <errno.h>
 
 /** Version of the VCOM PSU EEPROM format */
 #define PL_HWINFO_VERSION 1

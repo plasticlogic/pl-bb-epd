@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <fcntl.h>
+#include <errno.h>
 
 
 #ifdef	__cplusplus

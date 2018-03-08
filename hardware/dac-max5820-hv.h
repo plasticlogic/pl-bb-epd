@@ -29,6 +29,7 @@
 
 #include <hardware/dac-max5820.h>
 #include <pl/hv.h>
+#include <errno.h>
 
 
 /**

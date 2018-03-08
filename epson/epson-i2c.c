@@ -110,11 +110,12 @@ static int epson_s1d135xx_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 				   uint8_t *data, uint8_t count, uint8_t flags)
 {
 	struct s1d135xx *p = i2c->controller;
-
-	if (!(flags & PL_I2C_NO_START))
-		if (s1d135xx_i2c_send_addr(p, i2c_addr, 1))
-			return -1;
-
+	int stat;
+	if (!(flags & PL_I2C_NO_START)){
+		stat = s1d135xx_i2c_send_addr(p, i2c_addr, 1);
+		if (stat)
+			return stat;
+	}
 	while (count--) {
 		uint8_t cmd;
 
@@ -126,8 +127,9 @@ static int epson_s1d135xx_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 
 		p->write_reg(p, S1D135XX_I2C_REG_CMD, cmd);
 
-		if (s1d135xx_i2c_poll(p, 0))
-			return -1;
+		stat = s1d135xx_i2c_poll(p, 0);
+		if (stat)
+			return stat;
 
 		*data++ = p->read_reg(p, S1D135XX_I2C_REG_RD);
 	}
@@ -151,9 +153,12 @@ static int epson_s1d135xx_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 {
 	struct s1d135xx *p = i2c->controller;
 
-	if (!(flags & PL_I2C_NO_START))
-		if (s1d135xx_i2c_send_addr(p, i2c_addr, 0))
-			return -1;
+	int stat;
+		if (!(flags & PL_I2C_NO_START)){
+			stat = s1d135xx_i2c_send_addr(p, i2c_addr, 0);
+			if (stat)
+				return stat;
+		}
 
 	while (count--) {
 		uint8_t cmd;
@@ -166,8 +171,9 @@ static int epson_s1d135xx_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 		p->write_reg(p, S1D135XX_I2C_REG_WD, *data++);
 		p->write_reg(p, S1D135XX_I2C_REG_CMD, cmd);
 
-		if (s1d135xx_i2c_poll(p, 1))
-			return -1;
+		stat = s1d135xx_i2c_poll(p, 0);
+		if (stat)
+			return stat;
 	}
 
 	return 0;
@@ -211,15 +217,16 @@ static int s1d135xx_i2c_poll(struct s1d135xx *p, int check_nak)
 			break;
 	}
 
-	if (!i)
+	if (!i){
 		LOG("TIMEOUT");
-	else  if (status & S1D135XX_I2C_STAT_ERROR)
+		return -ETIME;
+	}else  if (status & S1D135XX_I2C_STAT_ERROR){
 		LOG("ERROR");
-	else if (check_nak && (status & S1D135XX_I2C_STAT_RX_NAK))
+	}else if (check_nak && (status & S1D135XX_I2C_STAT_RX_NAK)){
 		LOG("NAK");
-	else
+	}else
 		return 0;
 
-	return -1;
+	return -EINVAL;
 }
 

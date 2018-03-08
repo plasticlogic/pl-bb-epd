@@ -29,6 +29,7 @@
 
 #include "config_defs.h"
 #include "hw_setup.h"
+#include <errno.h>
 
 int parse_config(hw_setup_t *setup, const char *filename);
 

@@ -69,7 +69,7 @@ int pl_generic_controller_get_wfid(pl_generic_controller_t *p, const char *wf_pa
 		if (!strcmp(wfid->path, wf_path))
 			return wfid->id;
 
-	return -1;
+	return -EINVAL;
 }
 
 // -----------------------------------------------------------------------------

@@ -79,7 +79,7 @@ static int nvm_s1d13541_read(struct pl_nvm * nvm, unsigned int addr, uint8_t * b
 
 	// wait for status: idle
 	if(wait_for_ack(p, S1D13541_PROM_STATUS_IDLE, 0xffff))
-		return -1;
+		return -ETIME;
 
 	for(i=0; i<len; i++)
 	{
@@ -94,11 +94,11 @@ static int nvm_s1d13541_read(struct pl_nvm * nvm, unsigned int addr, uint8_t * b
 
 			//wait for status: read mode start
 			if(wait_for_ack(p, S1D13541_PROM_STATUS_READ_MODE, S1D13541_PROM_STATUS_READ_MODE))
-				return -1;
+				return -ETIME;
 
 			//wait for status: read operation finished
 			if(wait_for_ack(p, 0x0000, S1D13541_PROM_STATUS_READ_BUSY))
-				return -1;
+				return -ETIME;
 
 			// set read operation start trigger
 			data = p->read_reg(p, S1D13541_PROM_READ_DATA);
@@ -115,7 +115,7 @@ static int nvm_s1d13541_read(struct pl_nvm * nvm, unsigned int addr, uint8_t * b
 
 	//wait for status: read mode stop
 	if(wait_for_ack(p, 0x0000, S1D13541_PROM_STATUS_READ_MODE))
-		return -1;
+		return -ETIME;
 
 	return 0;
 }
@@ -377,7 +377,7 @@ static int wait_for_ack (struct s1d135xx *p, uint16_t status, uint16_t mask)
 		--timeout;
 		if (timeout == 0){
 			LOG("PROM acknowledge timeout");
-			return -1;
+			return -ETIME;
 		}
 	}
 
@@ -437,7 +437,7 @@ int s1d13541_generate_eeprom_blob(struct pl_nvm *nvm, uint8_t *data)
 	else
 	{
 		printf("Not able to generate the EEProm blob, due to wrong dispID length: %d\n", strlen(nvm->dispId));
-		return -1;
+		return -EEPDC;
 	}
 
 	fe = atoi(c_fe);

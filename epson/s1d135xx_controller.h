@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <pl/generic_controller.h>
 #include "epson-s1d135xx.h"
-
+#include <errno.h>
 int s1d13524_controller_setup(pl_generic_controller_t *p, s1d135xx_t *s1d135xx);
 int s1d13541_controller_setup(pl_generic_controller_t *p, s1d135xx_t *s1d135xx);
 

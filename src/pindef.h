@@ -28,6 +28,7 @@
 
 #include "pl/gpio.h"
 #include "beaglebone/beaglebone-gpio.h"
+#include <errno.h>
 
 #define VCOM_EN         BEAGLEBONE_GPIO(0,14) //P9-26 // VCOM switch enable
 #define PMIC_EN           BEAGLEBONE_GPIO(1,14) //P8-16 // HV-PMIC enable

@@ -28,7 +28,7 @@
 
 #include <pl/hv.h>
 #include <pl/gpio.h>
-
+#include <errno.h>
 
 /**
  * creates a pl_hv_driver object based on the beaglebone gpios.

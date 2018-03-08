@@ -29,6 +29,7 @@
 #define INCLUDE_PL_TYPES_H 1
 
 #include <stdint.h>
+#include <errno.h>
 
 struct pl_area {
 	int left;

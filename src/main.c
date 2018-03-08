@@ -36,7 +36,7 @@
  *
  *
  */
-
+#include <errno.h>
 #include <stdio.h>
 #include <linux/types.h>
 #include <fcntl.h>
@@ -98,6 +98,7 @@ int get_waveform(void);
 int get_temperature(void);
 int get_resolution(void);
 int update_image(char *path, const char* wfID, enum pl_update_mode mode, int vcom_switch, int updateCount, int waitTime);
+int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode, int vcom_switch, int updateCount, int waitTime, struct pl_area* area);
 int read_register(regSetting_t regSetting);
 int write_register(regSetting_t regSetting, const uint32_t bitmask);
 int send_cmd(regSetting_t regSetting);
@@ -124,6 +125,7 @@ int execute_get_waveform(int argc, char **argv);
 int execute_get_temperature(int argc, char **argv);
 int execute_get_resolution(int argc, char **argv);
 int execute_update_image(int argc, char **argv);
+int execute_update_image_regional(int argc, char **argv);
 int execute_slideshow(int argc, char **argv);
 int execute_counter(int argc, char **argv);
 int execute_write_reg(int argc, char **argv);
@@ -145,6 +147,7 @@ void printHelp_get_resolution(int identLevel);
 void printHelp_get_waveform(int identLevel);
 void printHelp_get_temperature(int identLevel);
 void printHelp_update_image(int identLevel);
+void printHelp_update_image_regional(int identLevel);
 void printHelp_write_reg(int identLevel);
 void printHelp_read_reg(int identLevel);
 void printHelp_info(int identLevel);
@@ -156,29 +159,30 @@ void printHelp_send_cmd(int identLevel);
 void printHelp_fill(int identLevel);
 
 struct CmdLineOptions supportedOperations[] = {
-		{"-start_epdc",	 	"initializes the EPD controller", 			execute_start_epdc, 	printHelp_start_epdc},
-		{"-stop_epdc", 		"de-initializes the EPD controller", 		execute_stop_epdc, 		printHelp_stop_epdc},
-		{"-set_vcom", 		"sets com voltage", 						execute_set_vcom, 		printHelp_set_vcom},
-		{"-set_waveform", 	"sets the waveform", 						execute_set_waveform, 	printHelp_set_waveform},
-		{"-set_temperature","sets the temperature", 					execute_set_temperature,printHelp_set_temperature},
-		{"-get_vcom", 		"gets com voltage", 						execute_get_vcom, 		printHelp_get_vcom},
-		{"-get_resolution",	"gets display resolution",					execute_get_resolution,	printHelp_get_resolution},
-		{"-get_waveform", 	"gets the waveform", 						execute_get_waveform, 	printHelp_get_waveform},
-		{"-get_temperature","gets the temperature", 					execute_get_temperature,printHelp_get_temperature},
-		{"-update_image", 	"updates the display", 						execute_update_image, 	printHelp_update_image},
-		{"-slideshow",		"shows a slidshow of .png images",			execute_slideshow,		printHelp_slideshow},
-		{"-fill", 			"fill the screen with a defined greylevel", execute_fill, 			printHelp_fill},
-//		{"-count",			"shows a counting number",					execute_counter,		printHelp_counter},
+	{"-start_epdc",	 			"initializes the EPD controller", 			execute_start_epdc, 			printHelp_start_epdc},
+	{"-stop_epdc", 				"de-initializes the EPD controller", 		execute_stop_epdc, 				printHelp_stop_epdc},
+	{"-set_vcom", 				"sets com voltage", 						execute_set_vcom, 				printHelp_set_vcom},
+	{"-set_waveform", 			"sets the waveform", 						execute_set_waveform, 			printHelp_set_waveform},
+	{"-set_temperature",		"sets the temperature", 					execute_set_temperature,		printHelp_set_temperature},
+	{"-get_vcom", 				"gets com voltage", 						execute_get_vcom, 				printHelp_get_vcom},
+	{"-get_resolution",			"gets display resolution",					execute_get_resolution,			printHelp_get_resolution},
+	{"-get_waveform", 			"gets the waveform", 						execute_get_waveform, 			printHelp_get_waveform},
+	{"-get_temperature",		"gets the temperature", 					execute_get_temperature,		printHelp_get_temperature},
+	{"-update_image", 			"updates the display", 						execute_update_image, 			printHelp_update_image},
+	{"-update_image_regional", 	"updates the display on certain area", 		execute_update_image_regional, 	printHelp_update_image_regional},
+	{"-slideshow",				"shows a slidshow of .png images",			execute_slideshow,				printHelp_slideshow},
+	{"-fill", 					"fill the screen with a defined greylevel", execute_fill, 					printHelp_fill},
+//		{"-count",					"shows a counting number",					execute_counter,				printHelp_counter},
 #ifdef INTERNAL_USAGE
-		{"-send_cmd", 		"sends a command of EPD controller", 		execute_send_cmd, 		printHelp_send_cmd},
-		{"-write_reg", 		"writes to a register of EPD controller", 	execute_write_reg, 		printHelp_write_reg},
-		{"-read_reg", 		"reads from a register of EPD controller", 	execute_read_reg, 		printHelp_read_reg},
-		{"-info",			"displays general display informations",	execute_info, printHelp_info},
+	{"-send_cmd", 				"sends a command of EPD controller", 		execute_send_cmd, 				printHelp_send_cmd},
+	{"-write_reg", 				"writes to a register of EPD controller", 	execute_write_reg, 				printHelp_write_reg},
+	{"-read_reg", 				"reads from a register of EPD controller", 	execute_read_reg, 				printHelp_read_reg},
+	{"-info",					"displays general display informations",	execute_info, 					printHelp_info},
 #endif
-		{"-switch_hv",	    "switches hv on/off based on parameter",	execute_switch_hv,	    printHelp_switch_hv},
-		{"-switch_com",	    "switches com on/off based on parameter",	execute_switch_com,	    printHelp_switch_com},
-		{"--version", 		"displays version info", 					print_versionInfo, 		NULL},
-		{"--help", 			"prints this help message", 				execute_help, 			NULL},
+	{"-switch_hv",	    		"switches hv on/off based on parameter",	execute_switch_hv,	    		printHelp_switch_hv},
+	{"-switch_com",	    		"switches com on/off based on parameter",	execute_switch_com,	   			printHelp_switch_com},
+	{"--version", 				"displays version info", 					print_versionInfo, 				NULL},
+	{"--help", 					"prints this help message", 				execute_help, 					NULL},
 };
 
 /**
@@ -231,7 +235,7 @@ int main(int argc, char* argv[])
 						matchedOperation->print_help_message(0);
 					}
 					else {
-						sprintf(message, "operation '%s' failed", matchedOperation->operation);
+						sprintf(message, "operation '%s' failed: Error: %i", matchedOperation->operation, stat);
 						abort_msg(message, ABORT_APPLICATION);
 					}
 				}
@@ -451,6 +455,39 @@ int execute_update_image(int argc, char **argv){
 	return stat;
 }
 
+
+int execute_update_image_regional(int argc, char **argv){
+	int stat;
+
+	char* wfID = "default";
+	int mode = 0;
+	int vcom_switch_enable = 1;
+	int updateCount = 1;
+	int waitTime = 0;
+	struct pl_area* area = malloc(sizeof(struct pl_area));
+
+	if(argc >= 9) vcom_switch_enable = atol(argv[8]);
+
+	if(argc >= 8) waitTime = atoi(argv[7]);
+
+	if(argc >= 7) updateCount = atoi(argv[6]);
+
+	if(argc >= 6) mode = atoi(argv[5]);
+
+	if(argc >= 5) wfID = argv[4];
+
+	if(argc >= 4){
+		parser_read_area(argv[3], ",", area);
+		stat = update_image_regional(argv[2], wfID, (enum pl_update_mode) mode,
+				vcom_switch_enable, updateCount, waitTime, area);
+	}
+	else
+	{
+		return ERROR_ARGUMENT_COUNT_MISMATCH;
+	}
+	return stat;
+}
+
 int execute_counter(int argc, char**argv){
 	int stat;
 	printf("%s\n",__func__);
@@ -652,7 +689,7 @@ int execute_switch_hv(int argc, char **argv){
 
 	if (state < 0 || state > 1){
 		LOG("Given HV state (%d) not supported.", state);
-		return -1;
+		return -EINVAL;
 	}
 	stat = switch_hv(state);
 	return stat;
@@ -672,7 +709,7 @@ int execute_switch_com(int argc, char **argv){
 
 	if (state < -1 || state > 1){
 		LOG("Given COM state (%d) not supported.", state);
-		return -1;
+		return -EINVAL;
 	}
 	stat = switch_hv(state);
 	return stat;
@@ -698,9 +735,10 @@ int start_epdc(int load_nvm_content, int execute_clear)
 	LOG("load_nvm_content?: %d", load_nvm_content);
 
 	// initialize GPIOs
-	if (pl_gpio_config_list(&(hardware->gpios), hardware->board_gpios, hardware->gpio_count)){
+	stat = pl_gpio_config_list(&(hardware->gpios), hardware->board_gpios, hardware->gpio_count);
+	if (stat){
 		LOG("GPIO init failed");
-		return -1;
+		return stat;
 	}
 	// enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
@@ -709,10 +747,10 @@ int start_epdc(int load_nvm_content, int execute_clear)
 	stat = epdc->init(epdc, load_nvm_content);
 	if(stat){
 		LOG("EPDC-Init failed: %i\n", stat);
-		return -1;
+		return stat;
 	}
 	if (execute_clear){
-		stat |= epdc->clear_init(epdc);
+		stat = epdc->clear_init(epdc);
 	}
 	return stat;
 };
@@ -724,12 +762,14 @@ int start_epdc(int load_nvm_content, int execute_clear)
  */
 int stop_epdc()
 {
+	int stat = 0;
 	hardware->gpios.set(hardware->vddGPIO, 0);
 
 	// de-configure Epson GPIOs
-	if (pl_gpio_deconfigure_list(&(hardware->gpios), hardware->board_gpios, hardware->gpio_count)){
+	stat = pl_gpio_deconfigure_list(&(hardware->gpios), hardware->board_gpios, hardware->gpio_count);
+	if (stat){
 		LOG("GPIO deconfigure failed");
-		return -1;
+		return stat;
 	}
 
 	return 0;
@@ -756,6 +796,7 @@ int set_vcom(int vcom)
 int set_waveform(char *waveform, float *temperature)
 {
   int do_update = 0;
+  int stat = 0;
 
   if (temperature != NULL && (epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL))
   {
@@ -767,8 +808,9 @@ int set_waveform(char *waveform, float *temperature)
   if (do_update || (epdc->controller->temp_mode != PL_EPDC_TEMP_MANUAL))
 	  epdc->controller->update_temp(epdc->controller);
 
-  if (epdc->controller->load_wflib(epdc->controller, waveform))
-	return -1;
+  stat = epdc->controller->load_wflib(epdc->controller, waveform);
+  if (stat)
+	return stat;
 
 
   return 0;
@@ -793,7 +835,7 @@ int set_temperature(float temperature)
 	{
 	  LOG("Manual set temperature not possible.\n"
 		  "Temperature mode is not set to \"MANUAL\".");
-	  return -1;
+	  return -EINVAL;
 	}
 
   return 0;
@@ -815,9 +857,10 @@ int get_waveform(void)
 {
 
 	int isPgm = 0;
+	int stat = epdc->nvm->read_header(epdc->nvm, &isPgm);
 
-	if(epdc->nvm->read_header(epdc->nvm, &isPgm))
-		return -1;
+	if(stat)
+		return stat;
 
 	printf("Waveform Version: %s\n", epdc->nvm->wfVers);
 
@@ -838,7 +881,7 @@ int get_temperature(void)
 		{
 		  LOG("Manual get temperature not possible.\n"
 			  "Temperature mode is not set to \"MANUAL\".");
-		  return -1;
+		  return -EINVAL;
 		}
 	return 0;
 }
@@ -846,8 +889,9 @@ int get_temperature(void)
 int get_resolution(void)
 {
 	int x,y;
-	if(epdc->controller->get_resolution(epdc->controller, &x, &y))
-		return -1;
+	int stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
+	if(stat)
+		return stat;
 	LOG("Physical Resolution: %ix%i", x,y);
 	return 0;
 }
@@ -865,7 +909,7 @@ int get_resolution(void)
 int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 			int vcomSwitchEnable, int updateCount, int waitTime) {
 	int cnt = 0;
-
+	int stat;
 	LOG("path: %s", path);
 
 	int wfId = pl_generic_controller_get_wfid(epdc->controller, wfID);
@@ -876,10 +920,11 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	LOG("vcomSwitch: %d", vcomSwitchEnable);
 
 	if (wfId == -1)
-		return -1;
+		return -EINVAL;
 
-	if (epdc->controller->load_image(epdc->controller, path, NULL, 0, 0))
-		return -1;
+	stat = epdc->controller->load_image(epdc->controller, path, NULL);
+	if (stat)
+		return stat;
 
 	if (epdc->hv->vcomSwitch != NULL){
 		if (vcomSwitchEnable == 0){
@@ -891,8 +936,65 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 
 	for(cnt=0; cnt < updateCount; cnt++)
 	{
-		if (epdc->update(epdc, wfId, mode, NULL))
-			return -1;
+		stat = epdc->update(epdc, wfId, mode, NULL);
+		if (stat)
+			return stat;
+
+		usleep(waitTime * 1000);
+	}
+
+	if (epdc->hv->vcomSwitch != NULL){
+		if (vcomSwitchEnable == 0){
+			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 0);
+		}
+	}
+
+	return 0;
+}
+/**
+ * Updates image.
+ * @param path image path.
+ * @param wfID refers to the waveform id.
+ * @param mode refers to the update mode, i.e. 0=full update, 1=partial update.
+ * @param vcomSwitchEnable enables vcom switch control via epdc, 1=enable, 0=bypass.
+ * @param updateCount refers to the count of image updates to execute
+ * @param waitTime [ms] refers to the time to wait after one image update
+ * @return status
+ */
+int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode,
+			int vcomSwitchEnable, int updateCount, int waitTime, struct pl_area *area) {
+	int cnt = 0;
+	int stat;
+	LOG("path: %s", path);
+
+	int wfId = pl_generic_controller_get_wfid(epdc->controller, wfID);
+	LOG("wfID: %d", wfId);
+	LOG("updateMode: %d", mode);
+	LOG("updateCount: %d", updateCount);
+	LOG("waitTime: %d", waitTime);
+	LOG("vcomSwitch: %d", vcomSwitchEnable);
+	LOG("area: l: %i, t: %i, h: %i, w: %i", area->left, area->top, area->height, area->width);
+
+	if (wfId == -1)
+		return -EINVAL;
+
+	stat = epdc->controller->load_image(epdc->controller, path, area);
+		if (stat)
+			return stat;
+
+	if (epdc->hv->vcomSwitch != NULL){
+		if (vcomSwitchEnable == 0){
+			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 1);
+		} else {
+			epdc->hv->vcomSwitch->disable_bypass_mode(epdc->hv->vcomSwitch);
+		}
+	}
+
+	for(cnt=0; cnt < updateCount; cnt++)
+	{
+		stat = epdc->update(epdc, wfId, mode, area);
+		if (stat)
+			return stat;
 
 		usleep(waitTime * 1000);
 	}
@@ -915,11 +1017,11 @@ int read_register(regSetting_t regSetting){
 	uint16_t *data = malloc(sizeof(uint16_t)*regSetting.valCount);
 	regSetting.val = data;
 	if (regSetting.val == NULL)
-		return -1;
+		return -EINVAL;
 
 	int stat = epdc->read_register(epdc, &regSetting );
 	if (stat)
-		return -1;
+		return stat;
 
 	printf("register addr    = 0x%04X:\n", regSetting.addr);
 	printf("register data    = \n");
@@ -930,15 +1032,19 @@ int read_register(regSetting_t regSetting){
 }
 
 int fill(uint8_t gl, uint8_t wfid, int update_mode){
-	LOG("Fill: %x, %i, %i", gl, wfid, update_mode);
-	int x,y;
-		if(epdc->controller->get_resolution(epdc->controller, &x, &y))
-			return -1;
+
+	int x,y, stat;
 	struct pl_area a = {0, 0, x, y};
+
+	stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
+	if(stat)
+		return stat;
 	LOG("FILL: %i, area: %i, %i, %i, %i", gl, a.width, a.height, a.top, a.left);
 
-	int stat = epdc->controller->fill(epdc->controller, &a, gl);
-	stat |= epdc->update(epdc, wfid, update_mode, &a);
+	stat = epdc->controller->fill(epdc->controller, &a, gl);
+	if(stat)
+		return stat;
+	stat = epdc->update(epdc, wfid, update_mode, &a);
 	return stat;
 }
 
@@ -949,11 +1055,11 @@ int fill(uint8_t gl, uint8_t wfid, int update_mode){
 */
 int write_register(regSetting_t regSetting, const uint32_t bitmask){
 	if (regSetting.val == NULL)
-		return -1;
+		return -EINVAL;
 
 	int stat = epdc->write_register(epdc, regSetting, bitmask);
 	if (stat)
-		return -1;
+		return stat;
 
 	return 0;
 }
@@ -967,11 +1073,11 @@ int send_cmd(regSetting_t regSetting){
 
 
 	if (regSetting.val == NULL)
-		return -1;
+		return -EINVAL;
 
 	int stat = epdc->send_cmd(epdc, regSetting);
 	if (stat)
-		return -1;
+		return stat;
 
 	return 0;
 }
@@ -980,11 +1086,11 @@ int send_cmd(regSetting_t regSetting){
  * displays the general display informations.
  */
 int info(){
-	int stat = 0;
-	int isPgm = 0;
 
-	if(epdc->nvm->read_header(epdc->nvm, &isPgm))
-		return -1;
+	int isPgm = 0;
+	int stat = epdc->nvm->read_header(epdc->nvm, &isPgm);
+	if(stat)
+		return stat;
 
 	printf("NVM is programmed: %d\n", isPgm);
 	printf("Display ID: %s\n", epdc->nvm->dispId);
@@ -998,7 +1104,7 @@ int info(){
 	printf("Feature 3: %s\n", epdc->nvm->feature3);
 	printf("Feature 4: %s\n", epdc->nvm->feature4);
 
-	return stat;
+	return 0;
 }
 
 /**
@@ -1066,7 +1172,7 @@ int readBinaryFile(const char *binaryPath, uint8_t **blob){
 
 	if (fs == NULL){
 		LOG("Can't open specified binary file.");
-		return -1;
+		return -ENOENT;
 	}
 
 	fseek(fs, 0, SEEK_END);
@@ -1080,7 +1186,7 @@ int readBinaryFile(const char *binaryPath, uint8_t **blob){
 
 	if (bytecount != len){
 		LOG("Error during binary file reading.");
-		return -1;
+		return -EIO;
 	}
 
 	return bytecount;
@@ -1091,7 +1197,7 @@ int readBinaryFile(const char *binaryPath, uint8_t **blob){
 // ----------------------------------------------------------------------
 int counter(const char* wf)
 {
-	return -1;
+	return -ENOSYS;
 	printf("%s\n",__func__);
 	int wfid = 4;
 	unsigned char count = 0;
@@ -1148,7 +1254,7 @@ int slideshow(const char *path, const char* wf, int waittime)
 		sscanf(wf, "%i", &wfid);
 		LOG("Using Waveform %i" ,wfid);
 	}
-
+	int stat;
 	assert(path != NULL);
 	int count = 10;
 //#if VERBOSE
@@ -1159,7 +1265,7 @@ int slideshow(const char *path, const char* wf, int waittime)
 
 		if ((dir = opendir(path)) == NULL) {
 			LOG("Failed to open directory [%s]", path);
-			return -1;
+			return -ENOENT;
 		}
 
 		while ((d=readdir(dir)) != NULL) {
@@ -1167,10 +1273,10 @@ int slideshow(const char *path, const char* wf, int waittime)
 			if(d->d_name[0] == '.')
 				continue;
 
-
-			if (show_image(path, d->d_name, wfid)) {
+			stat = show_image(path, d->d_name, wfid);
+			if (stat) {
 				LOG("Failed to show image");
-				return -1;
+				return stat;
 			}
 			usleep(waittime);
 
@@ -1184,28 +1290,31 @@ int slideshow(const char *path, const char* wf, int waittime)
 int show_image(const char *dir, const char *file, int wfid)
 {
 	char path[256];
-
+	int stat = 0;
 	LOG("Image: %s %s", dir, file);
 	if(wfid <= -1 || wfid > 14){
 		wfid = 2;// = pl_generic_controller_get_wfid(epdc->controller, wfID);
 	}
 	if (wfid < 0)
-		return -1;
+		return -EINVAL;
 	if(dir!=NULL){
 		LOG("Dir is not NULL: %s", dir);
-		if (join_path(path, sizeof(path), dir, file))
-			return -1;
+		stat = join_path(path, sizeof(path), dir, file);
+		if (stat)
+			return stat;
 		LOG("Show: %s", path);
-		if (epdc->controller->load_image(epdc->controller, path, NULL, 0, 0))
-				return -1;
+		stat = epdc->controller->load_image(epdc->controller, path, NULL);
+		if (stat)
+			return stat;
 	}else{
 		LOG("Dir is NULL: %s", file);
-		if (epdc->controller->load_image(epdc->controller, file, NULL, 0, 0))
-				return -1;
+		stat = epdc->controller->load_image(epdc->controller, file, NULL);
+		if (stat)
+			return stat;
 	}
-	if (epdc->update(epdc, wfid,0, NULL))
-		return -1;
-	return 0;
+	stat = epdc->update(epdc, wfid,0, NULL);
+
+	return stat;
 }
 
 // ----------------------------------------------------------------------
@@ -1313,12 +1422,28 @@ void printHelp_get_temperature(int identLevel){
 	printf("\n");
 }
 
+
 void printHelp_update_image(int identLevel){
+	printf("%*s Updates the display with a given image.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -update_image_regional <image>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<image>               : \tpath to the image file.\n", identLevel, " ");
+	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
+	printf("%*s \t<updateMode>          : \tid of the used update mode.\n", identLevel, " ");
+	printf("%*s \t<updateCount>         : \tcount of image updates to execute.\n", identLevel, " ");
+	printf("%*s \t<waitTime>            : \ttime to wait after each image update [ms].\n", identLevel, " ");
+	printf("%*s \t<vcomSwitchEnable>    : \tautomatic vcom switch enable: 0=disable/1=enable.\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_update_image_regional(int identLevel){
 	printf("%*s Updates the display with a given image.\n", identLevel, " ");
 	printf("\n");
 	printf("%*s Usage: epdc-app -update_image <image>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<image>               : \tpath to the image file.\n", identLevel, " ");
+	printf("%*s \t<area>                : \tarea to be used (top,left,height,width).\n", identLevel, " ");
 	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
 	printf("%*s \t<updateMode>          : \tid of the used update mode.\n", identLevel, " ");
 	printf("%*s \t<updateCount>         : \tcount of image updates to execute.\n", identLevel, " ");

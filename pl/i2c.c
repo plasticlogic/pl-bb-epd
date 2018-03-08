@@ -32,7 +32,7 @@ int pl_i2c_reg_read_8(struct pl_i2c *i2c, uint8_t i2c_addr, uint8_t reg,
 		      uint8_t *data)
 {
 	if (i2c->write(i2c, i2c_addr, &reg, 1, PL_I2C_NO_STOP))
-		return -1;
+		return -EIO;
 
 	return i2c->read(i2c, i2c_addr, data, 1, 0);
 }
@@ -51,7 +51,7 @@ int pl_i2c_reg16_read_8(struct pl_i2c *i2c, uint8_t i2c_addr, uint16_t reg,
 	const uint8_t w_reg[2] = {(reg >> 8) & 0xff, (uint8_t) reg};
 
 	if (i2c->write(i2c, i2c_addr, w_reg, 2, PL_I2C_NO_STOP))
-		return -1;
+		return -EIO;
 
 	return i2c->read(i2c, i2c_addr, data, 1, 0);
 }
@@ -68,10 +68,10 @@ int pl_i2c_reg_read_16be(struct pl_i2c *i2c, uint8_t i2c_addr, uint8_t reg,
 			 uint16_t *data)
 {
 	if (i2c->write(i2c, i2c_addr, &reg, 1, PL_I2C_NO_STOP))
-		return -1;
+		return -EIO;
 
 	if (i2c->read(i2c, i2c_addr, (uint8_t *)data, 2, 0))
-		return -1;
+		return -EIO;
 
 	swap16(data);
 	return 0;

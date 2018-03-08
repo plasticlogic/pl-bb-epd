@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include <pl/pmic.h>
+#include <errno.h>
 
 pl_pmic_t *tps65185_new(struct pl_i2c *i2c, uint8_t i2c_addr);
 

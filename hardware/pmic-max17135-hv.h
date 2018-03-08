@@ -28,6 +28,7 @@
 
 #include <hardware/pmic-max17135.h>
 #include <pl/hv.h>
+#include <errno.h>
 
 /**
  * creates a pl_hv_driver object based on the maxim pmic MAX17135.

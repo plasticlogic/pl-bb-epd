@@ -26,6 +26,7 @@
 #ifndef PARALLEL_H_
 #define PARALLEL_H_
 
+#include <errno.h>
 typedef struct pl_parallel
 {
   void *hw_ref;		// hardware reference

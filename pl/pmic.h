@@ -23,6 +23,7 @@
  *      Author: sebastian.friebe
  */
 
+#include <errno.h>
 #ifndef PMIC_H_
 #define PMIC_H_
 

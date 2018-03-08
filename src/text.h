@@ -29,6 +29,7 @@
 #include "assert.h"
 
 #include <math.h>
+#include <errno.h>
 
 #ifndef TEXT_H
 #define TEXT_H

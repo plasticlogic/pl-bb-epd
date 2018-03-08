@@ -28,6 +28,7 @@
 
 #include <hardware/pmic-tps65185.h>
 #include <pl/hv.h>
+#include <errno.h>
 
 /**
  * creates a pl_hv_driver object based on the Texas Instruments pmic TPS65185.

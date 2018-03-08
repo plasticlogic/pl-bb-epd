@@ -31,7 +31,7 @@
 #include "pl/pmic.h"
 #include <epson/epson-s1d135xx.h>
 #include <pl/i2c.h>
-
+#include <errno.h>
 #define S1D13541_PROM_STATUS		0x0500
 #define S1D13541_PROM_CTRL			0x0502
 #define S1D13541_PROM_ADR_PGR_DATA	0x0504

@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <pl/global.h>
 #include <pl/parallel.h>
-
+#include <errno.h>
 
 struct pl_gpio;
 

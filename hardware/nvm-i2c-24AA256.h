@@ -25,6 +25,7 @@
 
 #include <pl/nvm.h>
 #include <pl/i2c.h>
+#include <errno.h>
 
 #define I2C_24AA256		0x54
 #define SIZE_24AA256	0x8000

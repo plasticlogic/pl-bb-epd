@@ -30,7 +30,7 @@
 #define BEAGLEBONE_I2C_H 1
 
 #include <stdint.h>
-
+#include <errno.h>
 struct pl_gpio;
 struct pl_i2c;
 

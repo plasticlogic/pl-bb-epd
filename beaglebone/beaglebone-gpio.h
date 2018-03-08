@@ -27,6 +27,7 @@
 #define BEAGLEBONE_GPIO_H_
 
 #include "pl/gpio.h"
+#include <errno.h>
 
 #define BEAGLEBONE_GPIO(_port, _pin) ((_port) << 5 | _pin)
 

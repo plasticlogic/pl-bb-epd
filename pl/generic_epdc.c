@@ -44,6 +44,8 @@ static int read_vcom_from_file(const char *filename, int *vcomInMillivolts);
 static int switch_hvs_on(pl_hv_t *p);
 static int switch_hvs_off(pl_hv_t *p);
 
+#define VERBOSE 1
+
 /**
  * allocates memory to hold a pl_generic_epdc structure
  *
@@ -91,19 +93,20 @@ static void generic_epdc_delete(struct pl_generic_epdc *p){
 }
 
 int do_load_nvm_content(struct pl_generic_epdc *p){
+	int stat = 0;
 	if (p->nvm == NULL){
 		LOG("Abort: There's no nvm defined in the EPDC.");
-		return -1;
+		return -EINVAL;
 	}
 
 	if (p->hv->vcomConfig == NULL){
 		LOG("Abort: There's no vcom configuration HW defined in the EPDC.");
-		return -1;
+		return -EINVAL;
 	}
 
 	if (p->controller == NULL){
 		LOG("Abort: There's no controller HW defined in the EPDC.");
-		return -1;
+		return -EINVAL;
 	}
 
 	uint8_t *buffer = NULL;
@@ -113,29 +116,49 @@ int do_load_nvm_content(struct pl_generic_epdc *p){
 	p->nvm->read_wfdata(p->nvm, &buffer, &bufferSize);
 	if (bufferSize <= 0){
 		LOG("Cannot read NVM content!");
-		return -1;
+		return -ECOMM;
 	}
 	if (p->nvm->nvm_format == NVM_FORMAT_S040){
 
 		// unpack vcom and waveform data from NVM content
-		if (unpack_nvm_content(buffer, bufferSize))
-			return -1;
+		stat = unpack_nvm_content(buffer, bufferSize);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if (stat)
+			return stat;
 
 		int vcomInMillivolts;
 
 		// load vcom file and send data to vcomConfig
-		if (read_vcom_from_file("/tmp/vcom_from_display_nvm", &vcomInMillivolts))
-			return -1;
+		stat = read_vcom_from_file("/tmp/vcom_from_display_nvm", &vcomInMillivolts);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 
-		if (p->hv->vcomConfig->set_vcom(p->hv->vcomConfig, vcomInMillivolts))
-			return -1;
+		stat = p->hv->vcomConfig->set_vcom(p->hv->vcomConfig, vcomInMillivolts);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 
 		// load waveform file and send data to controller
-		if (p->controller->update_temp(p->controller))
-			return -1;
+		stat = p->controller->update_temp(p->controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 
-		if (p->controller->load_wflib(p->controller, "/tmp/waveform_from_display_nvm.bin"))
-			return -1;
+		stat = p->controller->load_wflib(p->controller, "/tmp/waveform_from_display_nvm.bin");
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 	}
 	else if (p->nvm->nvm_format == NVM_FORMAT_S1D13541){
 		LOG("NVM_FORMAT_S1D13541 does not support Wf loading from NVM");
@@ -146,7 +169,7 @@ int do_load_nvm_content(struct pl_generic_epdc *p){
 		FILE *fd = fopen("/tmp/dummy.generic.wbf", "wb");
 		if (fd == NULL) {
 			LOG("error creating binary file.");
-			return -1;
+			return -ENOENT;
 		}
 #if 0
 		int i;
@@ -166,18 +189,34 @@ int do_load_nvm_content(struct pl_generic_epdc *p){
 		}
 
 		int isPgm = 0;
-		if(p->nvm->read_header(p->nvm, &isPgm))
-			return -1;
+		stat = p->nvm->read_header(p->nvm, &isPgm);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 		LOG("Setting vcom: %d",p->nvm->vcom);
-		if (p->hv->vcomConfig->set_vcom(p->hv->vcomConfig, p->nvm->vcom))
-			return -1;
+		stat = p->hv->vcomConfig->set_vcom(p->hv->vcomConfig, p->nvm->vcom);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 
 		// load waveform file and send data to controller
-		if (p->controller->update_temp(p->controller))
-			return -1;
+		stat = p->controller->update_temp(p->controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 
-		if (p->controller->load_wflib(p->controller, "/tmp/dummy.generic.wbf"))
-			return -1;
+		stat = p->controller->load_wflib(p->controller, "/tmp/dummy.generic.wbf");
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 	}
 	else if (p->nvm->nvm_format == NVM_FORMAT_PLAIN){
 
@@ -215,20 +254,23 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 	assert(controller != NULL);
 	if (controller->init != NULL)
 		stat |= controller->init(controller, load_nvm_content);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 
-	if (stat) return -1;
+	if (stat) return stat;
 
 	controller->update_temp(controller);
 
 	// initialize hv
 	if(!p->hv)
-		return -1;
+		return -EINVAL;
 	pl_hv_t *hv = p->hv;
 	assert(hv != NULL);
 	if (hv->init != NULL){
 		stat |= hv->init(hv);
 	}
-	if (stat) return -1;
+	if (stat) return stat;
 
 #if 0
 	// load data from display NVM and apply it's settings
@@ -355,12 +397,20 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content){
 #else
 	if(do_load_nvm_content(p) || !load_nvm_content){
 		LOG("Loading wflib: %s", controller->waveform_file_path);
-		if (controller->load_wflib(controller, controller->waveform_file_path))
-			return -1;
+		stat = controller->load_wflib(controller, controller->waveform_file_path);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 
 		LOG("Setting vcom: %d", p->default_vcom);
-		if (p->set_vcom(p, p->default_vcom))
-			return -1;
+		stat = p->set_vcom(p, p->default_vcom);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+		if(stat)
+			return stat;
 	}
 #endif
 
@@ -468,19 +518,34 @@ static int generic_update(struct pl_generic_epdc *p, int wfID, enum pl_update_mo
 		if (controller->update_temp != NULL)
 			stat |= controller->update_temp(controller);
 	}
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	//read_stopwatch(&t,"update_temp",1);
 	stat |= controller->configure_update(controller, wfID, mode, area);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	//read_stopwatch(&t,"configure_update",1);
 	if(!nowait){
 		stat |= switch_hvs_on(hv);
 	}
 	//read_stopwatch(&t,"switch_hvs_on",1);
 	stat |= controller->trigger_update(controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	//read_stopwatch(&t,"trigger_update",1);
 	if(!nowait){
 		stat |= controller->wait_update_end(controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 		//read_stopwatch(&t,"cwait_update_end",1);
 		stat |= switch_hvs_off(hv);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 		//read_stopwatch(&t,"switch_hvs_off",1);
 		}
 	return stat;
@@ -494,7 +559,6 @@ static int generic_update(struct pl_generic_epdc *p, int wfID, enum pl_update_mo
  * @return success indicator: 0 if passed, otherwise <> 0.
  */
 static int do_clear_update(struct pl_generic_epdc *p){
-
 	assert(p != NULL);
 	assert(p->controller != NULL);
 
@@ -511,18 +575,37 @@ static int do_clear_update(struct pl_generic_epdc *p){
 	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL){
 		if (controller->update_temp != NULL)
 			stat |= controller->update_temp(controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	}
 
 
-	if (p->controller->fill(p->controller, NULL, 0xFF))
-		return -1;
+	stat = p->controller->fill(p->controller, NULL, 0xFF);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	if(stat)
+		return stat;
 
 	stat |= switch_hvs_on(hv);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 
 	stat |= controller->clear_update(controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	stat |= controller->wait_update_end(controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 
 	stat |= switch_hvs_off(hv);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 
 	return stat;
 }
@@ -540,7 +623,6 @@ static int do_clear_update(struct pl_generic_epdc *p){
  */
 static int unpack_nvm_content(uint8_t *buffer, int bufferSize){
 
-
 	char command[200];
 	const char *filename = "/tmp/dummy.nvm";
 
@@ -552,15 +634,18 @@ static int unpack_nvm_content(uint8_t *buffer, int bufferSize){
 		else
 			LOG("Not all bytes have been written to file.");
 
-		return -1;
+		return -errno;
 	}
 	fclose(fd);
 
 	// generate binary blob
 	sprintf(command, "/home/root/scripts/extract_display_nvm_content.py %s", filename);
 	if (system(command)){
-		return -1;
+		return -errno;
 	}
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, errno);
+#endif
 
 	return 0;
 }
@@ -580,7 +665,7 @@ static int read_vcom_from_file(const char *filename, int *vcomInMillivolts){
 	// check if the file exists
 	if (fd == NULL){
 		LOG("Given vcom-file (%s) not found.", filename);
-		return -1;
+		return -ENOENT;
 	}
 
 	int bytecount = fscanf(fd, "%d", vcomInMillivolts);
@@ -588,7 +673,7 @@ static int read_vcom_from_file(const char *filename, int *vcomInMillivolts){
 
 	if (bytecount <= 0){
 		LOG("Vcom file (%s) seems to be empty.", filename);
-		return -1;
+		return -ENODATA;
 	}
 
 	return 0;
@@ -616,6 +701,9 @@ static int switch_hvs_on(pl_hv_t *hv){
 		hv->vcomSwitch->close(hv->vcomSwitch);
 		//LOG("ComSwitch on");
 	}
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	return stat;
 }
 
@@ -639,6 +727,10 @@ static int switch_hvs_off(pl_hv_t *hv){
 		stat |= hv->hvDriver->switch_off(hv->hvDriver);
 		//LOG("HV off\n");
 	}
+
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
 	return stat;
 }
 

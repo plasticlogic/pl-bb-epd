@@ -43,7 +43,7 @@ int pl_gpio_config_list(struct pl_gpio *gpio,
 		const struct pl_gpio_config *c = &config[i];
 
 		if (gpio->config(c->gpio, c->flags))
-			return -1;
+			return -EINVAL;
 	}
 
 	return 0;
@@ -62,7 +62,7 @@ int pl_gpio_deconfigure_list(struct pl_gpio *gpio,
 		const struct pl_gpio_config *c = &config[i];
 
 		if (gpio->deconfigure(c->gpio))
-			return -1;
+			return -EINVAL;
 	}
 
 	return 0;
@@ -93,13 +93,13 @@ int pl_gpio_check_flags(uint16_t flags)
 	/* must be either input, output or special */
 	if (!(flags & (PL_GPIO_INPUT | PL_GPIO_OUTPUT | PL_GPIO_SPECIAL))) {
 		LOG("GPIO must be either input, output or special");
-		return -1;
+		return -EINVAL;
 	}
 
 	/* can't be both output and input */
 	if ((flags & PL_GPIO_INPUT) && (flags & PL_GPIO_OUTPUT)) {
 		LOG("GPIO input and output flags conflict");
-		return -1;
+		return -EINVAL;
 	}
 
 	if (flags & PL_GPIO_INPUT) {
@@ -107,27 +107,27 @@ int pl_gpio_check_flags(uint16_t flags)
 		if (flags & (PL_GPIO_INIT_H | PL_GPIO_INIT_L |
 			     PL_GPIO_DRIVE_FULL | PL_GPIO_DRIVE_REDUCED)) {
 			LOG("Incompatible flags with input");
-			return -1;
+			return -EINVAL;
 		}
 
 		/* can't be both pull-high and pull-down */
 		if ((flags & PL_GPIO_PU) && (flags & PL_GPIO_PD)) {
 			LOG("Input pull up and down flags conflict");
-			return -1;
+			return -EINVAL;
 		}
 
 		if (flags & PL_GPIO_INTERRUPT) {
 			/* must be either rising or falling edge */
 			if (!(flags & (PL_GPIO_INT_RISE | PL_GPIO_INT_FALL))) {
 				LOG("Interrupt edge must be defined");
-				return -1;
+				return -EINVAL;
 			}
 
 			/* but not both */
 			if ((flags & PL_GPIO_INT_RISE) &&
 			    (flags & PL_GPIO_INT_FALL)) {
 				LOG("Interrupt edge flags conflict");
-				return -1;
+				return -EINVAL;
 			}
 		}
 	} else if (flags & PL_GPIO_OUTPUT) {
@@ -135,26 +135,26 @@ int pl_gpio_check_flags(uint16_t flags)
 		if (flags & (PL_GPIO_PU | PL_GPIO_PD | PL_GPIO_INTERRUPT |
 			     PL_GPIO_INT_RISE | PL_GPIO_INT_FALL)) {
 			LOG("Incompatible flags with output");
-			return -1;
+			return -EINVAL;
 		}
 
 		/* initial state must be high or low */
 		if (!(flags & (PL_GPIO_INIT_H | PL_GPIO_INIT_L))) {
 			LOG("Initial output state must be defined");
-			return -1;
+			return -EINVAL;
 		}
 
 		/* but not both */
 		if ((flags & PL_GPIO_INIT_H) && (flags & PL_GPIO_INIT_L)) {
 			LOG("Initial output state flags conflict");
-			return -1;
+			return -EINVAL;
 		}
 
 		/* can't be full and reduced drive strength */
 		if ((flags & PL_GPIO_DRIVE_FULL) &&
 		    (flags & PL_GPIO_DRIVE_REDUCED)) {
 			LOG("Output drive strength flags conflict");
-			return -1;
+			return -EINVAL;
 		}
 	}
 

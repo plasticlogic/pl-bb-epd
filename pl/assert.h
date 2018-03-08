@@ -20,12 +20,15 @@
 #ifndef ASSERT_H_
 #define ASSERT_H_
 
+#include <errno.h>
 /* Set to 1 to enable all assert statements.  Alternatively, define
  * LOCAL_ASSERT in each individual .c file before including this file.  */
 #define GLOBAL_ASSERT 1
 
 #define _STR(x)  __STR(x)
 #define __STR(x) #x
+
+#define EEPDC 200
 
 /* Defines how error will be signalled on status LED */
 enum abort_error {

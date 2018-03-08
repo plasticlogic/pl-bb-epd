@@ -27,7 +27,7 @@
 #define S1D13524_H_
 
 #include "epson-s1d135xx.h"
-
+#include <errno.h>
 #define S1D13524_PROD_CODE              0x004F
 #define S1D13524_STATUS_HRDY            (1 << 5)
 #define S1D13524_PLLCFG0                0x340F

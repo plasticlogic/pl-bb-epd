@@ -24,7 +24,7 @@
  */
 
 #include "epson-s1d135xx.h"
-
+#include <errno.h>
 #ifndef S1D13541_H_
 #define S1D13541_H_
 

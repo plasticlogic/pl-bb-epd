@@ -150,7 +150,7 @@ const struct s1d135xx_pins g_HBZ6_3_pins = {
 static int initialize_control_system(hw_setup_t *p,const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	if (!strcmp(selection, "BEAGLEBONE_WHITE" ))
@@ -160,7 +160,7 @@ static int initialize_control_system(hw_setup_t *p,const char *selection){
 		p->i2c_port = 1;
 	else {
 		LOG("Given control system type %s not supported.", selection);
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -176,7 +176,7 @@ static int initialize_control_system(hw_setup_t *p,const char *selection){
 static int initialize_driver_board(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in");
-		return -1;
+		return -EINVAL;
 	}
 	p->boardname = (char*) selection;
 	p->sInterfaceType = SPI;
@@ -232,7 +232,7 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 	}
 	else {
 		LOG("Given board type %s not supported.", selection);
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -309,7 +309,7 @@ static pl_pmic_t *get_tps65185_instance(hw_setup_t *p){
 static int initialize_nvm(hw_setup_t *p, const char *selection, const char *format_str){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	// intialize nvm
@@ -358,7 +358,7 @@ static int initialize_nvm(hw_setup_t *p, const char *selection, const char *form
 		}
 		else {
 			LOG("Given nvm format (%s) not supported.", format_str);
-			return -1;
+			return -EINVAL;
 		}
 	}
 
@@ -376,7 +376,7 @@ static int initialize_nvm(hw_setup_t *p, const char *selection, const char *form
 static int initialize_hv_config(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	if (!strcmp(selection, "MAX17135" ))
@@ -390,7 +390,7 @@ static int initialize_hv_config(hw_setup_t *p, const char *selection){
 
 	else {
 		LOG("Given EPD controller type not supported.");
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -407,7 +407,7 @@ static int initialize_hv_config(hw_setup_t *p, const char *selection){
 static int initialize_vcom_driver(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	if (!strcmp(selection, "MAX17135" ))
@@ -415,7 +415,7 @@ static int initialize_vcom_driver(hw_setup_t *p, const char *selection){
 
 	else if (!strcmp(selection, "MAX8520" )){
 		LOG("not yet implemented.");
-		return -1;
+		return -ENOSYS;
 	}
 
 	else if (!strcmp(selection, "TPS65185" ))
@@ -432,7 +432,7 @@ static int initialize_vcom_driver(hw_setup_t *p, const char *selection){
 
 	else {
 		LOG("Given EPD controller type not supported.");
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -449,7 +449,7 @@ static int initialize_vcom_driver(hw_setup_t *p, const char *selection){
 static int initialize_vcom_config(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	if (!strcmp(selection, "MAX17135" ))
@@ -470,7 +470,7 @@ static int initialize_vcom_config(hw_setup_t *p, const char *selection){
 
 	else {
 		LOG("Given EPD controller type not supported.");
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -486,7 +486,7 @@ static int initialize_vcom_config(hw_setup_t *p, const char *selection){
 static int initialize_vcom_switch(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	if (!strcmp(selection, "NULL" ))
@@ -506,7 +506,7 @@ static int initialize_vcom_switch(hw_setup_t *p, const char *selection){
 
 	else {
 		LOG("Given EPD controller type not supported.");
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -522,7 +522,7 @@ static int initialize_vcom_switch(hw_setup_t *p, const char *selection){
 static int initialize_hv_timing(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	int stat = 0;
@@ -538,7 +538,7 @@ static int initialize_hv_timing(hw_setup_t *p, const char *selection){
 
 	else {
 		LOG("Given EPD controller type not supported.");
-		return -1;
+		return -EINVAL;
 	}
 
 	return stat;
@@ -554,7 +554,7 @@ static int initialize_hv_timing(hw_setup_t *p, const char *selection){
 static int initialize_hv_driver(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	if (!strcmp(selection, "MAX17135" ))
@@ -577,7 +577,7 @@ static int initialize_hv_driver(hw_setup_t *p, const char *selection){
 
 	else {
 		LOG("Given EPD controller type not supported.");
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -595,7 +595,7 @@ static int initialize_hv_driver(hw_setup_t *p, const char *selection){
 static int initialize_controller(hw_setup_t *p, const char *selection){
 	if (p == NULL || selection ==  NULL){
 		LOG("Parameter exception in %s!", __func__);
-		return -1;
+		return -EINVAL;
 	}
 
 	p->controller = generic_controller_new();
@@ -612,7 +612,7 @@ static int initialize_controller(hw_setup_t *p, const char *selection){
 	else {
 		LOG("Given EPD controller type not supported.");
 		p->controller->delete(p->controller);
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;

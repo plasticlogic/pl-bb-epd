@@ -26,6 +26,7 @@
 #ifndef HV_H_
 #define HV_H_
 
+#include <errno.h>
 /**
  * interface definition for a vcom switch hardware
  */

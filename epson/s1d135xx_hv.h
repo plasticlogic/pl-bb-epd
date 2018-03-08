@@ -28,7 +28,8 @@
 
 #include "epson-s1d135xx.h"
 #include "pl/hv.h"
-
+#include <errno.h>
+#include <errno.h>
 /**
  * creates a pl_hv_driver object based on the EPSON controllers.
  *

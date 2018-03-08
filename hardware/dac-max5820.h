@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <pl/i2c.h>
 #include <pl/vcom.h>
+#include <errno.h>
 
 typedef struct dac_max5820 {
 	struct pl_i2c *i2c;

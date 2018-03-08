@@ -57,7 +57,7 @@ static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr, uint8
 
 	assert(blob);
 
-	int stat = -1;
+	int stat = -EINVAL;
 	uint32_t register_address = addr;
 	uint8_t reg[3];
 	int chunkSize = 256;

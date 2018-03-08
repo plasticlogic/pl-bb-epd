@@ -82,7 +82,7 @@ draw_bitmap(FT_Bitmap* bitmap,
 
 int show_ft_bitmap(struct pl_generic_controller* controller, struct pl_area* area, uint8_t invert) {
 
-
+	int stat = 0;
 	//struct timespec start;
 	//start_stopwatch(&start);
 #if 0
@@ -116,8 +116,9 @@ int show_ft_bitmap(struct pl_generic_controller* controller, struct pl_area* are
 	}
 #endif
 	//read_stopwatch(&start, "show bitmap", 1);
-	if(controller->load_buffer(controller,(char*) image, area, 0,0))
-		return -22;
+	stat = controller->load_buffer(controller,(char*) image, area);
+	if(stat)
+		return stat;
 	//read_stopwatch(&start, "load bitmap to EPDC buffer", 0);
 	return 0;
 }
@@ -146,15 +147,15 @@ int show_text(struct pl_generic_controller* controller, struct pl_area* area, co
 	target_height = area->height;//HEIGHT;
 
 	error = FT_Init_FreeType(&library); // initialize library
-	if(error) return -1;
+	if(error) return error;
 
 	error = FT_New_Face(library, font, 0, &face); // create face object
-	if(error) return -1;
+	if(error) return error;
 
 	// use 50pt at 100dpi
 	error = FT_Set_Char_Size(face, font_size * 64, font_size * 100,
 			100, 0); // set character size
-	if(error) return -1;
+	if(error) return error;
 
 	slot = face->glyph;
 
@@ -192,7 +193,7 @@ int show_text(struct pl_generic_controller* controller, struct pl_area* area, co
 	//read_stopwatch(&start, "generate text",0);
 	error = show_ft_bitmap(controller, area, invert);
 
-	if(error) return -1;
+	if(error) return error;
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 	free(image);

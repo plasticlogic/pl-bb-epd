@@ -27,6 +27,7 @@
 #define GENERIC_CONTROLLER_H_
 
 #include <pl/types.h>
+#include <errno.h>
 
 typedef struct pl_generic_controller{
 	void *hw_ref;
@@ -58,8 +59,8 @@ typedef struct pl_generic_controller{
 	int (*wait_update_end)(struct pl_generic_controller *p);
 	int (*fill)(struct pl_generic_controller *p, const struct pl_area *area, uint8_t g);
 	int (*load_wflib)(struct pl_generic_controller *p, const char *filename);
-	int (*load_image)(struct pl_generic_controller *p, const char *path, const struct pl_area *area, int left, int top);
-	int (*load_buffer)(struct pl_generic_controller *p, const char* buffer, const struct pl_area *area, int left, int top);
+	int (*load_image)(struct pl_generic_controller *p, const char *path, const struct pl_area *area);
+	int (*load_buffer)(struct pl_generic_controller *p, const char* buffer, const struct pl_area *area);
 	int (*set_power_state)(struct pl_generic_controller *p, enum pl_epdc_power_state state);
 	int (*set_temp_mode)(struct pl_generic_controller *p, enum pl_epdc_temp_mode mode);
 	int (*update_temp)(struct pl_generic_controller *p);

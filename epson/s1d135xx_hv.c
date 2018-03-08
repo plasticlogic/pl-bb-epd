@@ -60,7 +60,7 @@ pl_hv_driver_t *s1d135xx_get_hv_driver(s1d135xx_t *s1d135xx){
  * @return PASS(==0) / FAIL(!=0) information
  */
 static int s1d135xx_hv_driver_on(struct pl_hv_driver *p){
-	if (p == NULL) return -1;
+	if (p == NULL) return -EINVAL;
 	s1d135xx_t *s1d135xx = (s1d135xx_t *)p->hw_ref;
 	return s1d135xx->set_epd_power(s1d135xx, 1);
 
@@ -73,7 +73,7 @@ static int s1d135xx_hv_driver_on(struct pl_hv_driver *p){
  * @return PASS(==0) / FAIL(!=0) information
  */
 static int s1d135xx_hv_driver_off(struct pl_hv_driver *p){
-	if (p == NULL) return -1;
+	if (p == NULL) return -EINVAL;
 	s1d135xx_t *s1d135xx = (s1d135xx_t *)p->hw_ref;
 	return s1d135xx->set_epd_power(s1d135xx, 0);
 }
@@ -100,7 +100,7 @@ pl_vcom_driver_t *s1d135xx_get_vcom_driver(s1d135xx_t *s1d135xx){
  * @return PASS(==0) / FAIL(!=0) information
  */
 static int s1d135xx_vcom_driver_on(pl_vcom_driver_t *p){
-	if (p == NULL) return -1;
+	if (p == NULL) return -EINVAL;
 	s1d135xx_t *s1d135xx = (s1d135xx_t *)p->hw_ref;
 	return s1d135xx->set_epd_power(s1d135xx, 1);
 }
@@ -112,7 +112,7 @@ static int s1d135xx_vcom_driver_on(pl_vcom_driver_t *p){
  * @return PASS(==0) / FAIL(!=0) information
  */
 static int s1d135xx_vcom_driver_off(pl_vcom_driver_t *p){
-	if (p == NULL) return -1;
+	if (p == NULL) return -EINVAL;
 	s1d135xx_t *s1d135xx = (s1d135xx_t *)p->hw_ref;
 	return s1d135xx->set_epd_power(s1d135xx, 0);
 }

@@ -78,7 +78,7 @@ static void delete(struct pl_nvm *p){
 static int read_wfdata(struct pl_nvm *nvm, uint8_t **data, int *count){
 	if (nvm == NULL){
 		LOG("Abort: no nvm defined");
-		return -1;
+		return -EINVAL;
 	}
 
 	switch(nvm->nvm_format){
@@ -93,14 +93,14 @@ static int read_wfdata(struct pl_nvm *nvm, uint8_t **data, int *count){
 		break;
 	default:
 		LOG("Used nvm format (%d) does not support load waveform from nvm.", nvm->nvm_format);
-		return -1;
+		return -EINVAL;
 	}
 }
 
 static int read_header(struct pl_nvm *nvm, int *isPgm){
 	if (nvm == NULL){
 		LOG("Abort: no nvm defined");
-		return -1;
+		return -EINVAL;
 	}
 
 	switch(nvm->nvm_format){
@@ -118,7 +118,7 @@ static int read_header(struct pl_nvm *nvm, int *isPgm){
 		break;
 	default:
 		LOG("Given nvm format not supported for header readout.");
-		return -1;
+		return -EINVAL;
 	}
 
 	return 0;
@@ -135,7 +135,7 @@ static int read_wfdata_S040_format(struct pl_nvm *nvm, uint8_t **data, int *coun
 	long unsigned int wf_data_length = 0;
 	// read data, but it's in big-endian
 	if (nvm->read(nvm, offset_wf_data_length, (uint8_t *)&wf_data_length, 4))
-			return -1;
+			return -EIO;
 
 	// bring data in right order (little-endian)
 	swap32(&wf_data_length);
@@ -145,7 +145,7 @@ static int read_wfdata_S040_format(struct pl_nvm *nvm, uint8_t **data, int *coun
 	*data = (uint8_t *)malloc(sizeof(uint8_t)* byteCount);
 
 	if (nvm->read(nvm, 0, *data, byteCount))
-		return -1;
+		return -EIO;
 
 	*count = byteCount;
 
@@ -160,12 +160,12 @@ static int read_wfdata_generic_format(struct pl_nvm *nvm, uint8_t **data, int *c
 	uint8_t buffer[nvm->size];
 
 	if (nvm->read(nvm, 0, buffer, nvm->size))
-		return -1;
+		return -EIO;
 
 	// check magic word
 	if(buffer[NVM_MAGIC_ID_POS] != 0x50 || buffer[NVM_MAGIC_ID_POS+1] != 0x4C)
 	{
-		return -1;
+		return -EINVAL;
 	}
 
 	// get wf start pos
@@ -196,7 +196,7 @@ static int read_wfdata_plain_format(struct pl_nvm *nvm, uint8_t **data, int *cou
 	*data = (uint8_t *)malloc(sizeof(uint8_t)*mtp_size);
 
 	if (nvm->read(nvm, 0, *data, mtp_size))
-		return -1;
+		return -EIO;
 
 	return 0;
 }
@@ -212,11 +212,11 @@ static int read_header_S1D13541_format(struct pl_nvm *nvm, int *isPgm){
 	uint8_t buffer[nvm->size];
 
 	if (nvm->read(nvm, 0, buffer, nvm->size))
-		return -1;
+		return -EIO;
 
 	//memcpy(nvm->dispId, buffer, nvm->size);
 	if(s1d13541_extract_eeprom_blob(nvm, buffer))
-		return -1;
+		return -EIO;
 
 	if(atoi(nvm->dispId))
 		*isPgm = 1;

@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <pl/i2c.h>
 #include <pl/hv.h>
+#include <errno.h>
 
 
 // generic nvm format for freescale an epson (einc)

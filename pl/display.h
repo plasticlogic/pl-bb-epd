@@ -27,6 +27,7 @@
 #define DISPLAY_H_
 
 #include <pl/nvm.h>
+#include <errno.h>
 
 typedef struct pl_display{
 	uint32_t gate_lines;

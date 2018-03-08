@@ -29,6 +29,7 @@
 #define INCLUDE_PL_I2C_H 1
 
 #include <stdint.h>
+#include <errno.h>
 
 /**
    @file pl/i2c.h

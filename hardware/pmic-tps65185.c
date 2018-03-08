@@ -33,7 +33,7 @@
 
 /* Set to 1 to enable verbose log messages */
 #define VERBOSE 1
-
+#define EPMIC 199
 /* Set to 1 to dump registers */
 #define DO_REG_DUMP 0
 
@@ -190,7 +190,7 @@ static int tps65185_init(pl_pmic_t *p)
 		for (i = 0; i < ARRAY_SIZE(init_data); i++) {
 			if (pl_i2c_reg_write_8(p->i2c, p->i2c_addr, init_data[i].reg,
 					init_data[i].data))
-				return -1;
+				return -EINVAL;
 		}
 	}
 
@@ -203,14 +203,14 @@ static int tps65185_check_revision(pl_pmic_t *p)
 	assert(p);
 
 	if (pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_REV_ID, &ver.byte))
-		return -1;
+		return -EPMIC;
 
 	LOG("Version: %d.%d.%d", ver.v.major, ver.v.minor, ver.v.version);
 
 	if (ver.byte != HVPMIC_VERSION) {
 		LOG("Wrong version: 0x%02X instead of 0x%02X",
 		    ver.byte, HVPMIC_VERSION);
-		return -1;
+		return -EPMIC;
 	}
 
 	return 0;
@@ -235,11 +235,11 @@ static int tps65185_wait_pok(pl_pmic_t *p)
 
 	if (pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_PG_STAT,
 			   &pgstat))
-		return -1;
+		return -EPMIC;
 
 	if (pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_INT1, &int1) ||
 	    pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_INT2, &int2))
-		return -1;
+		return -EPMIC;
 
 #if VERVBOSE
 	if (int1 || int2)
@@ -284,10 +284,10 @@ static int tps65185_set_vcom_register(pl_pmic_t *p, int value)
 	assert(p != NULL);
 
 	if (pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_VCOM1, v1))
-		return -1;
+		return -EPMIC;
 
 	if (pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_VCOM2, v2))
-		return -1;
+		return -EPMIC;
 
 	return 0;
 }
@@ -314,7 +314,7 @@ static int tps65185_set_vcom_voltage(pl_pmic_t *p, int mv)
 	v2 = ((dac_value >> 8) & 0x0001);
 
 	if (pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_VCOM1, v1))
-	    return -1;
+	    return -EPMIC;
 
 	return pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_VCOM2, v2);
 }
@@ -349,13 +349,13 @@ static int tps65185_temperature_measure(pl_pmic_t *p, int16_t *measured)
 
 	/* Trigger conversion */
 	if (pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_TMST1, 0x80))
-		return -1;
+		return -EPMIC;
 
 	/* wait for it to complete */
 	do {
 		if (pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_TMST1,
 				      &progress))
-			return -1;
+			return -EPMIC;
 	} while ((progress & 0x20));
 
 	/* read the temperature */
@@ -376,11 +376,11 @@ static int tps65185_temperature_measure(pl_pmic_t *p, int16_t *measured)
 
 static int tps65185_vcom_enable(pl_pmic_t *pmic){
 	LOG("tps65185_vcom_enable - not yet implemented");
-	return -1;
+	return -ENOSYS;
 }
 static int tps65185_vcom_disable(pl_pmic_t *pmic){
 	LOG("tps65185_vcom_disable - not yet implemented");
-	return -1;
+	return -ENOSYS;
 }
 
 static int tps65185_apply_timings(pl_pmic_t *p){
