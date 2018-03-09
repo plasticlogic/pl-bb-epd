@@ -31,7 +31,7 @@
 #include <pl/gpio.h>
 #include <src/pindef.h>
 
-#define VERBOSE 1
+#define VERBOSE 0
 
 static const struct pl_wfid wf_table[] = {
 	{ "default",	   1 },
@@ -169,14 +169,14 @@ static int clear_update(pl_generic_controller_t *p){
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	stat = p->trigger_update(p);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	return 0;
@@ -260,7 +260,7 @@ static int load_wflib(pl_generic_controller_t *p, const char *filename)
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	p->waveform_file_path = (char*) filename;
@@ -339,7 +339,7 @@ static int s1d13541_update_temp(pl_generic_controller_t *p)
 		break;
 	}
 
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	if (s1d135xx->flags.needs_update) {
@@ -347,7 +347,7 @@ static int s1d13541_update_temp(pl_generic_controller_t *p)
 		LOG("Updating waveform table");
 #endif
 		stat = p->load_wflib(p, standard_waveform_filename);
-		if (stat)
+		if(stat < 0)
 			return stat;
 	}
 
@@ -387,14 +387,14 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	stat =s1d135xx->load_init_code(s1d135xx, p->instruction_code_path);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat){
+	if(stat < 0){
 		LOG("Failed to load init code");
 
 			return stat;
@@ -409,28 +409,28 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	stat = set_power(p, PL_EPDC_RUN);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	stat = s1d135xx->init_gate_drv(s1d135xx);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	stat = s1d135xx->wait_dspe_trig(s1d135xx);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	p->xres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
@@ -442,7 +442,7 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	LOG("Ready %dx%d", p->xres, p->yres);
@@ -460,7 +460,7 @@ static int set_power(pl_generic_controller_t *p, enum pl_epdc_power_state state)
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	p->power_state = state;
@@ -532,7 +532,7 @@ static int update_temp_manual(struct s1d135xx *p, int manual_temp)
 static int update_temp_auto(struct s1d135xx *p, uint16_t temp_reg)
 {
 	int stat =p->set_power_state(p, PL_EPDC_STANDBY);
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	p->send_cmd_with_params(p, S1D13541_CMD_RD_TEMP, NULL, 0);
@@ -544,7 +544,7 @@ static int update_temp_auto(struct s1d135xx *p, uint16_t temp_reg)
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	update_temp(p, temp_reg);

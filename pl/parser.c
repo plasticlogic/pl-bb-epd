@@ -80,7 +80,7 @@ int parser_read_str(const char *str, const char *sep, char *out, int out_len)
 	if (!len)
 		return 0;
 
-	if (len == -1)
+	if (len < 0)
 		while (str[++len]);
 
 	if (len >= out_len)

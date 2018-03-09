@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 			// just execute the operation
 			else {
 				stat = matchedOperation->execute_operation(argc, argv);
-				if (stat){
+				if(stat < 0){
 
 					if ((stat == ERROR_ARGUMENT_COUNT_MISMATCH) && (matchedOperation->print_help_message != NULL)){
 						sprintf(message, "wrong number of arguments...");
@@ -736,7 +736,7 @@ int start_epdc(int load_nvm_content, int execute_clear)
 
 	// initialize GPIOs
 	stat = pl_gpio_config_list(&(hardware->gpios), hardware->board_gpios, hardware->gpio_count);
-	if (stat){
+	if(stat < 0){
 		LOG("GPIO init failed");
 		return stat;
 	}
@@ -745,7 +745,7 @@ int start_epdc(int load_nvm_content, int execute_clear)
 
 	sleep(1);
 	stat = epdc->init(epdc, load_nvm_content);
-	if(stat){
+	if (stat < 0){
 		LOG("EPDC-Init failed: %i\n", stat);
 		return stat;
 	}
@@ -767,7 +767,7 @@ int stop_epdc()
 
 	// de-configure Epson GPIOs
 	stat = pl_gpio_deconfigure_list(&(hardware->gpios), hardware->board_gpios, hardware->gpio_count);
-	if (stat){
+	if(stat < 0){
 		LOG("GPIO deconfigure failed");
 		return stat;
 	}
@@ -809,7 +809,7 @@ int set_waveform(char *waveform, float *temperature)
 	  epdc->controller->update_temp(epdc->controller);
 
   stat = epdc->controller->load_wflib(epdc->controller, waveform);
-  if (stat)
+  if(stat < 0)
 	return stat;
 
 
@@ -859,7 +859,7 @@ int get_waveform(void)
 	int isPgm = 0;
 	int stat = epdc->nvm->read_header(epdc->nvm, &isPgm);
 
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	printf("Waveform Version: %s\n", epdc->nvm->wfVers);
@@ -890,7 +890,7 @@ int get_resolution(void)
 {
 	int x,y;
 	int stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
-	if(stat)
+	if (stat < 0)
 		return stat;
 	LOG("Physical Resolution: %ix%i", x,y);
 	return 0;
@@ -919,11 +919,11 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	LOG("waitTime: %d", waitTime);
 	LOG("vcomSwitch: %d", vcomSwitchEnable);
 
-	if (wfId == -1)
+	if (wfId < 0)
 		return -EINVAL;
 
 	stat = epdc->controller->load_image(epdc->controller, path, NULL);
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	if (epdc->hv->vcomSwitch != NULL){
@@ -937,7 +937,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	for(cnt=0; cnt < updateCount; cnt++)
 	{
 		stat = epdc->update(epdc, wfId, mode, NULL);
-		if (stat)
+		if(stat < 0)
 			return stat;
 
 		usleep(waitTime * 1000);
@@ -975,11 +975,11 @@ int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode
 	LOG("vcomSwitch: %d", vcomSwitchEnable);
 	LOG("area: l: %i, t: %i, h: %i, w: %i", area->left, area->top, area->height, area->width);
 
-	if (wfId == -1)
+	if (wfId < 0)
 		return -EINVAL;
 
 	stat = epdc->controller->load_image(epdc->controller, path, area);
-		if (stat)
+		if(stat < 0)
 			return stat;
 
 	if (epdc->hv->vcomSwitch != NULL){
@@ -993,7 +993,7 @@ int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode
 	for(cnt=0; cnt < updateCount; cnt++)
 	{
 		stat = epdc->update(epdc, wfId, mode, area);
-		if (stat)
+		if(stat < 0)
 			return stat;
 
 		usleep(waitTime * 1000);
@@ -1020,7 +1020,7 @@ int read_register(regSetting_t regSetting){
 		return -EINVAL;
 
 	int stat = epdc->read_register(epdc, &regSetting );
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	printf("register addr    = 0x%04X:\n", regSetting.addr);
@@ -1037,12 +1037,12 @@ int fill(uint8_t gl, uint8_t wfid, int update_mode){
 	struct pl_area a = {0, 0, x, y};
 
 	stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
-	if(stat)
+	if (stat < 0)
 		return stat;
 	LOG("FILL: %i, area: %i, %i, %i, %i", gl, a.width, a.height, a.top, a.left);
 
 	stat = epdc->controller->fill(epdc->controller, &a, gl);
-	if(stat)
+	if (stat < 0)
 		return stat;
 	stat = epdc->update(epdc, wfid, update_mode, &a);
 	return stat;
@@ -1058,7 +1058,7 @@ int write_register(regSetting_t regSetting, const uint32_t bitmask){
 		return -EINVAL;
 
 	int stat = epdc->write_register(epdc, regSetting, bitmask);
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	return 0;
@@ -1076,7 +1076,7 @@ int send_cmd(regSetting_t regSetting){
 		return -EINVAL;
 
 	int stat = epdc->send_cmd(epdc, regSetting);
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	return 0;
@@ -1089,7 +1089,7 @@ int info(){
 
 	int isPgm = 0;
 	int stat = epdc->nvm->read_header(epdc->nvm, &isPgm);
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	printf("NVM is programmed: %d\n", isPgm);
@@ -1274,7 +1274,7 @@ int slideshow(const char *path, const char* wf, int waittime)
 				continue;
 
 			stat = show_image(path, d->d_name, wfid);
-			if (stat) {
+			if(stat < 0) {
 				LOG("Failed to show image");
 				return stat;
 			}
@@ -1300,16 +1300,16 @@ int show_image(const char *dir, const char *file, int wfid)
 	if(dir!=NULL){
 		LOG("Dir is not NULL: %s", dir);
 		stat = join_path(path, sizeof(path), dir, file);
-		if (stat)
+		if(stat < 0)
 			return stat;
 		LOG("Show: %s", path);
 		stat = epdc->controller->load_image(epdc->controller, path, NULL);
-		if (stat)
+		if(stat < 0)
 			return stat;
 	}else{
 		LOG("Dir is NULL: %s", file);
 		stat = epdc->controller->load_image(epdc->controller, file, NULL);
-		if (stat)
+		if(stat < 0)
 			return stat;
 	}
 	stat = epdc->update(epdc, wfid,0, NULL);

@@ -38,7 +38,7 @@
 #include <pl/utils.h>
 
 /* Set to 1 to enable verbose log messages */
-#define VERBOSE 1
+#define VERBOSE 0
 /*
 int pl_hwinfo_init(struct pl_hwinfo *info, const struct i2c_eeprom *eeprom)
 {
@@ -106,6 +106,7 @@ int pl_hwinfo_init_from_file(struct pl_hwinfo *info, const char *filename){
 	if (f == NULL)
 		return -ENOENT;
 
+	errno = 0;
 	// read file line by line
 	while(fgets(line, max_line_length, f) != NULL){
 		sscanf(line, "%s:%s\n", key, value);

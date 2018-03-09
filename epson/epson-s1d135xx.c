@@ -42,7 +42,7 @@
 #include <pl/color.h>
 
 /* Set to 1 to enable verbose update and EPD power on/off log messages */
-#define VERBOSE 1
+#define VERBOSE 0
 
 #define DATA_BUFFER_LENGTH              0x4B000 //512 //
 
@@ -267,7 +267,6 @@ static void s1d135xx_hard_reset(struct s1d135xx* p)
  */
 static int s1d135xx_soft_reset(struct s1d135xx *p)
 {
-
 	s1d135xx_write_reg(p, S1D135XX_REG_SOFTWARE_RESET, 0xFF);
 
 	return s1d135xx_wait_idle(p);
@@ -281,7 +280,6 @@ static int s1d135xx_soft_reset(struct s1d135xx *p)
 static int s1d135xx_wait_idle(struct s1d135xx *p)
 {
 	unsigned long timeout = 50000; // ca. 20s
-	LOG(".");
 	while (!get_hrdy(p)){
 		--timeout;
 		if (timeout == 0){
@@ -445,7 +443,7 @@ static int s1d135xx_set_registers(struct s1d135xx *p, const regSetting_t* map, i
 				stat = 0;	// success
 			}
 
-			if (stat){
+			if(stat < 0){
 				break;
 			}
 		}
@@ -557,7 +555,7 @@ static int s1d135xx_load_init_code(struct s1d135xx *p, const char *init_code_pat
 	set_cs(p, 1);
 	fclose(init_code_file);
 
-	if (stat) {
+	if(stat < 0) {
 		LOG("Failed to transfer init code file");
 		return -ECOMM;
 	}
@@ -723,7 +721,7 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 	if(memoryBuffer)
 		free(memoryBuffer);
 
-	if (stat)
+	if(stat < 0)
 		return -EEPDC;
 	/*
 		if (p->wait_for_idle(p))
@@ -872,7 +870,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		free(scrambledPNG);
 
 
-	if (stat)
+	if(stat < 0)
 		return -EEPDC;
 //*
 	if (p->wait_for_idle(p))
@@ -1077,7 +1075,7 @@ static int s1d13524_check_prod_code(struct s1d135xx *p, uint16_t ref_code)
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 	set_cs(p, 1);
 	rev = p->read_reg(p, 0x0000);
@@ -1112,14 +1110,14 @@ static int s1d13524_clear_init(struct s1d135xx *p)
 	p->send_cmd_with_params(p, 0x32, params, ARRAY_SIZE(params));
 
 	stat = p->wait_for_idle(p);
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	stat = s1d13524_init_ctlr_mode(p);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 #if 1 /* ToDo: find out why the first image state goes away */
@@ -1127,7 +1125,7 @@ static int s1d13524_clear_init(struct s1d135xx *p)
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if (stat)
+	if(stat < 0)
 		return stat;
 #endif
 
@@ -1143,21 +1141,21 @@ static int s1d13541_init_controller(struct s1d135xx *p)
 	p->hard_reset(p);
 
 	stat = p->soft_reset(p);
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	stat = p->check_prod_code(p, S1D13541_PROD_CODE);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	stat = s1d13541_init_clocks(p);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	return 0;
@@ -1172,14 +1170,14 @@ static int s1d13524_init_controller(struct s1d135xx *p)
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	stat = p->check_prod_code(p, S1D13524_PROD_CODE);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	p->write_reg(p, S1D135XX_REG_I2C_STATUS, S1D13524_I2C_DELAY);
@@ -1188,7 +1186,7 @@ static int s1d13524_init_controller(struct s1d135xx *p)
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	if(stat)
+	if (stat < 0)
 		return stat;
 
 	return 0;

@@ -32,7 +32,7 @@
 #include "pl/utils.h"
 
 /* Set to 1 to enable verbose log messages */
-#define VERBOSE 1
+#define VERBOSE 0
 #define EPMIC 199
 /* Set to 1 to dump registers */
 #define DO_REG_DUMP 0

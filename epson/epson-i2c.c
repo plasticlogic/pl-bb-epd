@@ -113,7 +113,7 @@ static int epson_s1d135xx_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 	int stat;
 	if (!(flags & PL_I2C_NO_START)){
 		stat = s1d135xx_i2c_send_addr(p, i2c_addr, 1);
-		if (stat)
+		if(stat < 0)
 			return stat;
 	}
 	while (count--) {
@@ -128,7 +128,7 @@ static int epson_s1d135xx_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 		p->write_reg(p, S1D135XX_I2C_REG_CMD, cmd);
 
 		stat = s1d135xx_i2c_poll(p, 0);
-		if (stat)
+		if(stat < 0)
 			return stat;
 
 		*data++ = p->read_reg(p, S1D135XX_I2C_REG_RD);
@@ -156,7 +156,7 @@ static int epson_s1d135xx_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 	int stat;
 		if (!(flags & PL_I2C_NO_START)){
 			stat = s1d135xx_i2c_send_addr(p, i2c_addr, 0);
-			if (stat)
+			if(stat < 0)
 				return stat;
 		}
 
@@ -172,7 +172,7 @@ static int epson_s1d135xx_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 		p->write_reg(p, S1D135XX_I2C_REG_CMD, cmd);
 
 		stat = s1d135xx_i2c_poll(p, 0);
-		if (stat)
+		if(stat < 0)
 			return stat;
 	}
 

@@ -248,14 +248,13 @@ void dump_hex16(const void *data, uint16_t len)
 
 int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * height)
 {
-  int ERROR = -1;
-
   LOG("filename %s", file_name);
 
   png_structp png_ptr;
   png_infop info_ptr;
   FILE *fp;
 
+  errno = 0;
   if ((fp = fopen(file_name, "rb")) == NULL)
      return (-errno);
 
@@ -359,6 +358,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
   png_structp png_ptr;
   png_infop info_ptr;
   FILE *fp;
+	errno = 0;
 
   if ((fp = fopen(file_name, "rb")) == NULL)
      return (-errno);

@@ -98,12 +98,12 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "general:control_system", NULL);
 	if (str == NULL) LOG("missing control system setting...");
 	stat = setup->initialize_control_system(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	str = iniparser_getstring(dictConfig, "general:driver_board", NULL);
 	if (str == NULL) LOG("missing driver board setting...");
 	stat = setup->initialize_driver_board(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	str = iniparser_getstring(dictConfig, "general:nvm_spi_port", NULL);
 	if (str == NULL) LOG("missing general:nvm_spi_port setting...");
@@ -140,7 +140,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	// initialize i2c
 	// ----------------------
 	stat = beaglebone_i2c_init(setup->i2c_port, &(setup->host_i2c));
-	if (stat) return -ENODEV;
+	if(stat < 0) return -ENODEV;
 
 	if(setup->sInterfaceType == SPI){
 		LOG("Interface: SPI");
@@ -153,16 +153,16 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "display:controller", NULL);
 	if (str == NULL) LOG("missing controller setting...");
 	stat = setup->initialize_controller(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	setup->controller->regDefaults = NULL;
 	setup->controller->regDefaultsCount = 0;
 	stat = loadRegisterSettings(setup, dictConfig);
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	stat = setTemperatureMode(setup->controller, dictConfig);
-	if (stat)
+	if(stat < 0)
 		return stat;
 
 	str = iniparser_getstring(dictConfig, "display:default_waveform", NULL);
@@ -241,32 +241,32 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "hv_hardware:hv_config", NULL);
 	if (str == NULL) LOG("missing hv_config setting...");
 	stat = setup->initialize_hv_config(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	str = iniparser_getstring(dictConfig, "hv_hardware:hv_driver", NULL);
 	if (str == NULL) LOG("missing hv_driver setting...");
 	stat = setup->initialize_hv_driver(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	str = iniparser_getstring(dictConfig, "hv_hardware:vcom_switch", NULL);
 	if (str == NULL) LOG("missing vcom_switch setting...");
 	stat = setup->initialize_vcom_switch(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	str = iniparser_getstring(dictConfig, "hv_hardware:vcom_config", NULL);
 	if (str == NULL) LOG("missing vcom_config setting...");
 	stat = setup->initialize_vcom_config(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	str = iniparser_getstring(dictConfig, "hv_hardware:vcom_driver", NULL);
 	if (str == NULL) LOG("missing vcom_driver setting...");
 	stat = setup->initialize_vcom_driver(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	str = iniparser_getstring(dictConfig, "hv_hardware:hv_timing", NULL);
 	if (str == NULL) LOG("missing hv_timing setting...");
 	stat = setup->initialize_hv_timing(setup, str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	if (setup->hvTiming != NULL){
 		setup->hvTiming->toffset_vgl_on  = atoi(iniparser_getstring(dictConfig, "hv_hardware:TOFFSET_VGL_ON" , "0"));
@@ -291,7 +291,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "display:nvm", NULL);
 	if (str == NULL) LOG("missing display:nvm setting...");
 	stat |= setup->initialize_nvm(setup, str, format_str);
-	if (stat) return stat;
+	if(stat < 0) return stat;
 
 	// ------------------------------------
 	// initialize vcom

@@ -117,7 +117,7 @@ int show_ft_bitmap(struct pl_generic_controller* controller, struct pl_area* are
 #endif
 	//read_stopwatch(&start, "show bitmap", 1);
 	stat = controller->load_buffer(controller,(char*) image, area);
-	if(stat)
+	if (stat < 0)
 		return stat;
 	//read_stopwatch(&start, "load bitmap to EPDC buffer", 0);
 	return 0;

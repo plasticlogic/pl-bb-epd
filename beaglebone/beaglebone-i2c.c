@@ -84,15 +84,16 @@ int beaglebone_i2c_init(uint8_t channel, struct pl_i2c *i2c)
 static int beaglebone_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 			    const uint8_t *data, uint8_t count, uint8_t flags)
 {
+
+	errno = 0;
 	if (ioctl(i2c->priv, I2C_SLAVE, i2c_addr) < 0) {
 	        LOG("Failed to acquire bus access and/or talk to slave.\n");
 	        /* ERROR HANDLING; you can check errno to see what went wrong */
 	        return -errno;
 	}
-
 	int result = write(i2c->priv, data, count);
 	if (result != count){
-		return -errno;
+		return -ENODATA;
 	}
 	return 0;
 }
@@ -113,6 +114,7 @@ static int beaglebone_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 static int beaglebone_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr, uint8_t *data,
 			   uint8_t count, uint8_t flags)
 {
+	errno = 0;
 	if (ioctl(i2c->priv, I2C_SLAVE, i2c_addr) < 0) {
 	        LOG("Failed to acquire bus access and/or talk to slave.\n");
 	        /* ERROR HANDLING; you can check errno to see what went wrong */
@@ -121,7 +123,7 @@ static int beaglebone_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr, uint8_t *da
 
 	int result = read(i2c->priv, data, count);
 	if (result != count){
-		return -errno;
+		return -ENODATA;
 	}
 	return 0;
 
