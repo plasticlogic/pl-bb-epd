@@ -44,6 +44,8 @@ int rgbw_processing(uint32_t *src_width, uint32_t *src_height,
 		src_update_region->top = 0;
 #if VERBOSE
 		LOG("Redefining area...");
+		LOG("L: %i, T: %i, H: %i, W: %i", src_update_region->left, src_update_region->top, src_update_region->height, src_update_region->width);
+
 #endif
 	}
 

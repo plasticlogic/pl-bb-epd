@@ -28,11 +28,15 @@
 struct pl_gpio;
 
 pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* hw_ref, uint8_t serial){
-	//pl_generic_interface_t* interface = malloc(sizeof(pl_generic_interface_t));
+	pl_generic_interface_t* interface;
 	if(serial){
-		return (pl_generic_interface_t*) beaglebone_spi_new(spi_channel, hw_ref);
+		interface = (pl_generic_interface_t*) beaglebone_spi_new(spi_channel, hw_ref);
+		//interface->interface_type = SPI;
+		return interface;
 	}else{
-		return (pl_generic_interface_t*) beaglebone_parallel_new(hw_ref);
+		interface = (pl_generic_interface_t*) beaglebone_parallel_new(hw_ref);
+		//interface->interface_type = PARALLEL;
+		return interface;
 	}
 	return NULL;
 }

@@ -98,7 +98,7 @@ int get_waveform(void);
 int get_temperature(void);
 int get_resolution(void);
 int update_image(char *path, const char* wfID, enum pl_update_mode mode, int vcom_switch, int updateCount, int waitTime);
-int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode, int vcom_switch, int updateCount, int waitTime, struct pl_area* area);
+int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode, int vcom_switch, int updateCount, int waitTime, struct pl_area* area, int top, int left);
 int read_register(regSetting_t regSetting);
 int write_register(regSetting_t regSetting, const uint32_t bitmask);
 int send_cmd(regSetting_t regSetting);
@@ -464,22 +464,29 @@ int execute_update_image_regional(int argc, char **argv){
 	int vcom_switch_enable = 1;
 	int updateCount = 1;
 	int waitTime = 0;
+
+	int top;
+	int left;
 	struct pl_area* area = malloc(sizeof(struct pl_area));
 
-	if(argc >= 9) vcom_switch_enable = atol(argv[8]);
+	if(argc >= 10) vcom_switch_enable = atol(argv[9]);
 
-	if(argc >= 8) waitTime = atoi(argv[7]);
+	if(argc >= 9) waitTime = atoi(argv[8]);
 
-	if(argc >= 7) updateCount = atoi(argv[6]);
+	if(argc >= 8) updateCount = atoi(argv[7]);
 
-	if(argc >= 6) mode = atoi(argv[5]);
+	if(argc >= 7) mode = atoi(argv[6]);
 
-	if(argc >= 5) wfID = argv[4];
+	if(argc >= 6) wfID = argv[5];
+
+	if(argc >= 5){
+		parser_read_int(argv[4]+parser_read_int(argv[4], ",", &left), ",", &top);
+	}
 
 	if(argc >= 4){
 		parser_read_area(argv[3], ",", area);
 		stat = update_image_regional(argv[2], wfID, (enum pl_update_mode) mode,
-				vcom_switch_enable, updateCount, waitTime, area);
+				vcom_switch_enable, updateCount, waitTime, area, top, left);
 	}
 	else
 	{
@@ -922,7 +929,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	if (wfId < 0)
 		return -EINVAL;
 
-	stat = epdc->controller->load_image(epdc->controller, path, NULL);
+	stat = epdc->controller->load_image(epdc->controller, path, NULL, 0, 0);
 	if(stat < 0)
 		return stat;
 
@@ -962,7 +969,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
  * @return status
  */
 int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode,
-			int vcomSwitchEnable, int updateCount, int waitTime, struct pl_area *area) {
+			int vcomSwitchEnable, int updateCount, int waitTime, struct pl_area *area, int top, int left) {
 	int cnt = 0;
 	int stat;
 	LOG("path: %s", path);
@@ -973,12 +980,14 @@ int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode
 	LOG("updateCount: %d", updateCount);
 	LOG("waitTime: %d", waitTime);
 	LOG("vcomSwitch: %d", vcomSwitchEnable);
+	LOG("top: %d", top);
+	LOG("left: %d", left);
 	LOG("area: l: %i, t: %i, h: %i, w: %i", area->left, area->top, area->height, area->width);
 
 	if (wfId < 0)
 		return -EINVAL;
 
-	stat = epdc->controller->load_image(epdc->controller, path, area);
+	stat = epdc->controller->load_image(epdc->controller, path, area, top, left);
 		if(stat < 0)
 			return stat;
 
@@ -1303,12 +1312,12 @@ int show_image(const char *dir, const char *file, int wfid)
 		if(stat < 0)
 			return stat;
 		LOG("Show: %s", path);
-		stat = epdc->controller->load_image(epdc->controller, path, NULL);
+		stat = epdc->controller->load_image(epdc->controller, path, NULL, 0, 0);
 		if(stat < 0)
 			return stat;
 	}else{
 		LOG("Dir is NULL: %s", file);
-		stat = epdc->controller->load_image(epdc->controller, file, NULL);
+		stat = epdc->controller->load_image(epdc->controller, file, NULL, 0, 0);
 		if(stat < 0)
 			return stat;
 	}

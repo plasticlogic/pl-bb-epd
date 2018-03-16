@@ -61,7 +61,7 @@ static int write_register(pl_generic_controller_t *p, const regSetting_t setting
 static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting);
 
 static int load_buffer(pl_generic_controller_t *p, const char *buffer, const struct pl_area *area);
-static int load_png_image(pl_generic_controller_t *p, const char *path, const struct pl_area *area);
+static int load_png_image(pl_generic_controller_t *p, const char *path, const struct pl_area *area, int top, int left);
 static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm);
 static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t grey);
 static int load_wflib(pl_generic_controller_t *p,  const char *filename);
@@ -212,7 +212,7 @@ static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t 
 }
 
 static int load_png_image(pl_generic_controller_t *p, const char *path,
-			       const struct pl_area *area)
+			       const struct pl_area *area, int top, int left)
 {
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
@@ -223,7 +223,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13524_REG_FRAME_DATA_LENGTH);
 
-	return s1d135xx->load_png_image(s1d135xx, path, S1D13524_LD_IMG_4BPP, 4, (struct pl_area *) area);
+	return s1d135xx->load_png_image(s1d135xx, path, S1D13524_LD_IMG_4BPP, 4, (struct pl_area *) area, top, left);
 }
 static int load_buffer(pl_generic_controller_t *p, const char *buffer, const struct pl_area *area)
 {

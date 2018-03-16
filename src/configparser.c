@@ -186,10 +186,10 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	setup->controller->display_scrambling = (str == NULL) ? 0 : atoi(str);
 
 	str = iniparser_getstring(dictConfig, "general:DISPLAY_SCRAMBLE_XOFFSET", NULL);
-	setup->controller->xoffset = (str == NULL) ? -1 : atoi(str);
+	setup->controller->xoffset = (str == NULL) ? 0 : atoi(str);
 
 	str = iniparser_getstring(dictConfig, "general:DISPLAY_SCRAMBLE_YOFFSET", NULL);
-	setup->controller->yoffset = (str == NULL) ? -1 : atoi(str);
+	setup->controller->yoffset = (str == NULL) ? 0 : atoi(str);
 
 	str = iniparser_getstring(dictConfig, "general:CFA", NULL);
 	if(str==NULL){

@@ -62,7 +62,6 @@ pl_spi_t *beaglebone_spi_new(uint8_t spi_channel, struct pl_gpio * hw_ref){
 	p->write_bytes = spi_write_bytes;
 	p->set_cs = spi_set_cs;
 	p->delete = delete;
-
 	return p;
 }
 

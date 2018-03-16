@@ -27,11 +27,13 @@
 #define PARALLEL_H_
 
 #include <errno.h>
+
 typedef struct pl_parallel
 {
   void *hw_ref;		// hardware reference
   int fd;           // open file descriptor: /dev/spi-X.Y
   int cs_gpio; 		// chip select gpio
+ // int interface_type;
 
   int (*open)(struct pl_parallel * p);
   int (*close)(struct pl_parallel * p);

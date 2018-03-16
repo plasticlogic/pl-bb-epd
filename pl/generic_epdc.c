@@ -116,7 +116,7 @@ int do_load_nvm_content(struct pl_generic_epdc *p){
 	p->nvm->read_wfdata(p->nvm, &buffer, &bufferSize);
 	if (bufferSize <= 0){
 		LOG("Cannot read NVM content!");
-		return -ECOMM;
+		return -ENODATA;
 	}
 	if (p->nvm->nvm_format == NVM_FORMAT_S040){
 

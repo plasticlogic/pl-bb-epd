@@ -96,7 +96,7 @@ static int s1d135xx_configure_update(struct s1d135xx *p, int wfid, enum pl_updat
 static int s1d135xx_execute_update(struct s1d135xx *p);
 static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t mode,unsigned bpp, const struct pl_area *area);
 static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_t mode,
-		unsigned bpp, struct pl_area *area);
+		unsigned bpp, struct pl_area *area, int top, int left);
 static int s1d135xx_pattern_check(struct s1d135xx *p, uint16_t height, uint16_t width, uint16_t checker_size, uint16_t mode);
 static int s1d135xx_fill(struct s1d135xx *p, uint16_t mode, unsigned bpp,
 		  const struct pl_area *a, uint8_t grey);
@@ -115,7 +115,9 @@ static int s1d13524_init_clocks(struct s1d135xx *p);
 
 // private functions
 //static void memory_padding(uint8_t *source, uint8_t *target, int s_gl, int s_sl, int t_gl, int t_sl);
-static void memory_padding(uint8_t *source, uint8_t *target, int s_gl, int s_sl, int t_gl, int t_sl, int o_gl, int o_sl);
+static void memory_padding(uint8_t *source, uint8_t *target, int source_gatelines, int source_sourcelines, int target_gatelines, int target_sourcelines, int gate_offset, int source_offset);
+static void memory_padding_area(uint8_t *source, uint8_t *target,  int source_gatelines,
+		int source_sourcelines, int gate_offset, int source_offset, struct pl_area* source_area, int top, int left);
 static int check_prod_code(struct s1d135xx *p, uint16_t ref_code);
 static int get_hrdy(struct s1d135xx *p);
 static int wflib_wr(void *ctx, const uint8_t *data, size_t n);
@@ -280,6 +282,12 @@ static int s1d135xx_soft_reset(struct s1d135xx *p)
 static int s1d135xx_wait_idle(struct s1d135xx *p)
 {
 	unsigned long timeout = 50000; // ca. 20s
+	/*
+	if(p->interface->interface_type == PARALLEL){
+		//LOG("PARALLEL");
+		timeout = 2;
+	}
+	//*/
 	while (!get_hrdy(p)){
 		--timeout;
 		if (timeout == 0){
@@ -557,7 +565,7 @@ static int s1d135xx_load_init_code(struct s1d135xx *p, const char *init_code_pat
 
 	if(stat < 0) {
 		LOG("Failed to transfer init code file");
-		return -ECOMM;
+		return -ENODATA;
 	}
 
 	if (p->wait_for_idle(p))
@@ -733,14 +741,13 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 }
 
 static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_t mode,
-		unsigned bpp, struct pl_area *area)
+		unsigned bpp, struct pl_area *area, int top, int left)
 {
 	assert(p != NULL);
 
-	int height = 0;
-	int width = 0;
+	int v_yres, height = 0;
+	int v_xres, width = 0;
 
-	int stat = 0;
 	int memorySize = p->yres*p->xres;
 	uint8_t *scrambledPNG;
 	if(p->cfa_overlay.r_position == -1){
@@ -749,22 +756,39 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		// read png image
 		if (read_png(path, &pngBuffer, &width, &height))
 			return -ENOENT;
-		//if the image does not fit the screen, rotate
+		//if the image does fit the screen rotated, rotate
 		if(!p->display_scrambling){
 			if(height == p->xres && width == p->yres){
-				//LOG("BW %ix%i -> %ix%i", height, width, p->yres, p->xres);
 				rotate_8bit_image(&height, &width, pngBuffer);
 			}
+			v_xres = p->xres - (2* p->xoffset);
+			v_yres = p->yres - p->yoffset;
 		}else{
 			if(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK){
-				if(height == (p->xres * 2) && width == (p->yres / 2)){
+				v_xres = p->xres * 2;
+				v_yres = p->yres / 2;
+				if(area){
+					area->left /= 2;
+					area->top *= 2;
+					area->width /= 2;
+					area->height *= 2;
+				}
+				if(height == (v_xres) && width == (v_yres) && (height != width)){
 					rotate_8bit_image(&height, &width, pngBuffer);
-					//LOG("BWS %ix%i -> %ix%i", height, width, p->yres, p->xres);
+					LOG("BWS %ix%i -> %ix%i", height, width, p->yres, p->xres);
 				}
 			}else if(p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK){
-				if(height == (p->xres / 2) && width == (p->yres * 2)){
+				v_xres = p->xres / 2;
+				v_yres = p->yres * 2;
+				if(area){
+					area->left *= 2;
+					area->top /= 2;
+					area->width *= 2;
+					area->height /= 2;
+				}
+				if(height == (v_xres) && width == (v_yres) && (height != width)){
 					rotate_8bit_image(&height, &width, pngBuffer);
-					//LOG("BWS2 %ix%i -> %ix%i", height, width, p->yres, p->xres);
+					LOG("BWS2 %ix%i -> %ix%i", height, width, p->yres, p->xres);
 				}
 			}
 		}
@@ -781,18 +805,45 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		if (read_rgbw_png(path, &pngBuffer, &width, &height))
 			return -ENOENT;
 
+		// apply cfa filter to resolution
+		v_xres = (p->xres - (2*p->xoffset)) / 2;
+		v_yres = (p->yres - p->yoffset) / 2;
+
 		if(!p->display_scrambling){
-			if(height == p->xres/2 && width == p->yres/2){
+//*
+			if(area){
+				area->left *= 2;
+				area->top *= 2;
+				area->width *= 2;
+				area->height *= 2;
+			}
+//*/
+			if(height == v_xres && width == v_yres && (height != width)){
 				rotate_rgbw_image(&height, &width, pngBuffer);
 				LOG("CFA %ix%i -> %ix%i", height, width, p->yres, p->xres);
 			}
 		}else{
 			if(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK){
-				if(height == (p->xres * 2) && width == (p->yres / 2)){
+				v_xres = v_xres * 2;
+				v_yres = v_yres / 2;
+				if(area){
+					area->top *= 4;
+					area->height *= 4;
+				}
+				if(height == (v_xres) && width == (v_yres) && (height != width)){
 					rotate_rgbw_image(&height, &width, pngBuffer);
 				}
 			}else if(p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK){
-				if(height == (p->xres / 2) && width == (p->yres * 2)){
+				v_xres = v_xres / 2;
+				v_yres = v_yres * 2;
+				if(area){
+					area->left *= 4;
+					//area->top /= 2;
+					area->width *= 4;
+					//area->height /= 2;
+
+				}
+				if(height == (v_xres) && width == (v_yres) && (height != width)){
 					rotate_rgbw_image(&height, &width, pngBuffer);
 				}
 			}
@@ -802,7 +853,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 		// scramble image
 		scrambledPNG = malloc(4*max(height, p->yres)*max(width, p->xres));
 		uint8_t *colorBuffer = malloc(4*max(height, p->yres)*max(width, p->xres));
-		rgbw_processing((uint32_t*) &width, (uint32_t*) &height, pngBuffer, colorBuffer, (struct pl_area*) area, p->cfa_overlay);
+		rgbw_processing((uint32_t*) &width, (uint32_t*) &height, pngBuffer, colorBuffer, (struct pl_area*) (area)?NULL:area, p->cfa_overlay);
 		scramble_array(colorBuffer, scrambledPNG, &height, &width,  p->display_scrambling);
 		free(colorBuffer);
 		if(pngBuffer)
@@ -810,27 +861,53 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	}
 //*
 	if(area == NULL){
-		if(height > p->yres || width > p->xres){
+		if(height > v_yres || width > v_xres){
 			area = malloc(sizeof(struct pl_area));
-			area->height = min(height, p->yres);
-			area->width = min(width, p->xres);
-			area->left = ((int) (p->xres - width)<0)?0:p->xres - width;
-			area->top = ((int) (p->yres - height)<0)?0:p->yres - height;
+			area->height = min(height, v_yres);
+			area->width = min(width, v_xres);
+			area->left = ((int) (v_xres - width)<0)?0:v_xres - width;
+			area->top = ((int) (v_yres - height)<0)?0:v_yres - height;
+			//*
+			if(p->cfa_overlay.r_position != -1){
+				area->left *= 2;
+				area->top *= 2;
+				area->width *= 2;
+				area->height *= 2;
+			}
+
 		}
+
 	}else{
 		if(area->height+area->top > p->yres || area->width+area->left > p->xres){
-			area->height = min(height, p->yres);
-			area->width = min(width, p->xres);
-			//area->left = ((int) (p->xres - width)<0)?0:p->xres - width;
-			//area->top = ((int) (p->yres - height)<0)?0:p->yres - height;
+			//crop image if bigger than screen
+			area->height = min(area->height+area->top, p->yres) - area->top;
+			area->width = min(area->width+area->left, p->xres) - area->left;
 		}
 	}
 //*/
 	// adapt image to memory
 
 	uint8_t *memoryBuffer = malloc(max(height, p->yres)*max(width, p->xres));
-	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres,	p->yoffset,	p->xoffset);
-	//memory_padding(scrambledPNG, memoryBuffer, min(height, p->yres), min(width, p->xres),min(height, p->yres), min(width, p->xres),  p->yoffset, p->xoffset);
+	if(area==NULL){
+		memory_padding(scrambledPNG, memoryBuffer,
+				height,
+				width,
+				p->yres,
+				p->xres,
+				p->yoffset,
+				p->xoffset
+	);
+	}else{
+		memory_padding_area(scrambledPNG, memoryBuffer,
+				height,
+				width,
+				p->yoffset,
+				p->xoffset,
+				area,
+				top, left
+		);
+		memorySize = (area->height+p->yoffset)*(area->width+p->xoffset);
+	}
 
 	// memory optimisation - if 4 bit per pixel mode is used
 	if (bpp == 4){
@@ -840,10 +917,23 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 			memoryBuffer[bitIdx] = (memoryBuffer[bitIdx*2+1] & 0xF0) | (memoryBuffer[bitIdx*2] >> 4);
 		}
 	}
-
 	set_cs(p, 0);
 
 	if (area != NULL) {
+		if(top || left){
+			// for scrambling or cfa overlay shift by 2 always
+			if((p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK) ||
+					(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK) ||
+					!(p->cfa_overlay.r_position == -1)){
+				top = (top/2)*2;
+				left = (left/2)*2;
+			}
+
+			area->top = top;
+			area->left = left;
+		}
+		area->top += p->yoffset;
+		area->left += p->xoffset;
 		send_cmd_area(p, S1D135XX_CMD_LD_IMG_AREA, mode, area);
 	} else {
 		send_cmd(p, S1D135XX_CMD_LD_IMG);
@@ -869,9 +959,6 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	if(scrambledPNG)
 		free(scrambledPNG);
 
-
-	if(stat < 0)
-		return -EEPDC;
 //*
 	if (p->wait_for_idle(p))
 		return -ETIME;
@@ -905,33 +992,57 @@ static void memory_padding(uint8_t *source, uint8_t *target,  int s_gl, int s_sl
  * If no offset is defined (o_gl=-1, o_sl=-1) the source content will be placed in the right lower corner,
  * while the left upper space is containing the offset lines.
  */
-static void memory_padding(uint8_t *source, uint8_t *target,  int s_gl, int s_sl, int t_gl, int t_sl, int o_gl, int o_sl)
+static void memory_padding(uint8_t *source, uint8_t *target,  int source_gatelines,
+		int source_sourcelines, int target_gatelines, int target_sourcelines,
+		int gate_offset, int source_offset)
 {
-	int sl, gl;
-	int _gl_offset = 0;
-	int _sl_offset = 0;
+	int sourceline, gateline;
+	int _gateline_offset = 0;
+	int _sourceline_offset = 0;
 
-	if(o_gl > 0)
-		_gl_offset = o_gl;
+	if(gate_offset > 0)
+		_gateline_offset = gate_offset;
 	else
-		_gl_offset = t_gl - s_gl;
+		_gateline_offset = target_gatelines - source_gatelines;
 
-	if(o_sl > 0)
-		_sl_offset = o_sl;
+	if(source_offset > 0)
+		_sourceline_offset = source_offset;
 	else
-		_sl_offset = t_sl - s_sl;
+		_sourceline_offset = target_sourcelines - source_sourcelines;
 
-	for (gl=0; gl<s_gl; gl++)
-		for(sl=0; sl<s_sl; sl++)
+	for (gateline=0; gateline<source_gatelines; gateline++)
+		for(sourceline=0; sourceline<source_sourcelines; sourceline++)
 		{
-			int s_idx = gl*s_sl+sl;
-			int t_idx = (gl+_gl_offset)*t_sl+(sl+_sl_offset);
-			if(!(s_idx < 0 || t_idx < 0 )){
-				target [t_idx] = source [s_idx];
-				source [s_idx] = 0x00;
+			int source_index = gateline*source_sourcelines+sourceline;
+			int target_index = (gateline+_gateline_offset)*target_sourcelines+(sourceline+_sourceline_offset);
+			if(!(source_index < 0 || target_index < 0 )){
+				target [target_index] = source [source_index];
+				source [source_index] = 0x00;
 			}
 		}
 }
+
+
+static void memory_padding_area(uint8_t *source, uint8_t *target,  int source_gatelines,
+		int source_sourcelines, int gate_offset, int source_offset, struct pl_area* source_area, int top, int left)
+{
+	int sourceline, gateline;
+#if VERBOSE
+	LOG("%s: source_gatelines %i, source_sourcelines %i, gate_offset %i, source_offset %i, source_area %p, top %i, left %i", __func__, source_gatelines, source_sourcelines, gate_offset, source_offset, source_area, top, left);
+	LOG("%s: AREA: L: %i, T: %i, H: %i, W: %i", __func__, source_area->left, source_area->top, source_area->height, source_area->width);
+#endif
+	for(gateline = source_area->top; gateline < source_area->top+source_area->height;gateline++){
+		for(sourceline = source_area->left; sourceline < source_area->left + source_area->width; sourceline++){
+			int source_index = (gateline/*+source_area->top*/)*(source_sourcelines/*+source_area->left*/)+sourceline;
+			int target_index = (gateline-source_area->top)*source_area->width+(sourceline-source_area->left);
+			if(!(source_index < 0 || target_index < 0 )){
+				target [target_index] = source [source_index];
+				source [source_index] = 0x80;
+			}
+		}
+	}
+}
+
 #endif
 
 
