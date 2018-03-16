@@ -1449,10 +1449,11 @@ void printHelp_update_image(int identLevel){
 void printHelp_update_image_regional(int identLevel){
 	printf("%*s Updates the display with a given image.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -update_image <image>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -update_image <image> <area> <position>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<image>               : \tpath to the image file.\n", identLevel, " ");
 	printf("%*s \t<area>                : \tarea to be used (top,left,height,width).\n", identLevel, " ");
+	printf("%*s \t<position>            : \tposition, where the area is printed to (top,left).\n", identLevel, " ");
 	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
 	printf("%*s \t<updateMode>          : \tid of the used update mode.\n", identLevel, " ");
 	printf("%*s \t<updateCount>         : \tcount of image updates to execute.\n", identLevel, " ");
