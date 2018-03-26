@@ -351,7 +351,6 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * he
 
 int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width, int * height)
 {
-  int ERROR = -1;
 
   LOG("filename %s", file_name);
 
@@ -457,23 +456,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
     	image_buffer[h*(*width)+w].r = (uint8_t) *(row_pointers[h]+0+color_offset*w);
     	image_buffer[h*(*width)+w].g = (uint8_t) *(row_pointers[h]+1+color_offset*w);
     	image_buffer[h*(*width)+w].b = (uint8_t) *(row_pointers[h]+2+color_offset*w);
-    	if(color_type & 4){
-    		image_buffer[h*(*width)+w].w = (uint8_t) *(row_pointers[h]+3+color_offset*w);
-
-    	}else{
-			image_buffer[h*(*width)+w].w = (uint8_t) (((image_buffer[h*(*width)+w].r * 299) + (image_buffer[h*(*width)+w].g * 587) + (image_buffer[h*(*width)+w].b * 114)) / 1000);
-		}
-    	/*
-    	if(w==0 || w==1){
-    		LOG("W: %i, 0x%02X%02X%02X%02X", h, image_buffer[h*(*width)+w].r,image_buffer[h*(*width)+w].g,image_buffer[h*(*width)+w].b,image_buffer[h*(*width)+w].w);
-    	}
-    	//*/
-    	/*
-		if(w==0 && h==0){
-			LOG("W: %i, 0x%02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X", h, *(row_pointers[h]+0),*(row_pointers[h]+1),*(row_pointers[h]+2),*(row_pointers[h]+3),*(row_pointers[h]+4),*(row_pointers[h]+5),*(row_pointers[h]+6),*(row_pointers[h]+7), *(row_pointers[h]+8),*(row_pointers[h]+9),*(row_pointers[h]+10),*(row_pointers[h]+11),*(row_pointers[h]+12),*(row_pointers[h]+13),*(row_pointers[h]+14),*(row_pointers[h]+15));
-			LOG("W: %i, 0x%02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X %02X%02X%02X%02X", h, *(row_pointers[h]+16),*(row_pointers[h]+17),*(row_pointers[h]+18),*(row_pointers[h]+19),*(row_pointers[h]+20),*(row_pointers[h]+21),*(row_pointers[h]+22),*(row_pointers[h]+23), *(row_pointers[h]+24),*(row_pointers[h]+25),*(row_pointers[h]+26),*(row_pointers[h]+27),*(row_pointers[h]+28),*(row_pointers[h]+29),*(row_pointers[h]+30),*(row_pointers[h]+31));
-		}
-		//*/
+		image_buffer[h*(*width)+w].w = (uint8_t) (((image_buffer[h*(*width)+w].r * 299) + (image_buffer[h*(*width)+w].g * 587) + (image_buffer[h*(*width)+w].b * 114)) / 1000);
 
     }
 
