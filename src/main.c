@@ -110,7 +110,7 @@ void print_application_help(int print_all);
 int info();
 int show_image(const char *dir, const char *file, int wfid);
 int counter(const char* wf);
-int fill(uint8_t gl, uint8_t wfid, int update_mode);
+int fill(uint8_t gl, uint8_t wfid, int update_mode, struct pl_area* a);
 //remove int interface_data(	char* interface,int number_of_values,char values);
 int slideshow(const char *path, const char* wf, int count);
 
@@ -574,6 +574,7 @@ int execute_send_cmd(int argc, char **argv){
 
 int execute_fill(int argc, char **argv){
 	uint8_t gl = 0xFF;
+	struct pl_area area;
 	int update_mode = PL_FULL_UPDATE;
 	int wfid = 2;
 	if (argc > 2){
@@ -585,22 +586,26 @@ int execute_fill(int argc, char **argv){
 		}else{
 			gl = atoi(argv[2]);
 		}
-
 		if(argc > 3){
-			wfid = atoi(argv[3]);
+			parser_read_area(argv[3], "," ,&area);
 
 			if(argc > 4){
-				if(!strcmp(argv[4], "partial")){
-					update_mode = PL_PART_UPDATE;
-				}else if(!strcmp(argv[4], "full")){
-					update_mode = PL_FULL_UPDATE;
-				}else{
-					return -22;
+				wfid = atoi(argv[4]);
+
+				if(argc > 5){
+					if(!strcmp(argv[5], "partial")){
+						update_mode = PL_PART_UPDATE;
+					}else if(!strcmp(argv[5], "full")){
+						update_mode = PL_FULL_UPDATE;
+					}else{
+						return -22;
+					}
 				}
 			}
 		}
 	}
-	return fill(gl, wfid, update_mode);
+	LOG("*");
+	return fill(gl, wfid, update_mode, &area);
 }
 
 int execute_write_reg(int argc, char **argv){
@@ -1040,20 +1045,45 @@ int read_register(regSetting_t regSetting){
 	return 0;
 }
 
-int fill(uint8_t gl, uint8_t wfid, int update_mode){
+int fill(uint8_t gl, uint8_t wfid, int update_mode, struct pl_area* a){
 
 	int x,y, stat;
-	struct pl_area a = {0, 0, x, y};
+	if(a){
+		if(a->height < 0 || a->width < 0 || a->left < 0 || a->top < 0){
+			a = NULL;
+			goto NO_AREA;
+		}
 
-	stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
+		LOG("FILL: %i, area: %i, %i, %i, %i", gl, a->width, a->height, a->top, a->left);
+		stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
+		if (stat < 0)
+			return stat;
+
+		if((a->left + a->width) > x){
+			if(a->width > x){
+				a->left = 0;
+				a->width = x;
+			}else{
+				a->left = x-a->width;
+			}
+		}
+
+		if(a->top + a->height > y){
+			if(a->height > y){
+				a->top = 0;
+				a->height = y;
+			}else{
+				a->top = y-a->height;
+			}
+		}
+
+
+	}
+NO_AREA:
+	stat = epdc->controller->fill(epdc->controller, a, gl);
 	if (stat < 0)
 		return stat;
-	LOG("FILL: %i, area: %i, %i, %i, %i", gl, a.width, a.height, a.top, a.left);
-
-	stat = epdc->controller->fill(epdc->controller, &a, gl);
-	if (stat < 0)
-		return stat;
-	stat = epdc->update(epdc, wfid, update_mode, &a);
+	stat = epdc->update(epdc, wfid, update_mode, a);
 	return stat;
 }
 
@@ -1435,7 +1465,7 @@ void printHelp_get_temperature(int identLevel){
 void printHelp_update_image(int identLevel){
 	printf("%*s Updates the display with a given image.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -update_image_regional <image>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -update_image <image>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<image>               : \tpath to the image file.\n", identLevel, " ");
 	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
@@ -1449,7 +1479,7 @@ void printHelp_update_image(int identLevel){
 void printHelp_update_image_regional(int identLevel){
 	printf("%*s Updates the display with a given image.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -update_image <image> <area> <position>\n", identLevel, " ");
+	printf("%*s Usage: epdc-app -update_image_regional <image> <area> <position>\n", identLevel, " ");
 	printf("\n");
 	printf("%*s \t<image>               : \tpath to the image file.\n", identLevel, " ");
 	printf("%*s \t<area>                : \tarea to be used (top,left,height,width).\n", identLevel, " ");

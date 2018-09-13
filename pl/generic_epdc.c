@@ -527,9 +527,9 @@ static int generic_update(struct pl_generic_epdc *p, int wfID, enum pl_update_mo
 	LOG("%s: stat: %i", __func__, stat);
 #endif
 	//read_stopwatch(&t,"configure_update",1);
-	if(!nowait){
+	//if(!nowait){
 		stat |= switch_hvs_on(hv);
-	}
+	//}
 	//read_stopwatch(&t,"switch_hvs_on",1);
 	stat |= controller->trigger_update(controller);
 #if VERBOSE
