@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <stddef.h>
 #include <string.h>
+#include "types.h"
 #include "assert.h"
 #include "pl/vcom.h"
 #include "pmic-max17135.h"
@@ -318,7 +319,7 @@ static int max17135_wait_pok(pl_pmic_t *pmic)
 /* use the i2c interface to power up the PMIC */
 static int max17135_hv_enable(pl_pmic_t *pmic)
 {
-	uint dac_value = 0x01;
+	uint8_t dac_value = 0x01;
 	uint8_t mask = 0x01;
 	assert(pmic);
 
@@ -332,7 +333,7 @@ static int max17135_hv_enable(pl_pmic_t *pmic)
 /* use the i2c interface to power down the PMIC */
 static int max17135_hv_disable(pl_pmic_t *pmic)
 {
-	uint dac_value = 0x00;
+	uint8_t dac_value = 0x00;
 	uint8_t mask = 0x01;
 	assert(pmic);
 
@@ -345,7 +346,7 @@ static int max17135_hv_disable(pl_pmic_t *pmic)
 
 static int max17135_vcom_enable(pl_pmic_t *pmic)
 {
-	uint dac_value = 0x02;
+	uint8_t dac_value = 0x02;
 	uint8_t mask = 0x02;
 	assert(pmic);
 
@@ -359,7 +360,7 @@ static int max17135_vcom_enable(pl_pmic_t *pmic)
 /* use the i2c interface to power down the PMIC */
 static int max17135_vcom_disable(pl_pmic_t *pmic)
 {
-	uint dac_value = 0x00;
+	uint8_t dac_value = 0x00;
 	uint8_t mask = 0x02;
 	assert(pmic);
 

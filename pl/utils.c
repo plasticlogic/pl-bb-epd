@@ -631,7 +631,7 @@ int maxstr2memcpy(char* to, char* from, size_t maxMemSize)
 }
 
 void start_stopwatch(struct timespec* starttime){
-#if 1
+#if 0
 	struct timespec clock_resolution;
 	clock_getres(CLOCK_REALTIME, &clock_resolution);
 	//printf("Resolution  von CLOCK_REALTIME ist %ld Sekunden, %ld Nanosekunden\n",
@@ -643,7 +643,7 @@ void start_stopwatch(struct timespec* starttime){
 unsigned long long read_stopwatch(struct timespec* starttime, char* label, int reset){
 	struct timespec readtime;
 	unsigned long long elapsedTime = 0;
-#if 1
+#if 0
 
 	clock_gettime(CLOCK_REALTIME, &readtime);
 	elapsedTime = ((readtime.tv_sec * 1000000000L) + readtime.tv_nsec)

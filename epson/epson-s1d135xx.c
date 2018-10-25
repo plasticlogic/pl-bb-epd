@@ -772,11 +772,17 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 					area->top *= 2;
 					area->width /= 2;
 					area->height *= 2;
+#if VERBOSE
+					LOG("S:%i, L:%i, T:%i, H:%i, W:%i", p->display_scrambling, area->left, area->top, area->height, area->width);
+#endif
 				}
 				if(height == (v_xres) && width == (v_yres) && (height != width)){
 					rotate_8bit_image(&height, &width, pngBuffer);
-					LOG("BWS %ix%i -> %ix%i", height, width, p->yres, p->xres);
+
 				}
+#if VERBOSE
+				LOG("BWS %ix%i -> %ix%i (%i,%i)", height, width, p->yres, p->xres, v_yres, v_xres);
+#endif
 			}else if(p->display_scrambling & SCRAMBLING_SOURCE_SCRAMBLE_MASK){
 				v_xres = p->xres / 2;
 				v_yres = p->yres * 2;
@@ -785,11 +791,17 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 					area->top /= 2;
 					area->width *= 2;
 					area->height /= 2;
+#if VERBOSE
+					LOG("S:%i, L:%i, T:%i, H:%i, W:%i", p->display_scrambling, area->left, area->top, area->height, area->width);
+#endif
 				}
 				if(height == (v_xres) && width == (v_yres) && (height != width)){
 					rotate_8bit_image(&height, &width, pngBuffer);
-					LOG("BWS2 %ix%i -> %ix%i", height, width, p->yres, p->xres);
+
 				}
+#if VERBOSE
+				LOG("BWS2 %ix%i -> %ix%i", height, width, p->yres, p->xres);
+#endif
 			}
 		}
 
@@ -820,7 +832,9 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 //*/
 			if(height == v_xres && width == v_yres && (height != width)){
 				rotate_rgbw_image(&height, &width, pngBuffer);
+#if VERBOSE
 				LOG("CFA %ix%i -> %ix%i", height, width, p->yres, p->xres);
+#endif
 			}
 		}else{
 			if(p->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK){
@@ -861,12 +875,18 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path, uint16_
 	}
 //*
 	if(area == NULL){
-		if(height > v_yres || width > v_xres){
+#if VERBOSE
+		LOG("VX:%i, VY:%i, H:%i, W:%i", v_xres, v_yres, height, width);
+#endif
+		if((height > v_yres || width > v_xres) && !p->display_scrambling ){
 			area = malloc(sizeof(struct pl_area));
 			area->height = min(height, v_yres);
 			area->width = min(width, v_xres);
 			area->left = ((int) (v_xres - width)<0)?0:v_xres - width;
 			area->top = ((int) (v_yres - height)<0)?0:v_yres - height;
+
+
+
 			//*
 			if(p->cfa_overlay.r_position != -1){
 				area->left *= 2;
