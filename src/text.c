@@ -36,34 +36,19 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-
-//#define WIDTH   1280
-//#define HEIGHT  960
-
-
 #define LOG_TAG "text"
 #include "utils.h"
 #include "pl/types.h"
 
-/* origin is the upper left corner */
-//unsigned char image[HEIGHT][WIDTH];
+
 unsigned char* image;
 
-//*
-
-
-
 void
-draw_bitmap(FT_Bitmap* bitmap,
-		FT_Int x,
-		FT_Int y, struct pl_area* area, int invert) {
+draw_bitmap(FT_Bitmap* bitmap, FT_Int x, FT_Int y, struct pl_area* area, int invert) {
 	FT_Int i, j, p, q;
 	FT_Int x_max = x + bitmap->width;
 	FT_Int y_max = y + bitmap->rows;
 	char a,b;
-	if(x_max > area->width || y_max > area->height){
-		LOG("Text doesn't fit area: have: %ix%i and need %ix%i", area->width, area->height, x_max, y_max);
-	}
 	if(invert){
 		a = 0xFF;
 		b = 0x00;
@@ -81,52 +66,86 @@ draw_bitmap(FT_Bitmap* bitmap,
 }
 
 int show_ft_bitmap(struct pl_generic_controller* controller, struct pl_area* area, uint8_t invert) {
-
-	int stat = 0;
-	//struct timespec start;
-	//start_stopwatch(&start);
-#if 0
-	int i, j;
-	for (i = 0; i < area->width; i++) {
-		for (j = 0; j < area->height; j++) {
-			/*
-			if(invert){
-				if(image[j*area->width + i]){
-					image[j*area->width + i] = 0x00;
-				}else{
-					image[j*area->width + i] = 0xFF;
-				}
-			}else{
-				if(image[j*area->width + i]){
-					image[j*area->width + i] = 0xFF;
-				}else{
-					image[j*area->width + i] = 0x00;
-				}
-			}
-			//*/
-			//*
-			if(invert){
-				int temp = image[j*area->width + i];
-				//image[j*area->width + i] = 0xFF - temp + r;
-				image[j*area->width + i] = 0xFF - temp;
-
-			}
-			//*/
-		}
-	}
-#endif
-	//read_stopwatch(&start, "show bitmap", 1);
-	stat = controller->load_buffer(controller,(char*) image, area);
-	if (stat < 0)
-		return stat;
-	//read_stopwatch(&start, "load bitmap to EPDC buffer", 0);
-	return 0;
+	return controller->load_buffer(controller,(char*) image, area);
 }
 
+int get_text_area(struct pl_area* area,  const char* text, const char* font,  float text_angle,  int font_size){
+		FT_Library library;
+		FT_Face face;
+
+		FT_GlyphSlot slot;
+		FT_Matrix matrix; /// transformation matrix
+		FT_Vector pen; /// untransformed origin
+		FT_Error error;
+
+		double angle;
+		int target_height;
+		int n, num_chars;
+
+		num_chars = strlen(text);
+		angle = (text_angle / 360) * 3.14159 * 2;
+		target_height = font_size;
+
+		error = FT_Init_FreeType(&library); // initialize library
+		if(error) return error;
+
+		error = FT_New_Face(library, font, 0, &face); // create face object
+		if(error) return error;
+
+		error = FT_Set_Pixel_Sizes(face, 0, font_size); // set character size
+		if(error) return error;
+
+		slot = face->glyph;
+
+		// set up matrix
+		matrix.xx = (FT_Fixed) (cos(angle) * 0x10000L);
+		matrix.xy = (FT_Fixed) (-sin(angle) * 0x10000L);
+		matrix.yx = (FT_Fixed) (sin(angle) * 0x10000L);
+		matrix.yy = (FT_Fixed) (cos(angle) * 0x10000L);
+
+		pen.x = 0;
+		pen.y = target_height * 5 / 4;
+
+		for (n = 0; n <= num_chars; n++) {
+
+			// set transformation
+			FT_Set_Transform(face, &matrix, &pen);
+
+			// load glyph image into the slot (erase previous one)
+			error = FT_Load_Char(face, text[n], FT_LOAD_RENDER);
+			if(!error){
+				FT_Bitmap* bitmap = &slot->bitmap;
+				FT_Int x = slot->bitmap_left;
+				FT_Int y = target_height - slot->bitmap_top;
+				FT_Int x_max = x + bitmap->width;
+				FT_Int y_max = y + bitmap->rows;
+
+				// convert position
+				if(x_max > area->width){
+					//LOG("x:Text doesn't fit area: have: %ix%i and need %ix%i", area->width, area->height, x_max, y_max);
+					area->width = x_max;
+				}
+				if(y_max > area->height){
+					//LOG("y:Text doesn't fit area: have: %ix%i and need %ix%i", area->width, area->height, x_max, y_max);
+					area->height = y_max;
+				}
+			}
+			// increment pen position
+			pen.x += slot->advance.x;
+			pen.y += slot->advance.y;
+
+		}
+
+		if(error) return error;
+		FT_Done_Face(face);
+		FT_Done_FreeType(library);
+		return 0;
+
+}
 
 int show_text(struct pl_generic_controller* controller, struct pl_area* area, const char* text,
 		const char* font, float text_angle, int font_size, int x, int y, uint8_t invert) {
-	int i;
+	int i,h,w;
 	FT_Library library;
 	FT_Face face;
 
@@ -138,23 +157,19 @@ int show_text(struct pl_generic_controller* controller, struct pl_area* area, co
 	double angle;
 	int target_height;
 	int n, num_chars;
-	//struct timespec start;
-	//start_stopwatch(&start);
-	image = (unsigned char*) malloc(area->height*area->width);
-	for(i=0; i<(area->height * area->width); i++) image[i] = invert?0xFF:0x00;
+	controller->get_resolution(controller, &w, &h);
+	image = (unsigned char*) malloc(w*h);
+	for(i=0; i<(h * w); i++) image[i] = invert?0xFF:0x00;
 	num_chars = strlen(text);
-	angle = (text_angle / 360) * 3.14159 * 2; // use 25 degrees
-	target_height = area->height;//HEIGHT;
-
+	angle = (text_angle / 360) * 3.14159 * 2;
+	target_height = font_size;
 	error = FT_Init_FreeType(&library); // initialize library
 	if(error) return error;
 
 	error = FT_New_Face(library, font, 0, &face); // create face object
 	if(error) return error;
 
-	// use 50pt at 100dpi
-	error = FT_Set_Char_Size(face, font_size * 64, font_size * 100,
-			100, 0); // set character size
+	error = FT_Set_Pixel_Sizes(face, 0, font_size); // set character size
 	if(error) return error;
 
 	slot = face->glyph;
@@ -165,10 +180,8 @@ int show_text(struct pl_generic_controller* controller, struct pl_area* area, co
 	matrix.yx = (FT_Fixed) (sin(angle) * 0x10000L);
 	matrix.yy = (FT_Fixed) (cos(angle) * 0x10000L);
 
-	// the pen position in 26.6 cartesian space coordinates;
-	// start at (300,200) relative to the upper left corner
-	pen.x = x * 64;
-	pen.y = (target_height - y) * 64;
+	pen.x = 0;
+	pen.y = target_height;
 
 	for (n = 0; n < num_chars; n++) {
 		// set transformation
@@ -184,13 +197,10 @@ int show_text(struct pl_generic_controller* controller, struct pl_area* area, co
 		draw_bitmap(&slot->bitmap,
 				slot->bitmap_left,
 				target_height - slot->bitmap_top, area, invert);
-
 		// increment pen position
 		pen.x += slot->advance.x;
 		pen.y += slot->advance.y;
 	}
-	//LOG("Needed space is %iBB x %i px", pen.x/64 ,pen.y/64);
-	//read_stopwatch(&start, "generate text",0);
 	error = show_ft_bitmap(controller, area, invert);
 
 	if(error) return error;
@@ -200,4 +210,3 @@ int show_text(struct pl_generic_controller* controller, struct pl_area* area, co
 	image = NULL;
 	return 0;
 }
-//*/

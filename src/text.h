@@ -47,6 +47,7 @@ extern "C" {
 
 
 int show_text(struct pl_generic_controller* controller, struct pl_area* area, const char* text, const char* font, float text_angle, int font_size, int x, int y, uint8_t invert);
+int get_text_area(struct pl_area* area,  const char* text, const char* font,  float text_angle,  int font_size);
 
 #ifdef __cplusplus
 }

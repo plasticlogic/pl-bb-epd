@@ -668,9 +668,11 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 		unsigned bpp, const struct pl_area *area){
 	assert(p != NULL);
 	int stat = 0;
-
+	struct pl_area* source_area = malloc(sizeof(struct pl_area));
 	int height = 0;
 	int width = 0;
+	int left = 0;
+	int top = 0;
 
 	int memorySize;
 
@@ -680,20 +682,30 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 		memorySize = p->yres*p->xres;
 	}else{
 		memorySize = area->width * area->height;
+		source_area->left = 0;
+		source_area->top = 0;
+		source_area->height = area->height;
+		source_area->width = area->width;
 		height = area->height;
 		width = area->width;
+		left = area->left;
+		top = area->top;
 	}
 	// scramble image
 	if(area)
 		LOG("AREA: L: %i, T: %i, H: %i, W: %i", area->left, area->top, area->height, area->width);
-	uint8_t *scrambledPNG = malloc(height*width);
+	uint8_t *scrambledPNG = malloc((top+height)*(width+left));
+
 	scramble_array((uint8_t*) buffer, scrambledPNG, &height, &width,  p->display_scrambling);
 
 	// adapt image to memory
-
+	//LOG("memory padding: map %i bytes to %i bytes", (top+height)*(width+left), p->yres*p->xres);
 	uint8_t *memoryBuffer = malloc(p->yres*p->xres);
-	memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
-
+	if(area){
+		memory_padding_area(scrambledPNG, memoryBuffer, height, width, p->yoffset, p->xoffset, source_area, 0,0/*left,top*/);
+	}else{
+		memory_padding(scrambledPNG, memoryBuffer, height, width, p->yres, p->xres, p->yoffset, p->xoffset);
+	}
 
 	// memory optimisation - if 4 bit per pixel mode is used
 	if (bpp == 4){
@@ -714,7 +726,7 @@ static int s1d135xx_load_buffer(struct s1d135xx *p, const char *buffer, uint16_t
 	}
 
 	set_cs(p, 1);
-	/*
+	//*
 		if (p->wait_for_idle(p))
 			return -ETIME;
 	//*/
@@ -1055,10 +1067,11 @@ static void memory_padding_area(uint8_t *source, uint8_t *target,  int source_ga
 		for(sourceline = source_area->left; sourceline < source_area->left + source_area->width; sourceline++){
 			int source_index = (gateline/*+source_area->top*/)*(source_sourcelines/*+source_area->left*/)+sourceline;
 			int target_index = (gateline-source_area->top)*source_area->width+(sourceline-source_area->left);
+			//LOG("source_index = %i, target_index = %i",  source_index, target_index);
 			if(!(source_index < 0 || target_index < 0 )){
 				target [target_index] = source [source_index];
 				source [source_index] = 0x80;
-			}
+			}//184312,176452
 		}
 	}
 }
@@ -1162,13 +1175,14 @@ static int s1d135xx_fill(struct s1d135xx *p, uint16_t mode, unsigned bpp,
 		  const struct pl_area *a, uint8_t grey)
 {
 	struct pl_area full_area;
-	const struct pl_area *fill_area;
+	struct pl_area *fill_area;
 
 	set_cs(p, 0);
 
 	if (a != NULL) {
+		//LOG("AREA: L: %i, T: %i, H: %i, W: %i", a->left, a->top, a->height, a->width);
 		send_cmd_area(p, S1D135XX_CMD_LD_IMG_AREA, mode, a);
-		fill_area = a;
+		fill_area = (struct pl_area*) a;
 	} else {
 		send_cmd(p, S1D135XX_CMD_LD_IMG);
 		send_param(p->interface, mode);
@@ -1176,8 +1190,12 @@ static int s1d135xx_fill(struct s1d135xx *p, uint16_t mode, unsigned bpp,
 		full_area.left = 0;
 		full_area.width = p->xres;
 		full_area.height = p->yres;
+		//LOG("L: %i, T: %i, H: %i, W: %i", full_area.left, full_area.top, full_area.height, full_area.width);
+
 		fill_area = &full_area;
+
 	}
+	//LOG("AREA: L: %i, T: %i, H: %i, W: %i", fill_area->left, fill_area->top, fill_area->height, fill_area->width);
 
 	set_cs(p, 1);
 

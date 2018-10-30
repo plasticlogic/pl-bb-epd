@@ -110,6 +110,7 @@ void print_application_help(int print_all);
 int info();
 int show_image(const char *dir, const char *file, int wfid);
 int counter(const char* wf);
+int show_text_string(const char* text, int length, int x_pos, int y_pos, int wfid, char* font, int fontsize, int mode);
 int fill(uint8_t gl, uint8_t wfid, int update_mode, struct pl_area* a);
 //remove int interface_data(	char* interface,int number_of_values,char values);
 int slideshow(const char *path, const char* wf, int count);
@@ -128,6 +129,7 @@ int execute_update_image(int argc, char **argv);
 int execute_update_image_regional(int argc, char **argv);
 int execute_slideshow(int argc, char **argv);
 int execute_counter(int argc, char **argv);
+int execute_show_text(int argc, char**argv);
 int execute_write_reg(int argc, char **argv);
 int execute_read_reg(int argc, char **argv);
 int execute_info(int argc, char **argv);
@@ -153,6 +155,7 @@ void printHelp_read_reg(int identLevel);
 void printHelp_info(int identLevel);
 void printHelp_slideshow(int identLevel);
 void printHelp_counter(int identLevel);
+void printHelp_show_text(int identLevel);
 void printHelp_switch_hv(int identLevel);
 void printHelp_switch_com(int identLevel);
 void printHelp_send_cmd(int identLevel);
@@ -172,7 +175,8 @@ struct CmdLineOptions supportedOperations[] = {
 	{"-update_image_regional", 	"updates the display on certain area", 		execute_update_image_regional, 	printHelp_update_image_regional},
 	{"-slideshow",				"shows a slidshow of .png images",			execute_slideshow,				printHelp_slideshow},
 	{"-fill", 					"fill the screen with a defined greylevel", execute_fill, 					printHelp_fill},
-//		{"-count",					"shows a counting number",					execute_counter,				printHelp_counter},
+	{"-count",					"shows a counting number",					execute_counter,				printHelp_counter},
+	{"-show_text",				"shows a text string",						execute_show_text,				printHelp_show_text},
 #ifdef INTERNAL_USAGE
 	{"-send_cmd", 				"sends a command of EPD controller", 		execute_send_cmd, 				printHelp_send_cmd},
 	{"-write_reg", 				"writes to a register of EPD controller", 	execute_write_reg, 				printHelp_write_reg},
@@ -495,11 +499,42 @@ int execute_update_image_regional(int argc, char **argv){
 	return stat;
 }
 
+int execute_show_text(int argc, char**argv){
+	int stat;
+	// epdc-app -show_text <text> <font> <fontsize> <position> <wfID> <mode>
+	char* text;
+	int length;
+	int mode = 0;
+	int x_pos = 0;
+	int y_pos = 0;
+	int wfid = 2;
+	char* font = FONT0;
+	int fontsize = 100;
+	if(argc >= 8) mode = atoi(argv[7]);
+	if(argc >= 7) wfid = atoi(argv[6]);
+	if(argc >= 6){
+		parser_read_int(argv[5]+parser_read_int(argv[5], ",", &x_pos), ",", &y_pos);
+	}
+	if(argc >= 5) fontsize = atoi(argv[4]);
+	if(argc >= 4) font = argv[3];
+	if(argc >= 3){
+		length = strlen(argv[2]);
+		text = malloc(length+1);
+		strcpy(text, argv[2]);
+		text[length] = 0;
+		LOG("Text: %s, length: %i" ,text,length);
+		LOG("Font: %s, size: %i", font, fontsize);
+		LOG("Pos: %i,%i", x_pos, y_pos);
+		stat = show_text_string(text, length, x_pos, y_pos, wfid, font, fontsize, mode);
+	}else{
+		return ERROR_ARGUMENT_COUNT_MISMATCH;
+	}
+	return stat;
+}
+
 int execute_counter(int argc, char**argv){
 	int stat;
-	printf("%s\n",__func__);
 	stat = counter(NULL);
-
 	return stat;
 }
 
@@ -574,7 +609,7 @@ int execute_send_cmd(int argc, char **argv){
 
 int execute_fill(int argc, char **argv){
 	uint8_t gl = 0xFF;
-	struct pl_area area;
+	struct pl_area *area = NULL;
 	int update_mode = PL_FULL_UPDATE;
 	int wfid = 2;
 	if (argc > 2){
@@ -587,7 +622,8 @@ int execute_fill(int argc, char **argv){
 			gl = atoi(argv[2]);
 		}
 		if(argc > 3){
-			parser_read_area(argv[3], "," ,&area);
+			area = malloc(sizeof(struct pl_area));
+			parser_read_area(argv[3], "," ,area);
 
 			if(argc > 4){
 				wfid = atoi(argv[4]);
@@ -604,8 +640,7 @@ int execute_fill(int argc, char **argv){
 			}
 		}
 	}
-	LOG("*");
-	return fill(gl, wfid, update_mode, &area);
+	return fill(gl, wfid, update_mode, area);
 }
 
 int execute_write_reg(int argc, char **argv){
@@ -1231,14 +1266,34 @@ int readBinaryFile(const char *binaryPath, uint8_t **blob){
 	return bytecount;
 }
 
+
+int show_text_string(const char* text, int length, int x_pos, int y_pos, int wfid, char* font, int fontsize, int mode){
+	struct pl_area area;
+	area.width = fontsize;;
+	area.height = fontsize;
+	area.top = epdc->controller->yoffset+y_pos;
+	area.left = epdc->controller->xoffset+x_pos;
+
+	get_text_area(&area, text, font, 0, fontsize);
+
+	if(show_text(epdc->controller, &area, text, font, 0, fontsize, 0, 0, 1 ))
+		return -1;
+
+	//read_stopwatch(&t, "show text", 1);
+	if (epdc->update(epdc, wfid,mode, &area))
+		return -1;
+
+	return 0;
+}
+
 // ----------------------------------------------------------------------
 // Counter
 // ----------------------------------------------------------------------
 int counter(const char* wf)
 {
-	return -ENOSYS;
+	//return -ENOSYS;
 	printf("%s\n",__func__);
-	int wfid = 4;
+	int wfid = 11;
 	unsigned char count = 0;
 	char counter[10] = {0,};
 
@@ -1247,8 +1302,8 @@ int counter(const char* wf)
 		LOG("Using Waveform %i" ,wfid);
 	}
 	struct pl_area area;
-	area.height = 192;
-	area.width = 1024;
+	area.height = 600;
+	area.width = 600;
 	area.top = epdc->controller->yoffset;
 	area.left = epdc->controller->xoffset;
 //#if VERBOSE
@@ -1267,12 +1322,12 @@ int counter(const char* wf)
 	while (1) {
 		//start_stopwatch(&t);
 		sprintf(counter, "%u" ,count++);
-
+		LOG("%s", counter);
 		//read_stopwatch(&t, "start loop", 1);
-		if(show_text(epdc->controller, &area, counter, FONT0, 270, 50, 5, 1,1))
+		if(show_text(epdc->controller, &area, counter, FONT0, 0, 100, area.height/2, area.width/2, 1 ))
 			return -1;
 		//read_stopwatch(&t, "show text", 1);
-		if (epdc->update(epdc, wfid,PL_FULL_UPDATE_NOWAIT, NULL))
+		if (epdc->update(epdc, wfid,PL_FULL_AREA_UPDATE, &area))
 			return -1;
 		//read_stopwatch(&t, "update", 1);
 	}
@@ -1558,6 +1613,22 @@ void printHelp_pgm_nvm_binary(int identLevel){
 	printf("\n");
 }
 */
+void printHelp_show_text(int identLevel){
+	printf("%*s Shows a text string.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -show_text <text> <font> <fontsize> <position> <wfID> <mode>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<text>                : \tText string you want to place on the screen.\n", identLevel, " ");
+	printf("%*s \t                      : \tExample \"MyText\"\n", identLevel, " ");
+	printf("%*s \t<font>                : \tpath to the desired true type font.\n", identLevel, " ");
+	printf("%*s \t                      : \tExample \"/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf\"\n", identLevel, " ");
+	printf("%*s \t<fontsize>            : \tfontsize for the text. Default is 100\n", identLevel, " ");
+	printf("%*s \t<position>            : \tposition, where the area is printed to (top,left).\n", identLevel, " ");
+	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
+	printf("%*s \t<updateMode>          : \tid of the used update mode.\n", identLevel, " ");
+	printf("\n");
+}
+
 void printHelp_counter(int identLevel){
 	printf("%*s Shows a counting number.\n", identLevel, " ");
 	printf("\n");
