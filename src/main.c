@@ -110,7 +110,7 @@ void print_application_help(int print_all);
 int info();
 int show_image(const char *dir, const char *file, int wfid);
 int counter(const char* wf);
-int show_text_string(const char* text, int length, int x_pos, int y_pos, int wfid, char* font, int fontsize, int mode);
+int show_text_string(const char* text, int length, int x_pos, int y_pos, int wfid, char* font, int fontsize, int mode, int invert);
 int fill(uint8_t gl, uint8_t wfid, int update_mode, struct pl_area* a);
 //remove int interface_data(	char* interface,int number_of_values,char values);
 int slideshow(const char *path, const char* wf, int count);
@@ -508,10 +508,12 @@ int execute_show_text(int argc, char**argv){
 	int x_pos = 0;
 	int y_pos = 0;
 	int wfid = 2;
+	int invert = 0;
 	char* font = FONT0;
 	int fontsize = 100;
-	if(argc >= 8) mode = atoi(argv[7]);
-	if(argc >= 7) wfid = atoi(argv[6]);
+	if(argc >= 9) mode = atoi(argv[8]);
+	if(argc >= 8) wfid = atoi(argv[7]);
+	if(argc >= 7) invert = atoi(argv[6]);
 	if(argc >= 6){
 		parser_read_int(argv[5]+parser_read_int(argv[5], ",", &x_pos), ",", &y_pos);
 	}
@@ -525,7 +527,7 @@ int execute_show_text(int argc, char**argv){
 		LOG("Text: %s, length: %i" ,text,length);
 		LOG("Font: %s, size: %i", font, fontsize);
 		LOG("Pos: %i,%i", x_pos, y_pos);
-		stat = show_text_string(text, length, x_pos, y_pos, wfid, font, fontsize, mode);
+		stat = show_text_string(text, length, x_pos, y_pos, wfid, font, fontsize, mode, invert);
 	}else{
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
 	}
@@ -1267,7 +1269,7 @@ int readBinaryFile(const char *binaryPath, uint8_t **blob){
 }
 
 
-int show_text_string(const char* text, int length, int x_pos, int y_pos, int wfid, char* font, int fontsize, int mode){
+int show_text_string(const char* text, int length, int x_pos, int y_pos, int wfid, char* font, int fontsize, int mode, int invert){
 	struct pl_area area;
 	area.width = fontsize;;
 	area.height = fontsize;
@@ -1276,7 +1278,7 @@ int show_text_string(const char* text, int length, int x_pos, int y_pos, int wfi
 
 	get_text_area(&area, text, font, 0, fontsize);
 
-	if(show_text(epdc->controller, &area, text, font, 0, fontsize, 0, 0, 1 ))
+	if(show_text(epdc->controller, &area, text, font, 0, fontsize, 0, 0, invert ))
 		return -1;
 
 	//read_stopwatch(&t, "show text", 1);
@@ -1624,6 +1626,7 @@ void printHelp_show_text(int identLevel){
 	printf("%*s \t                      : \tExample \"/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf\"\n", identLevel, " ");
 	printf("%*s \t<fontsize>            : \tfontsize for the text. Default is 100\n", identLevel, " ");
 	printf("%*s \t<position>            : \tposition, where the area is printed to (top,left).\n", identLevel, " ");
+	printf("%*s \t<invert>              : \tswitch if white text on black or black text on white bg. Default is white on black.\n", identLevel, " ");
 	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
 	printf("%*s \t<updateMode>          : \tid of the used update mode.\n", identLevel, " ");
 	printf("\n");
