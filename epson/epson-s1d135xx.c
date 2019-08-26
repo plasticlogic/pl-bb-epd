@@ -1476,24 +1476,24 @@ static int transfer_file(struct pl_generic_interface *interface, FILE *file)
 
 static void transfer_data(struct pl_generic_interface *interface, const uint8_t *data, size_t n)
 {
-
+	// for SPI swap the bytes of the word
 	if(interface->mSpi){
 		uint16_t *data16 = (uint16_t *)data;
-		const unsigned int chunkSize = 4096;
 		unsigned int wordIdx;
-
 		for (wordIdx = 0; wordIdx < n/2; wordIdx++){
 			data16[wordIdx] = htobe16(data16[wordIdx]);
 		}
 		wordIdx = 0;
-		// transfer full chunks of data
-		while (n > chunkSize){
-			interface->write_bytes(interface, (uint8_t*) data, sizeof(uint8_t)*chunkSize);
-			data+=chunkSize;
-			n -= chunkSize;
-		}
-
 	}
+
+	const unsigned int chunkSize = 4096;
+	// transfer full chunks of data
+	while (n > chunkSize){
+		interface->write_bytes(interface, (uint8_t*) data, sizeof(uint8_t)*chunkSize);
+		data+=chunkSize;
+		n -= chunkSize;
+	}
+
 	// transfer rest bytes
 	if (n){
 		interface->write_bytes(interface, (uint8_t*) data, sizeof(uint8_t)*n);
