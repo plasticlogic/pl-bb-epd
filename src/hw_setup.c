@@ -210,6 +210,14 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 		p->vddGPIO = RUDDOCK_5V_EN;
 		p->sInterfaceType = PARALLEL;
 	}
+	else if (!strcmp(selection, "FALCON_I80" )){
+		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
+		p->s1d13541_pins = &g_s1d135xx_pins;
+		p->board_gpios = g_falcon_i80_gpios;
+		p->gpio_count = ARRAY_SIZE(g_falcon_parallel_gpios);
+		p->vddGPIO = RUDDOCK_5V_EN;
+		p->sInterfaceType = I80;
+	}
 	else if (!strcmp(selection, "FALCON" )){
 		p->s1d13524_pins = &g_s1d135xx_pins;
 		p->s1d13541_pins = &g_s1d135xx_pins;
@@ -323,7 +331,9 @@ static int initialize_nvm(hw_setup_t *p, const char *selection, const char *form
 	}
 	else if(!strcmp(selection, "MACRONIX_MX25U4033E")){
 		LOG("%s: Boardname: %s", __func__, p->boardname);
-		if(!strcmp("FALCON", p->boardname) || !strcmp("FALCON_PARALLEL", p->boardname)){
+		if(!strcmp("FALCON", p->boardname)
+				|| !strcmp("FALCON_PARALLEL", p->boardname)
+				|| !strcmp("FALCON_I80", p->boardname)){
 			p->nvmSPI->cs_gpio = FALCON_NVM_CS;
 		}else if(!strcmp("CHIFFCHAFF", p->boardname)){
 			p->nvmSPI->cs_gpio = CHIFFCHAFF_NVM_CS;
