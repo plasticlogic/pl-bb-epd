@@ -24,6 +24,7 @@
  */
 
 #include <beaglebone/beaglebone-i80.h>
+#include <beaglebone/beaglebone-parallel.h>
 #include <linux/types.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -32,12 +33,12 @@
 #include <src/pindef.h>
 
 // function prototypes
-static int i80_close(struct pl_i80 *p);
-static int i80_read_bytes(struct pl_i80 *p, uint8_t *buff, size_t size);
-static int i80_write_bytes(struct pl_i80 *p, uint8_t *buff, size_t size);
-static int i80_set_cs(struct pl_i80 *p, uint8_t cs);
-static int i80_init(struct pl_i80 *p);
-static void delete(struct pl_i80 *p);
+static int i80_close(struct pl_parallel *p);
+static int i80_read_bytes(struct pl_parallel *p, uint8_t *buff, size_t size);
+static int i80_write_bytes(struct pl_parallel *p, uint8_t *buff, size_t size);
+static int i80_set_cs(struct pl_parallel *p, uint8_t cs);
+static int i80_init(struct pl_parallel *p);
+static void delete(struct pl_parallel *p);
 static int wait_for_ready(struct pl_i80 *p);
 static void swap_data(uint8_t *buff, size_t size);
 
@@ -47,18 +48,21 @@ static void swap_data(uint8_t *buff, size_t size);
  * @param spi_channel number of the spi device /dev/spidev?.0
  * @return pl_spi structure
  */
-pl_i80_t *beaglebone_i80_new(struct pl_gpio * hw_ref){
-	pl_i80_t *p = (pl_i80_t *)malloc(sizeof(pl_i80_t));
+pl_parallel_t *beaglebone_i80_new(struct pl_gpio * hw_ref){
+	pl_parallel_t *parellel_ref = (pl_parallel_t *)malloc(sizeof(pl_parallel_t));
+	pl_i80_t *i80_ref = (pl_i80_t *)malloc(sizeof(pl_i80_t));
 
-	p->hw_ref = hw_ref;
-	p->open = i80_init;
-	p->close = i80_close;
-	p->read_bytes = i80_read_bytes;
-	p->write_bytes = i80_write_bytes;
-	p->set_cs = i80_set_cs;
-	p->delete = delete;
+	i80_ref->hw_ref = hw_ref;
+	parellel_ref->hw_ref = i80_ref;
 
-	return p;
+	parellel_ref->open = i80_init;
+	parellel_ref->close = i80_close;
+	parellel_ref->read_bytes = i80_read_bytes;
+	parellel_ref->write_bytes = i80_write_bytes;
+	parellel_ref->set_cs = i80_set_cs;
+	parellel_ref->delete = delete;
+
+	return parellel_ref;
 }
 
 /**
@@ -66,7 +70,8 @@ pl_i80_t *beaglebone_i80_new(struct pl_gpio * hw_ref){
  *
  * @param p pl_spi structure
  */
-static void delete(struct pl_i80 *p){
+static void delete(struct pl_parallel *p){
+
 	if (p != NULL){
 		free(p);
 		p = NULL;
@@ -79,10 +84,11 @@ static void delete(struct pl_i80 *p){
  * @param psSPI pl_spi structure
  * @return status
  */
-static int i80_init(struct pl_i80 *p)
+static int i80_init(struct pl_parallel *p)
 {
+	pl_i80_t * i80_ref = (pl_i80_t*) p->hw_ref;
 
-	p->fd = open("/dev/parallel", O_RDWR);
+	i80_ref->fd = open("/dev/parallel", O_RDWR);
 	if(p->fd < 0){
 		return FALSE;
 	}
@@ -96,10 +102,12 @@ static int i80_init(struct pl_i80 *p)
  * @param p pl_i80 structure
  * @return status
  */
-static int i80_close(struct pl_i80 *p){
+static int i80_close(struct pl_parallel *p)
+{
+	pl_i80_t * i80_ref = (pl_i80_t*) p->hw_ref;
 
-	if(p->fd)
-		close(p->fd);
+	if(i80_ref->fd)
+		close(i80_ref->fd);
 	else
 		return FALSE;
 	return TRUE;
@@ -113,32 +121,34 @@ static int i80_close(struct pl_i80 *p){
  * @param size size of the buffer
  * @return status
  */
-static int i80_read_bytes(struct pl_i80 *p, uint8_t *buff, size_t size){
+static int i80_read_bytes(struct pl_parallel *p, uint8_t *buff, size_t size){
 
 	int iResult = 0;
 
-	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
+	pl_i80_t * i80_ref = (pl_i80_t*) p->hw_ref;
 
-	if(wait_for_ready(p))
+	struct pl_gpio * gpio = (struct pl_gpio *) i80_ref->hw_ref;
+
+	if(wait_for_ready(i80_ref))
 	  return -1;
 
 	//Switch C/D to Data - DATA - H
 	//done outside
 
 	//CS-L
-	gpio->set(p->hcs_n_gpio, 0);
+	gpio->set(i80_ref->hcs_n_gpio, 0);
 
 	//RD Enable -L
-	gpio->set(p->hrd_n_gpio, 0);
+	gpio->set(i80_ref->hrd_n_gpio, 0);
 
 	//Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
-	iResult = read(p->fd, buff, size/2);
+	iResult = read(i80_ref->fd, buff, size/2);
 
 	//WR Disable -H
-	gpio->set(p->hrd_n_gpio, 1);
+	gpio->set(i80_ref->hrd_n_gpio, 1);
 
 	//CS-H
-	gpio->set(p->hcs_n_gpio, 1);
+	gpio->set(i80_ref->hcs_n_gpio, 1);
 
 	// necessary due to temporary reverse connection of parallel bus
 	swap_data(buff, size);
@@ -154,13 +164,15 @@ static int i80_read_bytes(struct pl_i80 *p, uint8_t *buff, size_t size){
  * @param size size of the buffer
  * @return status
  */
-static int i80_write_bytes(struct pl_i80 *p, uint8_t *buff, size_t size)
+static int i80_write_bytes(struct pl_parallel *p, uint8_t *buff, size_t size)
 {
 	int iResult = 0;
 
-	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
+	pl_i80_t * i80_ref = (pl_i80_t*) p->hw_ref;
 
-	if(wait_for_ready(p))
+	struct pl_gpio * gpio = (struct pl_gpio *) i80_ref->hw_ref;
+
+	if(wait_for_ready(i80_ref))
 	  return -1;
 
 	// necessary due to temporary reverse connection of parallel bus
@@ -170,19 +182,19 @@ static int i80_write_bytes(struct pl_i80 *p, uint8_t *buff, size_t size)
 	//done outside
 
 	//CS-L
-	gpio->set(p->hcs_n_gpio, 0);
+	gpio->set(i80_ref->hcs_n_gpio, 0);
 
 	//WR Enable -L
-	gpio->set(p->hwe_n_gpio, 0);
+	gpio->set(i80_ref->hwe_n_gpio, 0);
 
 	//Set Data output (Parallel output request)
-	iResult = write(p->fd, buff, size/2);
+	iResult = write(i80_ref->fd, buff, size/2);
 
 	//WR Disable-H
-	gpio->set(p->hwe_n_gpio, 1);
+	gpio->set(i80_ref->hwe_n_gpio, 1);
 
 	//CS-H
-	gpio->set(p->hcs_n_gpio, 1);
+	gpio->set(i80_ref->hcs_n_gpio, 1);
 
 	return iResult;
 }
@@ -193,10 +205,13 @@ static int i80_write_bytes(struct pl_i80 *p, uint8_t *buff, size_t size)
  * @param p pl_i80 structure
  * @return status
  */
-static int i80_set_cs(struct pl_i80 *p, uint8_t cs)
+static int i80_set_cs(struct pl_parallel *p, uint8_t cs)
 {
-	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
-	gpio->set(p->hcs_n_gpio, cs);
+	pl_i80_t * i80_ref = (pl_i80_t*) p->hw_ref;
+
+	struct pl_gpio * gpio = (struct pl_gpio *) i80_ref->hw_ref;
+
+	gpio->set(i80_ref->hcs_n_gpio, cs);
 
 	return 0;
 }

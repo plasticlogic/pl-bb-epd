@@ -43,12 +43,12 @@ typedef struct pl_i80
   int hrdy_gpio;
   int hirq_gpio;
 
-  int (*open)(struct pl_parallel * p);
-  int (*close)(struct pl_parallel * p);
-  int (*read_bytes)(struct pl_parallel *p, uint8_t *buff, size_t size);
-  int (*write_bytes)(struct pl_parallel *p, uint8_t *buff, size_t size);
-  int (*set_cs)(struct pl_parallel *p, uint8_t cs);
-  void (*delete)(struct pl_parallel *p);
+  int (*open)(struct pl_i80 * p);
+  int (*close)(struct pl_i80 * p);
+  int (*read_bytes)(struct pl_i80 *p, uint8_t *buff, size_t size);
+  int (*write_bytes)(struct pl_i80 *p, uint8_t *buff, size_t size);
+  int (*set_cs)(struct pl_i80 *p, uint8_t cs);
+  void (*delete)(struct pl_i80 *p);
 
 } pl_i80_t;
 

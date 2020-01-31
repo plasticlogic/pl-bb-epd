@@ -618,6 +618,9 @@ static int initialize_controller(hw_setup_t *p, const char *selection){
 		s1d13541 = get_s1d13541_instance(p);
 		s1d13541_controller_setup(p->controller, s1d13541);
 	}
+	else if (!strcmp(selection, "NONE" )){
+
+	}
 
 	else {
 		LOG("Given EPD controller type not supported.");
