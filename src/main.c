@@ -750,15 +750,15 @@ int start_epdc(int load_nvm_content, int execute_clear)
 	// enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
-	sleep(1);
-	stat = epdc->init(epdc, load_nvm_content);
-	if (stat < 0){
-		LOG("EPDC-Init failed: %i\n", stat);
-		return stat;
-	}
-	if (execute_clear){
-		stat = epdc->clear_init(epdc);
-	}
+//	sleep(1);
+//	stat = epdc->init(epdc, load_nvm_content);
+//	if (stat < 0){
+//		LOG("EPDC-Init failed: %i\n", stat);
+//		return stat;
+//	}
+//	if (execute_clear){
+//		stat = epdc->clear_init(epdc);
+//	}
 	return stat;
 };
 
