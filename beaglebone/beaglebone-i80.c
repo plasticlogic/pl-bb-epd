@@ -39,6 +39,7 @@ static int i80_set_cs(struct pl_i80 *p, uint8_t cs);
 static int i80_init(struct pl_i80 *p);
 static void delete(struct pl_i80 *p);
 static int wait_for_ready(struct pl_i80 *p);
+static void swap_data(uint8_t *buff, size_t size);
 
 /**
  * allocates, configures and returns a new pl_spi structure
@@ -139,6 +140,9 @@ static int i80_read_bytes(struct pl_i80 *p, uint8_t *buff, size_t size){
 	//CS-H
 	gpio->set(p->hcs_n_gpio, 1);
 
+	// necessary due to temporary reverse connection of parallel bus
+	swap_data(buff, size);
+
 	return iResult;
 }
 
@@ -158,6 +162,9 @@ static int i80_write_bytes(struct pl_i80 *p, uint8_t *buff, size_t size)
 
 	if(wait_for_ready(p))
 	  return -1;
+
+	// necessary due to temporary reverse connection of parallel bus
+	swap_data(buff, size);
 
 	//Switch C/D --> command = L / data = H
 	//done outside
@@ -210,4 +217,26 @@ static int wait_for_ready(struct pl_i80 *p)
 			}
 	}
 	return -1;
+}
+
+static void swap_data(uint8_t *buff, size_t size)
+{
+	int i = 0;
+	uint8_t tmp[2];
+
+	for(i=0; i< size/2; i++)
+	{
+		tmp[0] = buff[i*2];
+		tmp[1] = buff[i*2+1];
+
+		buff[i*2] = 		      tmp[1] >> 6 && 0x03;
+		buff[i*2] = buff[i*2] | ( tmp[1] >> 2 && 0x0c );
+		buff[i*2] = buff[i*2] | ( tmp[1] << 2 && 0x03 );
+		buff[i*2] = buff[i*2] | ( tmp[1] << 2 && 0x0c );
+
+		buff[i*2+1] = 		        tmp[0] >> 6 && 0x03;
+		buff[i*2+1] = buff[i*2] | ( tmp[0] >> 2 && 0x0c );
+		buff[i*2+1] = buff[i*2] | ( tmp[0] << 2 && 0x03 );
+		buff[i*2+1] = buff[i*2] | ( tmp[0] << 2 && 0x0c );
+	}
 }

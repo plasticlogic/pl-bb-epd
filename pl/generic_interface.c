@@ -49,7 +49,7 @@ pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpi
 		p->hcs_n_gpio =  FALCON_I80_HCS_N;
 		p->hdc_gpio =  FALCON_I80_HDC;
 		p->hrdy_gpio =  FALCON_I80_HRDY;
-		p->hirq_gpio =  FALCON_I80_HIRQ;
+		//p->hirq_gpio =  FALCON_I80_HIRQ;
 	}
 
 	return interface;
