@@ -59,6 +59,7 @@
 #include "hw_setup.h"
 #define LOG_TAG "main"
 #include <pl/utils.h>
+#include <pl/i80.h>
 #include "text.h"
 
 #define INTERNAL_USAGE
@@ -1023,20 +1024,42 @@ int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode
  * @return status
  */
 int read_register(regSetting_t regSetting){
-	uint16_t *data = malloc(sizeof(uint16_t)*regSetting.valCount);
-	regSetting.val = data;
-	if (regSetting.val == NULL)
-		return -EINVAL;
+//	uint16_t *data = malloc(sizeof(uint16_t)*regSetting.valCount);
+//	regSetting.val = data;
+//	if (regSetting.val == NULL)
+//		return -EINVAL;
 
-	int stat = epdc->read_register(epdc, &regSetting );
-	if(stat < 0)
-		return stat;
+	uint8_t out[2];
+	out[0] = 0x02;
+	out[1] = 0x03;
 
-	printf("register addr    = 0x%04X:\n", regSetting.addr);
-	printf("register data    = \n");
-	dump_hex16(regSetting.val, regSetting.valCount);
+	uint8_t in[40];
 
-	free(regSetting.val);
+	pl_generic_interface_t * p = hardware->sInterface;
+	pl_i80_t * i80_ref = (pl_i80_t *) p->hw_ref;
+	struct pl_gpio * gpio_ref = (struct pl_gpio *) i80_ref->hw_ref;
+
+	// command low, data high
+	gpio_ref->set(i80_ref->hdc_gpio, 0);
+
+	if(p->write_bytes(p, out, sizeof(out)) < 0)
+		return -1;
+
+	gpio_ref->set(i80_ref->hdc_gpio, 1);
+
+	if(p->read_bytes(p, in, sizeof(in)) < 0)
+		return -1;
+
+
+//	int stat = epdc->read_register(epdc, &regSetting );
+//	if(stat < 0)
+//		return stat;
+//
+//	printf("register addr    = 0x%04X:\n", regSetting.addr);
+//	printf("register data    = \n");
+//	dump_hex16(regSetting.val, regSetting.valCount);
+//
+//	free(regSetting.val);
 	return 0;
 }
 
