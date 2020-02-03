@@ -244,14 +244,24 @@ static void swap_data(uint8_t *buff, size_t size)
 		tmp[0] = buff[i*2];
 		tmp[1] = buff[i*2+1];
 
-		buff[i*2] = 		      tmp[1] >> 6 && 0x03;
-		buff[i*2] = buff[i*2] | ( tmp[1] >> 2 && 0x0c );
-		buff[i*2] = buff[i*2] | ( tmp[1] << 2 && 0x03 );
-		buff[i*2] = buff[i*2] | ( tmp[1] << 2 && 0x0c );
+		buff[i*2] = 		      tmp[1] >> 7 & 0x01;
+		buff[i*2] = buff[i*2] | ( tmp[1] >> 5 & 0x02 );
+		buff[i*2] = buff[i*2] | ( tmp[1] >> 3 & 0x04 );
+		buff[i*2] = buff[i*2] | ( tmp[1] >> 1 & 0x08 );
+		buff[i*2] = buff[i*2] | ( tmp[1] << 1 & 0x10 );
+		buff[i*2] = buff[i*2] | ( tmp[1] << 3 & 0x20 );
+		buff[i*2] = buff[i*2] | ( tmp[1] << 5 & 0x40 );
+		buff[i*2] = buff[i*2] | ( tmp[1] << 7 & 0x80 );
 
-		buff[i*2+1] = 		        tmp[0] >> 6 && 0x03;
-		buff[i*2+1] = buff[i*2] | ( tmp[0] >> 2 && 0x0c );
-		buff[i*2+1] = buff[i*2] | ( tmp[0] << 2 && 0x03 );
-		buff[i*2+1] = buff[i*2] | ( tmp[0] << 2 && 0x0c );
+		buff[i*2+1] = 		      tmp[0] >> 7 & 0x01;
+		buff[i*2+1] = buff[i*2+1] | ( tmp[0] >> 5 & 0x02 );
+		buff[i*2+1] = buff[i*2+1] | ( tmp[0] >> 3 & 0x04 );
+		buff[i*2+1] = buff[i*2+1] | ( tmp[0] >> 1 & 0x08 );
+		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 1 & 0x10 );
+		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 3 & 0x20 );
+		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 5 & 0x40 );
+		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 7 & 0x80 );
+
+		printf("swap: 0x%x | 0x%x --> 0x%x | 0x%x\n", tmp[1], tmp[0], buff[i*2+1], buff[i*2]);
 	}
 }

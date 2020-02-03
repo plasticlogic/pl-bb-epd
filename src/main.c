@@ -1045,6 +1045,18 @@ int read_register(regSetting_t regSetting){
 	if(p->write_bytes(p, out, sizeof(out)) < 0)
 		return -1;
 
+//	out[0] = 0x00;
+//	out[1] = 0x80;
+//
+//	if(p->write_bytes(p, out, sizeof(out)) < 0)
+//		return -1;
+//
+//	out[0] = 0xff;
+//	out[1] = 0xff;
+//
+//	if(p->write_bytes(p, out, sizeof(out)) < 0)
+//		return -1;
+
 	gpio_ref->set(i80_ref->hdc_gpio, 1);
 
 	if(p->read_bytes(p, in, sizeof(in)) < 0)
