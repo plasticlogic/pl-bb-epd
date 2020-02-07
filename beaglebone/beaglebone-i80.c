@@ -144,8 +144,10 @@ static int i80_read_bytes(struct pl_parallel *p, uint8_t *buff, size_t size){
 	//Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
 	iResult = read(i80_ref->fd, buff, size/2);
 
-	//WR Disable -H
+	//RD Disable -H
 	gpio->set(i80_ref->hrd_n_gpio, 1);
+
+	usleep(10);
 
 	//CS-H
 	gpio->set(i80_ref->hcs_n_gpio, 1);
@@ -244,23 +246,23 @@ static void swap_data(uint8_t *buff, size_t size)
 		tmp[0] = buff[i*2];
 		tmp[1] = buff[i*2+1];
 
-		buff[i*2] = 		      tmp[1] >> 7 & 0x01;
-		buff[i*2] = buff[i*2] | ( tmp[1] >> 5 & 0x02 );
-		buff[i*2] = buff[i*2] | ( tmp[1] >> 3 & 0x04 );
-		buff[i*2] = buff[i*2] | ( tmp[1] >> 1 & 0x08 );
-		buff[i*2] = buff[i*2] | ( tmp[1] << 1 & 0x10 );
-		buff[i*2] = buff[i*2] | ( tmp[1] << 3 & 0x20 );
-		buff[i*2] = buff[i*2] | ( tmp[1] << 5 & 0x40 );
-		buff[i*2] = buff[i*2] | ( tmp[1] << 7 & 0x80 );
+		buff[i*2] = 		    (( tmp[1] & 0x80 ) >> 6);
+		buff[i*2] = buff[i*2] | (( tmp[1] & 0x40 ) >> 6);
+		buff[i*2] = buff[i*2] | (( tmp[1] & 0x20 ) >> 3);
+		buff[i*2] = buff[i*2] | (( tmp[1] & 0x10 ));
+		buff[i*2] = buff[i*2] | (( tmp[1] & 0x08 ));
+		buff[i*2] = buff[i*2] | (( tmp[1] & 0x04 ) << 3);
+		buff[i*2] = buff[i*2] | (( tmp[1] & 0x02 ) << 6);
+		buff[i*2] = buff[i*2] | (( tmp[1] & 0x01 ) << 6);
 
-		buff[i*2+1] = 		      tmp[0] >> 7 & 0x01;
-		buff[i*2+1] = buff[i*2+1] | ( tmp[0] >> 5 & 0x02 );
-		buff[i*2+1] = buff[i*2+1] | ( tmp[0] >> 3 & 0x04 );
-		buff[i*2+1] = buff[i*2+1] | ( tmp[0] >> 1 & 0x08 );
-		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 1 & 0x10 );
-		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 3 & 0x20 );
-		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 5 & 0x40 );
-		buff[i*2+1] = buff[i*2+1] | ( tmp[0] << 7 & 0x80 );
+		buff[i*2+1] = 		        (( tmp[0] & 0x80 ) >> 6);
+		buff[i*2+1] = buff[i*2+1] | (( tmp[0] & 0x40 ) >> 6);
+		buff[i*2+1] = buff[i*2+1] | (( tmp[0] & 0x20 ) >> 2);
+		buff[i*2+1] = buff[i*2+1] | (( tmp[0] & 0x10 ) >> 2);
+		buff[i*2+1] = buff[i*2+1] | (( tmp[0] & 0x08 ) << 2);
+		buff[i*2+1] = buff[i*2+1] | (( tmp[0] & 0x04 ) << 2);
+		buff[i*2+1] = buff[i*2+1] | (( tmp[0] & 0x02 ) << 6);
+		buff[i*2+1] = buff[i*2+1] | (( tmp[0] & 0x01 ) << 6);
 
 		printf("swap: 0x%x | 0x%x --> 0x%x | 0x%x\n", tmp[1], tmp[0], buff[i*2+1], buff[i*2]);
 	}

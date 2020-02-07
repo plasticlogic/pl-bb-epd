@@ -1029,9 +1029,19 @@ int read_register(regSetting_t regSetting){
 //	if (regSetting.val == NULL)
 //		return -EINVAL;
 
-	uint8_t out[2];
-	out[0] = 0x02;
-	out[1] = 0x03;
+	uint8_t out[12];
+	out[0] = 0x01;
+	out[1] = 0x00;
+	out[2] = 0x00;
+	out[3] = 0x00;
+	out[4] = 0x01;
+	out[5] = 0x00;
+	out[6] = 0x00;
+	out[7] = 0x00;
+	out[8] = 0x01;
+	out[9] = 0x00;
+	out[10] = 0x00;
+	out[11] = 0x00;
 
 	uint8_t in[40];
 
@@ -1045,8 +1055,8 @@ int read_register(regSetting_t regSetting){
 	if(p->write_bytes(p, out, sizeof(out)) < 0)
 		return -1;
 
-//	out[0] = 0x00;
-//	out[1] = 0x80;
+//	out[0] = 0x01;
+//	out[1] = 0x00;
 //
 //	if(p->write_bytes(p, out, sizeof(out)) < 0)
 //		return -1;
