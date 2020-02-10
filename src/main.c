@@ -1029,19 +1029,19 @@ int read_register(regSetting_t regSetting){
 //	if (regSetting.val == NULL)
 //		return -EINVAL;
 
-	uint8_t out[10];
-	out[0] = 0x00;
-	out[1] = 0x00;
-	out[2] = 0xff;
-	out[3] = 0xff;
-	out[4] = 0x01;
-	out[5] = 0x00;
-	out[6] = 0xff;
-	out[7] = 0xff;
-	out[8] = 0x00;
-	out[9] = 0x00;
+//	uint8_t out[10];
+//	out[0] = 0x00;
+//	out[1] = 0x00;
+//	out[2] = 0xff;
+//	out[3] = 0xff;
+//	out[4] = 0x01;
+//	out[5] = 0x00;
+//	out[6] = 0xff;
+//	out[7] = 0xff;
+//	out[8] = 0x00;
+//	out[9] = 0x00;
 
-
+	uint8_t out[2];
 	uint8_t in[40];
 
 	pl_generic_interface_t * p = hardware->sInterface;
@@ -1051,6 +1051,18 @@ int read_register(regSetting_t regSetting){
 	// command low, data high
 	gpio_ref->set(i80_ref->hdc_gpio, 0);
 
+	out[0] = 0x00;
+	out[1] = 0x00;
+	if(p->write_bytes(p, out, sizeof(out)) < 0)
+		return -1;
+
+	out[0] = 0x00;
+	out[1] = 0x01;
+	if(p->write_bytes(p, out, sizeof(out)) < 0)
+		return -1;
+
+	out[0] = 0x03;
+	out[1] = 0x02;
 	if(p->write_bytes(p, out, sizeof(out)) < 0)
 		return -1;
 

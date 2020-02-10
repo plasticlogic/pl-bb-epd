@@ -186,14 +186,28 @@ static int i80_write_bytes(struct pl_parallel *p, uint8_t *buff, size_t size)
 	//CS-L
 	gpio->set(i80_ref->hcs_n_gpio, 0);
 
+	if(wait_for_ready(i80_ref))
+	  return -1;
+
+	usleep(10);
+
 	//WR Enable -L
 	gpio->set(i80_ref->hwe_n_gpio, 0);
+
+	usleep(10);
 
 	//Set Data output (Parallel output request)
 	iResult = write(i80_ref->fd, buff, size/2);
 
+	if(wait_for_ready(i80_ref))
+	  return -1;
+
+	usleep(10);
+
 	//WR Disable-H
 	gpio->set(i80_ref->hwe_n_gpio, 1);
+
+	usleep(10);
 
 	//CS-H
 	gpio->set(i80_ref->hcs_n_gpio, 1);
