@@ -15,6 +15,22 @@
 #include <pl/parallel.h>
 #include <errno.h>
 
+//typedef for variables
+typedef unsigned char TByte; //1 byte
+typedef unsigned short TWord; //2 bytes
+typedef unsigned long TDWord; //4 bytes
+
+typedef struct
+{
+    TWord usPanelW;
+    TWord usPanelH;
+    TWord usImgBufAddrL;
+    TWord usImgBufAddrH;
+    TWord usFWVersion[8]; //16 Bytes String
+    TWord usLUTVersion[8]; //16 Bytes String
+
+}I80IT8951DevInfo;
+
 #define WAIT_FOR_READY_TIMEOUT_I80 10000
 
 struct pl_gpio;
