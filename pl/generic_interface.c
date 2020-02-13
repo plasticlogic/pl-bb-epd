@@ -49,7 +49,7 @@ pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpi
 		i80_ref->hrd_n_gpio =  RUDDOCK_RESERVE_2;
 		i80_ref->hcs_n_gpio =  FALCON_I80_HCS_N;
 		i80_ref->hdc_gpio =  FALCON_I80_HDC;
-		i80_ref->hrdy_gpio =  FALCON_I80_HRDY;
+		i80_ref->hrdy_gpio =  RUDDOCK_HRDY;
 		//p->hirq_gpio =  FALCON_I80_HIRQ;
 	}
 
