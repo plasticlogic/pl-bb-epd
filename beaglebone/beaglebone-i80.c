@@ -342,7 +342,7 @@ static void swap_data(uint8_t *buff, size_t size)
 		buff[i*2] = buff[i*2] | (( tmp[0] & 0x02 ) << 5);
 		buff[i*2] = buff[i*2] | (( tmp[0] & 0x01 ) << 7);
 
-		printf("swap: 0x%x | 0x%x --> 0x%x | 0x%x\n", tmp[0], tmp[1], buff[i*2], buff[i*2+1]);
+		//printf("swap: 0x%x | 0x%x --> 0x%x | 0x%x\n", tmp[0], tmp[1], buff[i*2], buff[i*2+1]);
 	}
 }
 
