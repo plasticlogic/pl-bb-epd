@@ -51,6 +51,7 @@ typedef struct hw_setup {
 	const struct s1d135xx_pins *epson_pins;
 	const struct s1d135xx_pins *s1d13524_pins;		// pointer to selected pins for epson controller
 	const struct s1d135xx_pins *s1d13541_pins;		// pointer to selected pins for epson controller
+	const struct it8951_pins *it8951_pins;			// pointer to selected pins for ite controller
 	const struct pl_gpio_config *board_gpios;		//!< pointer to list of used gpios (based on driver board)
 	int gpio_count;									//!< number of gpios stored in board_gpios list
 	struct vcom_cal g_vcom_cal;						// vcom structure
