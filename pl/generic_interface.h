@@ -33,6 +33,7 @@
 enum interfaceType{
 	PARALLEL = 0,
 	SPI,
+	I80
 };
 
 typedef struct pl_generic_interface {
@@ -51,6 +52,6 @@ typedef struct pl_generic_interface {
 	struct spi_metadata *mSpi;
 }pl_generic_interface_t;
 
-pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* hw_ref, uint8_t serial);
+pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpio, enum interfaceType type);
 
 #endif /* GENERIC_INTERFACE_H_ */

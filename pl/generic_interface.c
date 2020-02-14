@@ -20,23 +20,38 @@
  * generic_interface.c
  *
  *  Created on: 02.11.2016
- *      Author: robert.pohlink
+ *      Author: robert.pohlink, matti.haugwitz
  */
 
 #include <pl/generic_interface.h>
+#include <beaglebone/beaglebone-i80.h>
+#include <pl/i80.h>
+#include <src/pindef.h>
 
 struct pl_gpio;
 
-pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* hw_ref, uint8_t serial){
+pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpio, enum interfaceType type){
 	pl_generic_interface_t* interface;
-	if(serial){
-		interface = (pl_generic_interface_t*) beaglebone_spi_new(spi_channel, hw_ref);
-		//interface->interface_type = SPI;
-		return interface;
-	}else{
-		interface = (pl_generic_interface_t*) beaglebone_parallel_new(hw_ref);
-		//interface->interface_type = PARALLEL;
-		return interface;
+	interface = NULL;
+
+	if(type == SPI){
+		interface = (pl_generic_interface_t*) beaglebone_spi_new(spi_channel, p_gpio);
 	}
-	return NULL;
+	else if(type == PARALLEL)
+	{
+		interface = (pl_generic_interface_t*) beaglebone_parallel_new(p_gpio);
+	}
+	else if(type == I80)
+	{
+		interface = (pl_generic_interface_t*) beaglebone_i80_new(p_gpio);
+		pl_i80_t* i80_ref = (pl_i80_t*) interface->hw_ref;
+		i80_ref->hwe_n_gpio =  RUDDOCK_RESERVE_3;
+		i80_ref->hrd_n_gpio =  RUDDOCK_RESERVE_2;
+		i80_ref->hcs_n_gpio =  FALCON_I80_HCS_N;
+		i80_ref->hdc_gpio =  FALCON_I80_HDC;
+		i80_ref->hrdy_gpio =  RUDDOCK_HRDY;
+		//p->hirq_gpio =  FALCON_I80_HIRQ;
+	}
+
+	return interface;
 }
