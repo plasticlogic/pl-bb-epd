@@ -101,6 +101,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="beaglebone"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="epson"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="hardware"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="ite"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="libpng-1.2.51"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="pl"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
@@ -212,6 +213,9 @@
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.1638475023;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.1638475023.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1613807014;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1930656746">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.237067721;cdt.managedbuild.config.gnu.cross.exe.release.237067721.;cdt.managedbuild.tool.gnu.cross.c.compiler.1684055876;cdt.managedbuild.tool.gnu.c.compiler.input.915886681">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
