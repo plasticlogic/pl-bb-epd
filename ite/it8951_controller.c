@@ -30,10 +30,34 @@
 #include <pl/assert.h>
 #include <pl/scramble.h>
 #include <pl/hv.h>
+#include <pl/generic_interface.h>
+#include <pl/i80.h>
+#include <pl/gpio.h>
 #define LOG_TAG "it8951_controller"
 #include "pl/utils.h"
 
 #include "ite/it8951_controller.h"
+
+static const struct pl_wfid wf_table[] = {
+	{ "default",	   2 },
+	{ "0",             0 },
+	{ "1",             1 },
+	{ "2",             2 },
+	{ "3",             3 },
+	{ "4",             4 },
+	{ "5",             5 },
+	{ "6",             6 },
+	{ "7",             7 },
+	{ "8",             8 },
+	{ "9",             9 },
+	{ "10",           10 },
+	{ "11",           11 },
+	{ "12",           12 },
+	{ "13",           13 },
+	{ "14",           14 },
+	{ "15",           15 },
+	{ NULL,           -1 }
+};
 
 static int trigger_update(struct pl_generic_controller *controller);
 static int clear_update(pl_generic_controller_t *p);
@@ -68,6 +92,7 @@ int it8951_controller_setup(struct pl_generic_controller *controller, it8951_t *
 	controller->send_cmd = send_cmd;
 
 	controller->init = init_controller;
+	controller->wf_table = wf_table;
 	controller->hw_ref = it8951;
 
 	controller->set_temp_mode = set_temp_mode;
@@ -89,6 +114,28 @@ static int clear_update(pl_generic_controller_t *p)
 
 static int init_controller(struct pl_generic_controller *controller, int use_wf_from_nvm)
 {
+	it8951_t *it8951 = controller->hw_ref;
+
+	assert(it8951 != NULL);
+
+	pl_generic_interface_t *bus = it8951->interface;
+
+	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+	struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
+
+	uint8_t data_out [2];
+	uint8_t data_in [40];
+
+	data_out[0] = 0x03;
+	data_out[1] = 0x02;
+
+	gpio->set(i80->hdc_gpio, 0);
+
+	bus->write_bytes(bus, data_out, sizeof(data_out));
+
+	bus->read_bytes(bus, data_in, sizeof(data_in));
+
+
 	return 0;
 }
 
