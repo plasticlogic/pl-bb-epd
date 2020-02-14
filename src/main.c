@@ -59,7 +59,6 @@
 #include "hw_setup.h"
 #define LOG_TAG "main"
 #include <pl/utils.h>
-#include <pl/i80.h>
 #include "text.h"
 
 #define INTERNAL_USAGE
@@ -751,15 +750,15 @@ int start_epdc(int load_nvm_content, int execute_clear)
 	// enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
-//	sleep(1);
-//	stat = epdc->init(epdc, load_nvm_content);
-//	if (stat < 0){
-//		LOG("EPDC-Init failed: %i\n", stat);
-//		return stat;
-//	}
-//	if (execute_clear){
-//		stat = epdc->clear_init(epdc);
-//	}
+	sleep(1);
+	stat = epdc->init(epdc, load_nvm_content);
+	if (stat < 0){
+		LOG("EPDC-Init failed: %i\n", stat);
+		return stat;
+	}
+	if (execute_clear){
+		stat = epdc->clear_init(epdc);
+	}
 	return stat;
 };
 
@@ -1024,92 +1023,20 @@ int update_image_regional(char *path, const char* wfID, enum pl_update_mode mode
  * @return status
  */
 int read_register(regSetting_t regSetting){
-//	uint16_t *data = malloc(sizeof(uint16_t)*regSetting.valCount);
-//	regSetting.val = data;
-//	if (regSetting.val == NULL)
-//		return -EINVAL;
+	uint16_t *data = malloc(sizeof(uint16_t)*regSetting.valCount);
+	regSetting.val = data;
+	if (regSetting.val == NULL)
+		return -EINVAL;
 
-//	uint8_t out[10];
-//	out[0] = 0x00;
-//	out[1] = 0x00;
-//	out[2] = 0xff;
-//	out[3] = 0xff;
-//	out[4] = 0x01;
-//	out[5] = 0x00;
-//	out[6] = 0xff;
-//	out[7] = 0xff;
-//	out[8] = 0x00;
-//	out[9] = 0x00;
+	int stat = epdc->read_register(epdc, &regSetting );
+	if(stat < 0)
+		return stat;
 
-	uint8_t out[2];
-	uint8_t out4[6];
-	uint8_t in[40];
-	uint8_t in2[4];
+	printf("register addr    = 0x%04X:\n", regSetting.addr);
+	printf("register data    = \n");
+	dump_hex16(regSetting.val, regSetting.valCount);
 
-	pl_generic_interface_t * p = hardware->sInterface;
-	pl_i80_t * i80_ref = (pl_i80_t *) p->hw_ref;
-	struct pl_gpio * gpio_ref = (struct pl_gpio *) i80_ref->hw_ref;
-
-	// command low, data high
-	gpio_ref->set(i80_ref->hdc_gpio, 0);
-
-//	out[0] = 0x00;
-//	out[1] = 0x03;
-//	if(p->write_bytes(p, out, sizeof(out)) < 0)
-//		return -1;
-//
-//	out[0] = 0x00;
-//	out[1] = 0x01;
-//	if(p->write_bytes(p, out, sizeof(out)) < 0)
-//		return -1;
-//
-//	out[0] = 0x00;
-//	out[1] = 0x10;
-//	if(p->write_bytes(p, out, sizeof(out)) < 0)
-//		return -1;
-//
-//	out[0] = 0x00;
-//	out[1] = 0x00;
-//	if(p->write_bytes(p, out, sizeof(out)) < 0)
-//		return -1;
-//
-//	if(p->read_bytes(p, in2, sizeof(in2)) < 0)
-//		return -1;
-
-
-
-	out[0] = 0x03;
-	out[1] = 0x02;
-	if(p->write_bytes(p, out, sizeof(out)) < 0)
-		return -1;
-
-//	out[0] = 0x01;
-//	out[1] = 0x00;
-//
-//	if(p->write_bytes(p, out, sizeof(out)) < 0)
-//		return -1;
-//
-//	out[0] = 0xff;
-//	out[1] = 0xff;
-//
-//	if(p->write_bytes(p, out, sizeof(out)) < 0)
-//		return -1;
-
-	//gpio_ref->set(i80_ref->hdc_gpio, 1);
-
-	if(p->read_bytes(p, in, sizeof(in)) < 0)
-		return -1;
-
-
-//	int stat = epdc->read_register(epdc, &regSetting );
-//	if(stat < 0)
-//		return stat;
-//
-//	printf("register addr    = 0x%04X:\n", regSetting.addr);
-//	printf("register data    = \n");
-//	dump_hex16(regSetting.val, regSetting.valCount);
-//
-//	free(regSetting.val);
+	free(regSetting.val);
 	return 0;
 }
 
