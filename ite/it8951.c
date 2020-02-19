@@ -15,6 +15,7 @@
 #define LOG_TAG "it8951"
 #include "pl/utils.h"
 #include <pl/spi.h>
+#include <sys/time.h>
 
 
 static TWord swap_data(TWord in);
@@ -82,6 +83,21 @@ void IT8951SetImgBufBaseAddr(struct pl_i80 *p, TDWord ulImgBufAddr)
 }
 
 //-----------------------------------------------------------
+//Host Cmd 4 - REG_RD
+//-----------------------------------------------------------
+TWord IT8951ReadReg(struct pl_i80 *p, TWord usRegAddr)
+{
+    TWord usData;
+    //----------I80 Mode-------------
+    //Send Cmd and Register Address
+    LCDWriteCmdCode(p, IT8951_TCON_REG_RD);
+    LCDWriteData(p, usRegAddr);
+    //Read data from Host Data bus
+    usData = LCDReadData(p);
+    return usData;
+}
+
+//-----------------------------------------------------------
 //Host Cmd 5 - REG_WR
 //-----------------------------------------------------------
 void IT8951WriteReg(struct pl_i80 *p, TWord usRegAddr,TWord usValue)
@@ -94,11 +110,24 @@ void IT8951WriteReg(struct pl_i80 *p, TWord usRegAddr,TWord usValue)
 }
 
 //-----------------------------------------------------------
+//Display function 1 - Wait for LUT Engine Finish
+//                     Polling Display Engine Ready by LUTNo
+//-----------------------------------------------------------
+void IT8951WaitForDisplayReady(struct pl_i80 *p)
+{
+    //Check IT8951 Register LUTAFSR => NonZero ¡V Busy, 0 - Free
+    while(IT8951ReadReg(p, LUTAFSR));
+}
+
+//-----------------------------------------------------------
 //Display function 2 ¡V Load Image Area process
 //-----------------------------------------------------------
 void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo, IT8951AreaImgInfo* pstAreaImgInfo)
 {
     TDWord i,j;
+    struct timeval tStop, tStart; // time variables
+    float tTotal;
+
     //Source buffer address of Host
     TWord* pusFrameBuf = (TWord*)pstLdImgInfo->ulStartFBAddr;
 
@@ -109,7 +138,7 @@ void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgI
     //Set Image buffer(IT8951) Base address
     IT8951SetImgBufBaseAddr(p, pstLdImgInfo->ulImgBufBaseAddr);
     //Send Load Image start Cmd
-    IT8951LoadImgAreaStart(pstLdImgInfo , pstAreaImgInfo);
+    IT8951LoadImgAreaStart(p, pstLdImgInfo , pstAreaImgInfo);
     //Host Write Data
     for(j=0;j< pstAreaImgInfo->usHeight;j++)
     {
@@ -121,17 +150,41 @@ void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgI
 //
 //        #else
 
+    	gettimeofday(&tStart, NULL);
+
         for(i=0;i< pstAreaImgInfo->usWidth/2;i++)
         {
             //Write a Word(2-Bytes) for each time
-            LCDWriteData(p, *pusFrameBuf);
+        	LCDWriteData_NoSwap(p, *pusFrameBuf);
             pusFrameBuf++;
         }
         //#endif
+
+        gettimeofday(&tStop, NULL);
+
+        tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
+
+        printf("Height: %d --> Time: %f\n", j, tTotal);
+
     }
     //Send Load Img End Command
-    IT8951LoadImgEnd();
+    IT8951LoadImgEnd(p);
 //	#endif
+}
+
+//-----------------------------------------------------------
+//Display functions 3 - Application for Display panel Area
+//-----------------------------------------------------------
+void IT8951DisplayArea(struct pl_i80 *p, TWord usX, TWord usY, TWord usW, TWord usH, TWord usDpyMode)
+{
+    //Send I80 Display Command (User defined command of IT8951)
+	LCDWriteCmdCode(p, USDEF_I80_CMD_DPY_AREA); //0x0034
+    //Write arguments
+    LCDWriteData(p, usX);
+    LCDWriteData(p, usY);
+    LCDWriteData(p, usW);
+    LCDWriteData(p, usH);
+    LCDWriteData(p, usDpyMode);
 }
 
 //-----------------------------------------------------------
@@ -187,6 +240,19 @@ static void LCDWriteData(struct pl_i80 *p, TWord usData)
 }
 
 //-----------------------------------------------------------
+//Host controller function 3 ¡V Write Data to host data Bus
+//-----------------------------------------------------------
+static void LCDWriteData_NoSwap(struct pl_i80 *p, TWord usData)
+{
+    //wait for ready
+    LCDWaitForReady(p);
+    // swap data
+    usData = swap_data(usData);
+    //write data
+    gpio_i80_16b_data_out(p, usData);
+}
+
+//-----------------------------------------------------------
 //Host controller function 4 ¡V Read Data from host data Bus
 //-----------------------------------------------------------
 static TWord LCDReadData(struct pl_i80 *p)
@@ -199,6 +265,46 @@ static TWord LCDReadData(struct pl_i80 *p)
     // swap data
     usData = swap_data_in(usData);
     return usData;
+}
+
+//-----------------------------------------------------------
+//Host controller function 5 ¡V Write command to host data Bus with aruments
+//-----------------------------------------------------------
+static void LCDSendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg)
+{
+     TWord i;
+     //Send Cmd code
+     LCDWriteCmdCode(p, usCmdCode);
+     //Send Data
+     for(i=0;i<usNumArg;i++)
+     {
+         LCDWriteData(p, pArg[i]);
+     }
+}
+
+//-----------------------------------------------------------
+//Host Cmd 11 - LD_IMG_AREA
+//-----------------------------------------------------------
+void IT8951LoadImgAreaStart(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo ,IT8951AreaImgInfo* pstAreaImgInfo)
+{
+    TWord usArg[5];
+    //Setting Argument for Load image start
+    usArg[0] = (pstLdImgInfo->usEndianType << 8 )
+    |(pstLdImgInfo->usPixelFormat << 4)
+    |(pstLdImgInfo->usRotate);
+    usArg[1] = pstAreaImgInfo->usX;
+    usArg[2] = pstAreaImgInfo->usY;
+    usArg[3] = pstAreaImgInfo->usWidth;
+    usArg[4] = pstAreaImgInfo->usHeight;
+    //Send Cmd and Args
+    LCDSendCmdArg(p, IT8951_TCON_LD_IMG_AREA , usArg , 5);
+}
+//-----------------------------------------------------------
+//Host Cmd 12 - LD_IMG_END
+//-----------------------------------------------------------
+void IT8951LoadImgEnd(struct pl_i80 *p)
+{
+    LCDWriteCmdCode(p, IT8951_TCON_LD_IMG_END);
 }
 
 //-------------------------------------------------------------------

@@ -159,11 +159,26 @@ it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interfa
 static void LCDWaitForReady(struct pl_i80 *p);
 static void LCDWriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
 static void LCDWriteData(struct pl_i80 *p, TWord usData);
+static void LCDWriteData_NoSwap(struct pl_i80 *p, TWord usData);
 static TWord LCDReadData(struct pl_i80 *p);
+static void LCDSendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg);
+
+
 static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd);
 static void gpio_i80_16b_data_out(struct pl_i80 *i80_ref, TWord usData);
 static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref);
 
 void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf);
+
+void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo, IT8951AreaImgInfo* pstAreaImgInfo);
+void IT8951DisplayArea(struct pl_i80 *p, TWord usX, TWord usY, TWord usW, TWord usH, TWord usDpyMode);
+
+void IT8951LoadImgEnd(struct pl_i80 *p);
+void IT8951LoadImgAreaStart(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo ,IT8951AreaImgInfo* pstAreaImgInfo);
+
+void IT8951WaitForDisplayReady(struct pl_i80 *p);
+
+TWord IT8951ReadReg(struct pl_i80 *p, TWord usRegAddr);
+void IT8951WriteReg(struct pl_i80 *p, TWord usRegAddr,TWord usValue);
 
 #endif /* IT8951_H_ */
