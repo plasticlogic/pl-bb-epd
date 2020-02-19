@@ -31,6 +31,7 @@
 #include "epson/epson-s1d135xx.h"
 #include "epson/s1d135xx_hv.h"
 #include "epson/s1d13541-nvm.h"
+#include "ite/it8951_controller.h"
 #include "hardware/pmic-max17135.h"
 #include "hardware/pmic-tps65185.h"
 #include <hardware/nvm-i2c-24LC014H.h>
@@ -51,6 +52,7 @@ static pl_pmic_t *get_max17135_instance(hw_setup_t *p);
 static pl_pmic_t *get_tps65185_instance(hw_setup_t *p);
 static s1d135xx_t *get_s1d13524_instance(hw_setup_t *p);
 static s1d135xx_t *get_s1d13541_instance(hw_setup_t *p);
+static it8951_t *get_it8951_instance(hw_setup_t *p);
 
 static int initialize_control_system(hw_setup_t *p, const char *selection);
 static int initialize_driver_board(hw_setup_t *p, const char *selection);
@@ -63,6 +65,7 @@ static int initialize_hv_timing(hw_setup_t *p, const char *selection);
 static int initialize_hv_driver(hw_setup_t *p, const char *selection);
 static int initialize_controller(hw_setup_t *p, const char *selection);
 
+static it8951_t * it8951;						//!< pointer to an ITE IT8951 implementation
 static s1d135xx_t *s1d13541;					//!< pointer to an Epson S1D13541 implementation
 static s1d135xx_t *s1d13524;					//!< pointer to an Epson S1D13524 implementation
 static pl_pmic_t *max17135;						//!< pointer to MAX17135 PMIC object
@@ -291,6 +294,19 @@ static s1d135xx_t *get_s1d13541_instance(hw_setup_t *p){
 	}
 
 	return s1d13541;
+}
+
+/**
+ * Implements singleton pattern for ITE IT8951 variable.
+ * @return instance of IT8951
+ * @see it8951_t
+ */
+static it8951_t *get_it8951_instance(hw_setup_t *p){
+	if (it8951 == NULL){
+		it8951 = it8951_new(&(p->gpios), (pl_generic_interface_t*) p->sInterface, &(p->host_i2c), p->it8951_pins);
+	}
+
+	return it8951;
 }
 
 /**
@@ -618,10 +634,13 @@ static int initialize_controller(hw_setup_t *p, const char *selection){
 		s1d13541 = get_s1d13541_instance(p);
 		s1d13541_controller_setup(p->controller, s1d13541);
 	}
+	else if (!strcmp(selection, "IT8951" )){
+		it8951 = get_it8951_instance(p);
+		it8951_controller_setup(p->controller, it8951);
+	}
 	else if (!strcmp(selection, "NONE" )){
 
 	}
-
 	else {
 		LOG("Given EPD controller type not supported.");
 		p->controller->delete(p->controller);

@@ -107,7 +107,7 @@ struct pl_gpio {
 	 */
 	void (*set_inactive)(unsigned gpio, uint16_t flags);
 
-};
+} pl_gpio_t;
 
 /** GPIO configuration information */
 struct pl_gpio_config {
