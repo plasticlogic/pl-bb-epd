@@ -135,6 +135,10 @@ static int init_controller(struct pl_generic_controller *controller, int use_wf_
 
 	bus->read_bytes(bus, data_in, sizeof(data_in));
 
+	// does the same again - just for confirmation
+
+	I80IT8951DevInfo devInfo;
+	GetIT8951SystemInfo(i80, &devInfo);
 
 	return 0;
 }
@@ -156,6 +160,36 @@ static int load_wflib(struct pl_generic_controller *controller, const char *file
 
 static int load_png_image(struct pl_generic_controller *controller, const char *path, const struct pl_area *area, int left,	int top)
 {
+	it8951_t *it8951 = controller->hw_ref;
+
+	assert(it8951 != NULL);
+
+	pl_generic_interface_t *bus = it8951->interface;
+
+	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+	struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
+
+	uint8_t data_out [2];
+	uint8_t data_in [40];
+
+	data_out[0] = 0x03;
+	data_out[1] = 0x02;
+
+	gpio->set(i80->hdc_gpio, 0);
+
+	bus->write_bytes(bus, data_out, sizeof(data_out));
+
+	bus->read_bytes(bus, data_in, sizeof(data_in));
+
+
+    //Set to Enable I80 Packed mode
+    IT8951WriteReg(I80CPCR, 0x0001);
+
+	TByte* gpFrameBuf = malloc(1872*1404);
+	memset(gpFrameBuf, 0xf0, 1872*1404);
+
+
+
 	return 0;
 }
 
