@@ -160,6 +160,7 @@ static void LCDWaitForReady(struct pl_i80 *p);
 static void LCDWriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
 static void LCDWriteData(struct pl_i80 *p, TWord usData);
 static void LCDWriteData_NoSwap(struct pl_i80 *p, TWord usData);
+static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size);
 static TWord LCDReadData(struct pl_i80 *p);
 static void LCDSendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg);
 
