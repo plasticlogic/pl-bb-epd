@@ -123,17 +123,17 @@ static int init_controller(struct pl_generic_controller *controller, int use_wf_
 	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 	struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
 
-	uint8_t data_out [2];
-	uint8_t data_in [40];
-
-	data_out[0] = 0x03;
-	data_out[1] = 0x02;
-
-	gpio->set(i80->hdc_gpio, 0);
-
-	bus->write_bytes(bus, data_out, sizeof(data_out));
-
-	bus->read_bytes(bus, data_in, sizeof(data_in));
+//	uint8_t data_out [2];
+//	uint8_t data_in [40];
+//
+//	data_out[0] = 0x03;
+//	data_out[1] = 0x02;
+//
+//	gpio->set(i80->hdc_gpio, 0);
+//
+//	bus->write_bytes(bus, data_out, sizeof(data_out));
+//
+//	bus->read_bytes(bus, data_in, sizeof(data_in));
 
 	// does the same again - just for confirmation
 

@@ -52,10 +52,12 @@ void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf)
 //
 //    #else
     //I80 interface - Single Read available
-    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
-    {
-        pusWord[i] = LCDReadData(p);
-    }
+//    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
+//    {
+//        pusWord[i] = LCDReadData(p);
+//    }
+
+    LCDReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
 
 //    #endif
 
@@ -270,6 +272,8 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
     //GPIO_SET_H(CD);
     gpio->set(p->hdc_gpio, 1);
 
+    //CS
+    gpio->set(p->hcs_n_gpio, 0);
 
     struct timeval tStop, tStart; // time variables
     float tTotal;
@@ -299,6 +303,9 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 
     //wait for ready
     LCDWaitForReady(p);
+
+    //CS
+    gpio->set(p->hcs_n_gpio, 1);
 }
 
 //-----------------------------------------------------------
@@ -314,6 +321,39 @@ static TWord LCDReadData(struct pl_i80 *p)
     // swap data
     usData = swap_data_in(usData);
     return usData;
+}
+
+//-----------------------------------------------------------
+//Host controller function 4 ¡V Read Data from host data Bus
+//-----------------------------------------------------------
+static void LCDReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
+{
+	int iResult = 0;
+
+    //wait for ready
+    LCDWaitForReady(p);
+
+	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
+
+	//read data from host data bus
+    gpio->set(p->hdc_gpio, 1);
+
+    //CS
+    gpio->set(p->hcs_n_gpio, 0);
+
+    int i = 0;
+    for(i=0; i<size; i++)
+    {
+    	// Executing read within the loop is necessary,
+    	// since executing read the does the HRD# pulse only once,
+    	// even with count >1 !
+    	iResult = read(p->fd, usData+i, 1);
+    	// swap data
+    	usData[i] = swap_data_in(usData[i]);
+    }
+
+    //CS
+    gpio->set(p->hcs_n_gpio, 1);
 }
 
 //-----------------------------------------------------------
@@ -388,7 +428,7 @@ static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd)
 
     //CS-H
     //GPIO_SET_H(CS);
-    //gpio->set(i80_ref->hcs_n_gpio, 1);
+    gpio->set(i80_ref->hcs_n_gpio, 1);
 
 }
 //-------------------------------------------------------------------
@@ -410,7 +450,7 @@ static void gpio_i80_16b_data_out(struct pl_i80 *i80_ref, TWord usData)
     gpio->set(i80_ref->hdc_gpio, 1);
     //CS-L
     //GPIO_SET_L(CS);
-    //gpio->set(i80_ref->hcs_n_gpio, 0);
+    gpio->set(i80_ref->hcs_n_gpio, 0);
     //WR Enable
     //GPIO_SET_L(WEN);
     //gpio->set(i80_ref->hwe_n_gpio, 0);
@@ -423,7 +463,7 @@ static void gpio_i80_16b_data_out(struct pl_i80 *i80_ref, TWord usData)
     //gpio->set(i80_ref->hwe_n_gpio, 1);
     //CS-H
     //GPIO_SET_H(CS);
-    //gpio->set(i80_ref->hcs_n_gpio, 1);
+    gpio->set(i80_ref->hcs_n_gpio, 1);
 }
 //-------------------------------------------------------------------
 //Host controller Read Data for 16 bits using GPIO simulation
@@ -447,10 +487,10 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
     gpio->set(i80_ref->hdc_gpio, 1);
     //CS-L
     //GPIO_SET_L(CS);
-    //gpio->set(i80_ref->hcs_n_gpio, 0);
+    gpio->set(i80_ref->hcs_n_gpio, 0);
     //RD Enable
     //GPIO_SET_L(REN);
-    gpio->set(i80_ref->hrd_n_gpio, 0);
+    //gpio->set(i80_ref->hrd_n_gpio, 0);
     //Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
     //See your host setting of GPIO
     //usData = GPIO_I80_Bus[16];
@@ -458,10 +498,10 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
 
     //WR Enable - H
     //GPIO_SET_H(WEN);
-    gpio->set(i80_ref->hrd_n_gpio, 1);
+    //gpio->set(i80_ref->hrd_n_gpio, 1);
     //CS-H
     //GPIO_SET_H(CS);
-    //gpio->set(i80_ref->hcs_n_gpio, 1);
+    gpio->set(i80_ref->hcs_n_gpio, 1);
 
     return usData;
 }
