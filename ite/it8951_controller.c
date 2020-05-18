@@ -123,17 +123,17 @@ static int init_controller(struct pl_generic_controller *controller, int use_wf_
 	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 	struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
 
-	uint8_t data_out [2];
-	uint8_t data_in [40];
-
-	data_out[0] = 0x03;
-	data_out[1] = 0x02;
-
-	gpio->set(i80->hdc_gpio, 0);
-
-	bus->write_bytes(bus, data_out, sizeof(data_out));
-
-	bus->read_bytes(bus, data_in, sizeof(data_in));
+//	uint8_t data_out [2];
+//	uint8_t data_in [40];
+//
+//	data_out[0] = 0x03;
+//	data_out[1] = 0x02;
+//
+//	gpio->set(i80->hdc_gpio, 0);
+//
+//	bus->write_bytes(bus, data_out, sizeof(data_out));
+//
+//	bus->read_bytes(bus, data_in, sizeof(data_in));
 
 	// does the same again - just for confirmation
 
@@ -182,8 +182,7 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
     //Get Device Info
 	I80IT8951DevInfo devInfo;
 	GetIT8951SystemInfo(i80, &devInfo);
-    //Host Frame Buffer allocation
-    gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
+
     //Get Image Buffer Address of IT8951
     gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 
@@ -191,8 +190,21 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
     IT8951WriteReg(i80, I80CPCR, 0x0001);
     //-------------------------------------------------------------------
 
-    //Write pixel 0xF0(White) to Frame Buffer
-    memset(gpFrameBuf, 0xF0, devInfo.usPanelW * devInfo.usPanelH);
+    int width = 0;
+    int height = 0;
+
+    if(0)
+    {
+        //Host Frame Buffer allocation
+        gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
+		//Write pixel 0xF0(White) to Frame Buffer
+		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
+    }
+    else
+    {
+		if (read_png(path, &gpFrameBuf, &width, &height))
+			return -ENOENT;
+	}
 
     //Check TCon is free ? Wait TCon Ready (optional)
     IT8951WaitForDisplayReady(i80);
@@ -216,7 +228,10 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
     //Load Image from Host to IT8951 Image Buffer
     IT8951HostAreaPackedPixelWrite(i80, &stLdImgInfo, &stAreaImgInfo);//Display function 2
     //Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
-    IT8951DisplayArea(i80, 0,0, devInfo.usPanelW, devInfo.usPanelH, 0);
+    IT8951DisplayArea(i80, 0,0, devInfo.usPanelW, devInfo.usPanelH, 2);
+
+    if(gpFrameBuf)
+    	free(gpFrameBuf);
 
 	return 0;
 }

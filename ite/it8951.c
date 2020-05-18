@@ -18,7 +18,7 @@
 #include <sys/time.h>
 
 
-static TWord swap_data(TWord in);
+static void swap_data(TWord *buff, int size);
 static TWord swap_data_in(TWord in);
 
 
@@ -52,10 +52,12 @@ void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf)
 //
 //    #else
     //I80 interface - Single Read available
-    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
-    {
-        pusWord[i] = LCDReadData(p);
-    }
+//    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
+//    {
+//        pusWord[i] = LCDReadData(p);
+//    }
+
+    LCDReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
 
 //    #endif
 
@@ -140,8 +142,9 @@ void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgI
     //Send Load Image start Cmd
     IT8951LoadImgAreaStart(p, pstLdImgInfo , pstAreaImgInfo);
     //Host Write Data
-    for(j=0;j< pstAreaImgInfo->usHeight;j++)
-    {
+    gettimeofday(&tStart, NULL);
+//    for(j=0;j< pstAreaImgInfo->usHeight;j++)
+//    {
 //    	#ifdef __SPI_2_I80_INF__
 //
 //            //Write 1 Line for each SPI transfer
@@ -150,23 +153,31 @@ void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgI
 //
 //        #else
 
-    	gettimeofday(&tStart, NULL);
+//    	gettimeofday(&tStart, NULL);
 
-        for(i=0;i< pstAreaImgInfo->usWidth/2;i++)
-        {
-            //Write a Word(2-Bytes) for each time
-        	LCDWriteData_NoSwap(p, *pusFrameBuf);
-            pusFrameBuf++;
-        }
+//        for(i=0;i< pstAreaImgInfo->usWidth/2;i++)
+//        {
+//            //Write a Word(2-Bytes) for each time
+//        	LCDWriteData_NoSwap(p, *pusFrameBuf);
+//            pusFrameBuf++;
+//        }
         //#endif
 
-        gettimeofday(&tStop, NULL);
+    	//LCDWriteDataBurst(p, pusFrameBuf + (j * pstAreaImgInfo->usWidth/2), pstAreaImgInfo->usWidth/2);
 
-        tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
+//        gettimeofday(&tStop, NULL);
+//
+//        tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
 
-        printf("Height: %d --> Time: %f\n", j, tTotal);
+        //printf("Height: %d --> Time: %f\n", j, tTotal);
 
-    }
+    //}
+    LCDWriteDataBurst(p, pusFrameBuf, pstAreaImgInfo->usWidth/2 * pstAreaImgInfo->usHeight);
+    gettimeofday(&tStop, NULL);
+
+    tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
+    printf("Height: %d --> Time: %f\n", j, tTotal);
+
     //Send Load Img End Command
     IT8951LoadImgEnd(p);
 //	#endif
@@ -221,7 +232,7 @@ static void LCDWriteCmdCode(struct pl_i80 *p, TWord usCmdCode)
     //wait for ready
     LCDWaitForReady(p);
     // swap data
-    usCmdCode = swap_data(usCmdCode);
+    swap_data(&usCmdCode, 1);
     //write cmd code
     gpio_i80_16b_cmd_out(p, usCmdCode);
 }
@@ -234,7 +245,7 @@ static void LCDWriteData(struct pl_i80 *p, TWord usData)
     //wait for ready
     LCDWaitForReady(p);
     // swap data
-    usData = swap_data(usData);
+    swap_data(&usData, 1);
     //write data
     gpio_i80_16b_data_out(p, usData);
 }
@@ -242,14 +253,59 @@ static void LCDWriteData(struct pl_i80 *p, TWord usData)
 //-----------------------------------------------------------
 //Host controller function 3 ¡V Write Data to host data Bus
 //-----------------------------------------------------------
-static void LCDWriteData_NoSwap(struct pl_i80 *p, TWord usData)
+static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 {
+	int iResult = 0;
+
+	//int i = 0;
+	//TWord usData_;
+
+	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
+
+    // swap data
+    swap_data(usData, size);
+
     //wait for ready
     LCDWaitForReady(p);
-    // swap data
-    usData = swap_data(usData);
-    //write data
-    gpio_i80_16b_data_out(p, usData);
+
+    //Switch C/D to Data => Data - H
+    //GPIO_SET_H(CD);
+    gpio->set(p->hdc_gpio, 1);
+
+    //CS
+    gpio->set(p->hcs_n_gpio, 0);
+
+    struct timeval tStop, tStart; // time variables
+    float tTotal;
+
+    gettimeofday(&tStart, NULL);
+    //for(i=0; i<size; i++)
+//    {
+////    	usData_ = usData[i];
+////        // swap data
+////    	usData_ = swap_data(usData_);
+////		//Set 16 bits Bus Data
+////		//See your host setting of GPIO
+////		iResult = write(p->fd, &usData_, 1);
+//
+//		// unswaped data
+//		iResult = write(p->fd, usData[i], 1);
+//    }
+
+    iResult = write(p->fd, usData, size/2);
+    LCDWaitForReady(p);
+    iResult = write(p->fd, usData + size/2, size/2);
+
+
+    gettimeofday(&tStop, NULL);
+    tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
+    printf("Data Transmission --> Time: %f\n", tTotal);
+
+    //wait for ready
+    LCDWaitForReady(p);
+
+    //CS
+    gpio->set(p->hcs_n_gpio, 1);
 }
 
 //-----------------------------------------------------------
@@ -265,6 +321,39 @@ static TWord LCDReadData(struct pl_i80 *p)
     // swap data
     usData = swap_data_in(usData);
     return usData;
+}
+
+//-----------------------------------------------------------
+//Host controller function 4 ¡V Read Data from host data Bus
+//-----------------------------------------------------------
+static void LCDReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
+{
+	int iResult = 0;
+
+    //wait for ready
+    LCDWaitForReady(p);
+
+	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
+
+	//read data from host data bus
+    gpio->set(p->hdc_gpio, 1);
+
+    //CS
+    gpio->set(p->hcs_n_gpio, 0);
+
+    int i = 0;
+    for(i=0; i<size; i++)
+    {
+    	// Executing read within the loop is necessary,
+    	// since executing read the does the HRD# pulse only once,
+    	// even with count >1 !
+    	iResult = read(p->fd, usData+i, 1);
+    	// swap data
+    	usData[i] = swap_data_in(usData[i]);
+    }
+
+    //CS
+    gpio->set(p->hcs_n_gpio, 1);
 }
 
 //-----------------------------------------------------------
@@ -327,7 +416,7 @@ static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd)
     gpio->set(i80_ref->hcs_n_gpio, 0);
     //WR Enable
     //GPIO_SET_L(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 0);
+    //gpio->set(i80_ref->hwe_n_gpio, 0);
     //Set Data output (Parallel output request)
     //See your host setting of GPIO
     //GPIO_I80_Bus[16] = usCmd;
@@ -335,7 +424,7 @@ static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd)
 
     //WR Enable - H
     //GPIO_SET_H(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 1);
+    //gpio->set(i80_ref->hwe_n_gpio, 1);
 
     //CS-H
     //GPIO_SET_H(CS);
@@ -364,14 +453,14 @@ static void gpio_i80_16b_data_out(struct pl_i80 *i80_ref, TWord usData)
     gpio->set(i80_ref->hcs_n_gpio, 0);
     //WR Enable
     //GPIO_SET_L(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 0);
+    //gpio->set(i80_ref->hwe_n_gpio, 0);
     //Set 16 bits Bus Data
     //See your host setting of GPIO
     iResult = write(i80_ref->fd, &usData, 1);
 
     //WR Enable - H
     //GPIO_SET_H(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 1);
+    //gpio->set(i80_ref->hwe_n_gpio, 1);
     //CS-H
     //GPIO_SET_H(CS);
     gpio->set(i80_ref->hcs_n_gpio, 1);
@@ -401,7 +490,7 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
     gpio->set(i80_ref->hcs_n_gpio, 0);
     //RD Enable
     //GPIO_SET_L(REN);
-    gpio->set(i80_ref->hrd_n_gpio, 0);
+    //gpio->set(i80_ref->hrd_n_gpio, 0);
     //Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
     //See your host setting of GPIO
     //usData = GPIO_I80_Bus[16];
@@ -409,7 +498,7 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
 
     //WR Enable - H
     //GPIO_SET_H(WEN);
-    gpio->set(i80_ref->hrd_n_gpio, 1);
+    //gpio->set(i80_ref->hrd_n_gpio, 1);
     //CS-H
     //GPIO_SET_H(CS);
     gpio->set(i80_ref->hcs_n_gpio, 1);
@@ -417,44 +506,35 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
     return usData;
 }
 
-static TWord swap_data(TWord in)
+static void swap_data(TWord *buff, int size)
 {
 	int i = 0;
-	uint8_t buff[2];
-	uint8_t tmp[2];
+	TWord tmp = 0;
 
-	buff[1] = (uint8_t)  in;
-	buff[0] = (uint8_t) (in >> 8);
+	for(i = 0; i< size; i++)
+	{
+		tmp = buff[i];
 
-	TWord out;
+		buff[i] = 		    (( tmp & 0x0080 ) << 1 );
+		buff[i] = buff[i] | (( tmp & 0x0040 ) << 3);
+		buff[i] = buff[i] | (( tmp & 0x0020 ) << 7);
+		buff[i] = buff[i] | (( tmp & 0x0010 ) << 6);
+		buff[i] = buff[i] | (( tmp & 0x0008 ) << 10);
+		buff[i] = buff[i] | (( tmp & 0x0004 ) << 9);
+		buff[i] = buff[i] | (( tmp & 0x0002 ) << 13);
+		buff[i] = buff[i] | (( tmp & 0x0001 ) << 15);
 
-	tmp[0] = buff[0];
-	tmp[1] = buff[1];
-
-	buff[i*2+1] = 		    (( tmp[1] & 0x80 ) >> 7);
-	buff[i*2+1] = buff[i*2+1] | (( tmp[1] & 0x40 ) >> 5);
-	buff[i*2+1] = buff[i*2+1] | (( tmp[1] & 0x20 ) >> 1);
-	buff[i*2+1] = buff[i*2+1] | (( tmp[1] & 0x10 ) >> 2);
-	buff[i*2+1] = buff[i*2+1] | (( tmp[1] & 0x08 ) << 2);
-	buff[i*2+1] = buff[i*2+1] | (( tmp[1] & 0x04 ) << 1);
-	buff[i*2+1] = buff[i*2+1] | (( tmp[1] & 0x02 ) << 5);
-	buff[i*2+1] = buff[i*2+1] | (( tmp[1] & 0x01 ) << 7);
-
-	buff[i*2] = 		        (( tmp[0] & 0x80 ) >> 7);
-	buff[i*2] = buff[i*2] | (( tmp[0] & 0x40 ) >> 5);
-	buff[i*2] = buff[i*2] | (( tmp[0] & 0x20 ) >> 3);
-	buff[i*2] = buff[i*2] | (( tmp[0] & 0x10 ) >> 1);
-	buff[i*2] = buff[i*2] | (( tmp[0] & 0x08 ) << 1);
-	buff[i*2] = buff[i*2] | (( tmp[0] & 0x04 ) << 3);
-	buff[i*2] = buff[i*2] | (( tmp[0] & 0x02 ) << 5);
-	buff[i*2] = buff[i*2] | (( tmp[0] & 0x01 ) << 7);
-
-	out =        buff[0];
-	out = out | (buff[1] << 8);
+		buff[i] = buff[i] | (( tmp & 0x8000 ) >> 15);
+		buff[i] = buff[i] | (( tmp & 0x4000 ) >> 13);
+		buff[i] = buff[i] | (( tmp & 0x2000 ) >> 11);
+		buff[i] = buff[i] | (( tmp & 0x1000 ) >> 9);
+		buff[i] = buff[i] | (( tmp & 0x0800 ) >> 7);
+		buff[i] = buff[i] | (( tmp & 0x0400 ) >> 5);
+		buff[i] = buff[i] | (( tmp & 0x0200 ) >> 3);
+		buff[i] = buff[i] | (( tmp & 0x0100 ) >> 1);
+	}
 
 	//printf("swap: 0x%x | 0x%x --> 0x%x | 0x%x\n", tmp[0], tmp[1], buff[i*2], buff[i*2+1]);
-
-	return out;
 }
 
 static TWord swap_data_in(TWord in)
