@@ -60,6 +60,7 @@
 #define LOG_TAG "main"
 #include <pl/utils.h>
 #include "text.h"
+#include <libgd/src/gd.h>
 
 #define INTERNAL_USAGE
 #define VERSION_INFO		"v1.2"
@@ -126,6 +127,7 @@ int execute_get_temperature(int argc, char **argv);
 int execute_get_resolution(int argc, char **argv);
 int execute_update_image(int argc, char **argv);
 int execute_update_image_regional(int argc, char **argv);
+int execute_update_gfx(int argc, char **argv);
 int execute_slideshow(int argc, char **argv);
 int execute_counter(int argc, char **argv);
 int execute_write_reg(int argc, char **argv);
@@ -148,6 +150,7 @@ void printHelp_get_waveform(int identLevel);
 void printHelp_get_temperature(int identLevel);
 void printHelp_update_image(int identLevel);
 void printHelp_update_image_regional(int identLevel);
+void printHelp_update_gfx(int identLevel);
 void printHelp_write_reg(int identLevel);
 void printHelp_read_reg(int identLevel);
 void printHelp_info(int identLevel);
@@ -170,6 +173,7 @@ struct CmdLineOptions supportedOperations[] = {
 	{"-get_temperature",		"gets the temperature", 					execute_get_temperature,		printHelp_get_temperature},
 	{"-update_image", 			"updates the display", 						execute_update_image, 			printHelp_update_image},
 	{"-update_image_regional", 	"updates the display on certain area", 		execute_update_image_regional, 	printHelp_update_image_regional},
+	{"-update_gfx",		"updates the display with auto gen. gfx image", execute_update_gfx, 		printHelp_update_gfx},
 	{"-slideshow",				"shows a slidshow of .png images",			execute_slideshow,				printHelp_slideshow},
 	{"-fill", 					"fill the screen with a defined greylevel", execute_fill, 					printHelp_fill},
 //		{"-count",					"shows a counting number",					execute_counter,				printHelp_counter},
@@ -493,6 +497,28 @@ int execute_update_image_regional(int argc, char **argv){
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
 	}
 	return stat;
+}
+
+int execute_update_gfx(int argc, char **argv){
+
+	int x = 1280;
+	int y = 960;
+
+	char* wfID = "default";
+	char* path = "/tmp/gfx.png";
+
+	FILE * f = fopen(path, "w");
+
+	gdImagePtr gfx = gdImageCreateTrueColor(x, y);
+	gdImageFilledRectangle(gfx, 0, 0, 99, 99, 0xFFFFFF);
+
+	gdImagePng(gfx, f);
+
+	fclose(f);
+
+	update_image(path, wfID, 0, 1, 1, 0);
+
+	return 0;
 }
 
 int execute_counter(int argc, char**argv){
@@ -1447,6 +1473,22 @@ void printHelp_update_image(int identLevel){
 }
 
 void printHelp_update_image_regional(int identLevel){
+	printf("%*s Updates the display with a given image.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -update_image <image> <area> <position>\n", identLevel, " ");
+	printf("\n");
+	printf("%*s \t<image>               : \tpath to the image file.\n", identLevel, " ");
+	printf("%*s \t<area>                : \tarea to be used (top,left,height,width).\n", identLevel, " ");
+	printf("%*s \t<position>            : \tposition, where the area is printed to (top,left).\n", identLevel, " ");
+	printf("%*s \t<wfID>                : \tid of the used waveform id.\n", identLevel, " ");
+	printf("%*s \t<updateMode>          : \tid of the used update mode.\n", identLevel, " ");
+	printf("%*s \t<updateCount>         : \tcount of image updates to execute.\n", identLevel, " ");
+	printf("%*s \t<waitTime>            : \ttime to wait after each image update [ms].\n", identLevel, " ");
+	printf("%*s \t<vcomSwitchEnable>    : \tautomatic vcom switch enable: 0=disable/1=enable.\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_update_gfx(int identLevel){
 	printf("%*s Updates the display with a given image.\n", identLevel, " ");
 	printf("\n");
 	printf("%*s Usage: epdc-app -update_image <image> <area> <position>\n", identLevel, " ");

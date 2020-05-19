@@ -1,9 +1,9 @@
 #ifndef GD_ERRORS_H
 #define GD_ERRORS_H
 
-#ifndef _WIN32
-# include <syslog.h>
-#else
+//#ifndef _WIN32
+//# include <syslog.h>
+//#else
 /*
  * priorities/facilities are encoded into a single 32-bit quantity, where the
  * bottom 3 bits are the priority (0-7) and the top 28 bits are the facility
@@ -21,7 +21,7 @@
 # define LOG_NOTICE      5       /* normal but significant condition */
 # define LOG_INFO        6       /* informational */
 # define LOG_DEBUG       7       /* debug-level messages */
-#endif
+//#endif
 
 /*
 LOG_EMERG      system is unusable

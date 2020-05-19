@@ -10,10 +10,11 @@
 #include "gd_errors.h"
 
 /* JCE: Arrange HAVE_LIBPNG so that it can be set in gd.h */
+#define HAVE_LIBPNG
 #ifdef HAVE_LIBPNG
 
 #include "gdhelpers.h"
-#include "png.h"		/* includes zlib.h and setjmp.h */
+#include "libpng-1.2.51/png.h"		/* includes zlib.h and setjmp.h */
 
 #define TRUE 1
 #define FALSE 0
