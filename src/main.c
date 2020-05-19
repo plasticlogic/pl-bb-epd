@@ -61,6 +61,7 @@
 #include <pl/utils.h>
 #include "text.h"
 #include <libgd/src/gd.h>
+#include <libgd/src/gdfontl.h>
 
 #define INTERNAL_USAGE
 #define VERSION_INFO		"v1.2"
@@ -506,11 +507,19 @@ int execute_update_gfx(int argc, char **argv){
 
 	char* wfID = "default";
 	char* path = "/tmp/gfx.png";
+	char *s = "Hello gd";
 
 	FILE * f = fopen(path, "w");
 
 	gdImagePtr gfx = gdImageCreateTrueColor(x, y);
-	gdImageFilledRectangle(gfx, 0, 0, 99, 99, 0xFFFFFF);
+	//gdImageFilledRectangle(gfx, 0, 0, 99, 99, 0xFFFFFF);
+
+	gdFontPtr fontptr = gdFontGetLarge();
+	gdImageString(gfx, fontptr,
+			gfx->sx / 2 - (strlen(s) * fontptr->w / 2),
+			gfx->sy / 2 - fontptr->h / 2,
+			(unsigned char*)s, 0xFFFFFF);
+
 
 	gdImagePng(gfx, f);
 
