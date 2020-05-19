@@ -17,16 +17,7 @@
 # endif
 #endif
 
-#ifdef HAVE_STDINT_H
 # include <stdint.h>
-#else
-# if defined(HAVE_INTTYPES_H)
-#  include <inttypes.h>
-# else
-#  include "msinttypes/inttypes.h"
-# endif
-#endif
-
 #include "gd.h"
 
 #ifndef MIN
