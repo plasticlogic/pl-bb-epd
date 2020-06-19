@@ -347,10 +347,10 @@ static int initialize_nvm(hw_setup_t *p, const char *selection, const char *form
 	}
 	else if(!strcmp(selection, "MACRONIX_MX25U4033E")){
 		LOG("%s: Boardname: %s", __func__, p->boardname);
-		if(!strcmp("FALCON", p->boardname)
-				|| !strcmp("FALCON_PARALLEL", p->boardname)
-				|| !strcmp("FALCON_I80", p->boardname)){
+		if(!strcmp("FALCON_PARALLEL", p->boardname)){
 			p->nvmSPI->cs_gpio = FALCON_NVM_CS;
+		}else if(!strcmp("FALCON_I80", p->boardname)){
+			p->nvmSPI->cs_gpio = FALCON_FIRMWARE_NVM_CS;
 		}else if(!strcmp("CHIFFCHAFF", p->boardname)){
 			p->nvmSPI->cs_gpio = CHIFFCHAFF_NVM_CS;
 		}

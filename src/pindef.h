@@ -79,6 +79,7 @@
 #define HBZ1_3_3V3_EN		BEAGLEBONE_GPIO(1,28)  //P9-12
 
 #define FALCON_NVM_CS		BEAGLEBONE_GPIO(3,17)	//P9-28
+#define FALCON_FIRMWARE_NVM_CS		BEAGLEBONE_GPIO(1,19)	//P9-16
 
 
 static const struct pl_gpio_config g_chiffchaff_gpios[] = {

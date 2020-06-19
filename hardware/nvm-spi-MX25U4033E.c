@@ -34,14 +34,14 @@
 #include <pl/utils.h>
 
 static int send_cmd(struct pl_spi *spi, uint8_t cmd);
-//remove static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_t * blob, int len);
+static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_t * blob, int len);
 static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr, uint8_t * blob, int len);
 
 int nvm_MX25U4033E_spi_init(struct pl_nvm * nvm, struct pl_spi * spi){
 
 	nvm->hw_ref = spi;
 	nvm->read = nvm_MX25U4033E_spi_read;
-	//remove nvm->pgm = nvm_MX25U4033E_spi_pgm;
+	nvm->pgm = nvm_MX25U4033E_spi_pgm;
 	nvm->size = MX25U4033E_SIZE;
 
 	return 0;
@@ -96,7 +96,7 @@ static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr, uint8
 
 	return stat;
 }
-/*//remove
+
 static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_t * blob, int len){
 
 	assert(blob);
@@ -115,6 +115,16 @@ static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_
 
 	// open spi
 	stat = spi->open(spi);
+
+	// read chip id
+	uint8_t rdid_data[3];
+	stat = spi->set_cs(spi, 1);
+	stat = spi->set_cs(spi, 0);
+	stat = send_cmd(spi, MX25U4033E_RDID);
+	stat = spi->read_bytes(spi, rdid_data, 1);
+	stat = spi->read_bytes(spi, rdid_data, 1);
+	stat = spi->read_bytes(spi, rdid_data, 1);
+	stat = spi->set_cs(spi, 1);
 
 	// send write enable
 	stat = spi->set_cs(spi, 1);
@@ -193,5 +203,4 @@ static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_
 
 	return stat;
 }
-//*/
 

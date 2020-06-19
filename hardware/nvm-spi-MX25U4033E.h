@@ -43,6 +43,8 @@
 #define MX25U4033E_CE		(0x60)	// chip erase
 #define MX25U4033E_RDID		(0x9f)	// read identification
 
+#define MX25U4033E_MANID_DEVID (0xc22018) // (0xc22013) 1xbyte Manufacture id 2xbyte device id
+
 // Status Register Bits
 #define MX25U4033E_STATUS_WIP	(1	   ) // write in progress
 #define MX25U4033E_STATUS_WEL	(1 << 1) // write enable latch

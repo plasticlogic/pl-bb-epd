@@ -81,7 +81,7 @@ enum nvm_type{
 typedef struct pl_nvm {
 	enum nvm_format_version nvm_format;		//!< specifies the data format stored in the NVM
 
-//	int (*pgm)(struct pl_nvm *nvm, unsigned int addr, uint8_t *data, int count);
+	int (*pgm)(struct pl_nvm *nvm, unsigned int addr, uint8_t *data, int count);
 //	int (*pgm_header_and_wfdata)(struct pl_nvm *nvm, uint8_t *data, int count);
 
 	int (*read)(struct pl_nvm *nvm, unsigned int addr, uint8_t *data, int count);

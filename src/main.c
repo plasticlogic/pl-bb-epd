@@ -133,6 +133,7 @@ int execute_slideshow(int argc, char **argv);
 int execute_counter(int argc, char **argv);
 int execute_write_reg(int argc, char **argv);
 int execute_read_reg(int argc, char **argv);
+int execute_pgm_epdc(int argc, char **argv);
 int execute_info(int argc, char **argv);
 int execute_switch_hv(int argc, char **argv);
 int execute_switch_com(int argc, char **argv);
@@ -154,6 +155,7 @@ void printHelp_update_image_regional(int identLevel);
 void printHelp_update_gfx(int identLevel);
 void printHelp_write_reg(int identLevel);
 void printHelp_read_reg(int identLevel);
+void printHelp_pgm_epdc(int identLevel);
 void printHelp_info(int identLevel);
 void printHelp_slideshow(int identLevel);
 void printHelp_counter(int identLevel);
@@ -182,6 +184,7 @@ struct CmdLineOptions supportedOperations[] = {
 	{"-send_cmd", 				"sends a command of EPD controller", 		execute_send_cmd, 				printHelp_send_cmd},
 	{"-write_reg", 				"writes to a register of EPD controller", 	execute_write_reg, 				printHelp_write_reg},
 	{"-read_reg", 				"reads from a register of EPD controller", 	execute_read_reg, 				printHelp_read_reg},
+	{"-pgm_epdc",				"programs firmware to the EPD controller", 	execute_pgm_epdc, 				printHelp_pgm_epdc},
 	{"-info",					"displays general display informations",	execute_info, 					printHelp_info},
 #endif
 	{"-switch_hv",	    		"switches hv on/off based on parameter",	execute_switch_hv,	    		printHelp_switch_hv},
@@ -706,6 +709,22 @@ int execute_read_reg(int argc, char **argv){
 	}
 
 	stat = read_register(regData);
+	return stat;
+}
+
+int execute_pgm_epdc(int argc, char **argv){
+	int stat = 0;
+
+	uint8_t* data;
+
+	pl_nvm_t* nvm = epdc->nvm;
+
+	unsigned int addr = 0x00;
+
+	int len = readBinaryFile(argv[2], &data);
+
+	stat = nvm->pgm(nvm, addr, data, len);
+
 	return stat;
 }
 
@@ -1557,6 +1576,13 @@ void printHelp_read_reg(int identLevel){
 	printf("\n");
 	printf("%*s \t<reg_addr> : \tspecifies the address of the register to be read.\n", identLevel, " ");
 	printf("%*s \t<datacount>: \tspecifies the amount of data portions to be read.\n", identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_pgm_epdc(int identLevel){
+	printf("%*s Programs the specified binary to the boot nvm or directly to the epdc.\n", identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -pgm_epdc <binary_path>\n", identLevel, " ");
 	printf("\n");
 }
 /*//remove
