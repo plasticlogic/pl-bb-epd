@@ -17,6 +17,8 @@
 #include <pl/spi.h>
 #include <sys/time.h>
 
+//#define SWAPDATA
+
 
 static void swap_data(TWord *buff, int size);
 static TWord swap_data_in(TWord in);
@@ -232,7 +234,13 @@ static void LCDWriteCmdCode(struct pl_i80 *p, TWord usCmdCode)
     //wait for ready
     LCDWaitForReady(p);
     // swap data
+
+#ifdef SWAPDATA
+    {
     swap_data(&usCmdCode, 1);
+    }
+#endif
+
     //write cmd code
     gpio_i80_16b_cmd_out(p, usCmdCode);
 }
@@ -245,7 +253,11 @@ static void LCDWriteData(struct pl_i80 *p, TWord usData)
     //wait for ready
     LCDWaitForReady(p);
     // swap data
+#ifdef SWAPDATA
+    {
     swap_data(&usData, 1);
+    }
+#endif
     //write data
     gpio_i80_16b_data_out(p, usData);
 }
@@ -263,7 +275,11 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
 
     // swap data
+#ifdef SWAPDATA
+    {
     swap_data(usData, size);
+    }
+#endif
 
     //wait for ready
     LCDWaitForReady(p);
@@ -319,7 +335,11 @@ static TWord LCDReadData(struct pl_i80 *p)
     //read data from host data bus
     usData = gpio_i80_16b_data_in(p);
     // swap data
+#ifdef SWAPDATA
+    {
     usData = swap_data_in(usData);
+    }
+#endif
     return usData;
 }
 
@@ -349,7 +369,11 @@ static void LCDReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
     	// even with count >1 !
     	iResult = read(p->fd, usData+i, 1);
     	// swap data
+#ifdef SWAPDATA
+    {
     	usData[i] = swap_data_in(usData[i]);
+    }
+#endif
     }
 
     //CS
