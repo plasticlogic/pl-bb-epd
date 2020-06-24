@@ -45,12 +45,11 @@ pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpi
 	{
 		interface = (pl_generic_interface_t*) beaglebone_i80_new(p_gpio);
 		pl_i80_t* i80_ref = (pl_i80_t*) interface->hw_ref;
-		i80_ref->hwe_n_gpio =  RUDDOCK_RESERVE_3;
-		i80_ref->hrd_n_gpio =  RUDDOCK_RESERVE_2;
+		i80_ref->hwe_n_gpio =  FALCON_I80_HWE_N;
+		i80_ref->hrd_n_gpio =  FALCON_I80_HRD_N;
 		i80_ref->hcs_n_gpio =  FALCON_I80_HCS_N;
 		i80_ref->hdc_gpio =  FALCON_I80_HDC;
-		i80_ref->hrdy_gpio =  RUDDOCK_HRDY;
-		//p->hirq_gpio =  FALCON_I80_HIRQ;
+		i80_ref->hrdy_gpio =  FALCON_I80_HRDY;
 	}
 
 	return interface;
