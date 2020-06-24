@@ -144,6 +144,16 @@ const struct s1d135xx_pins g_HBZ6_3_pins = {
 	RUDDOCK_RESERVE_2,
 };
 
+const struct it8951_pins g_it8951_falcon_pins = {
+	FALCON_I80_RESET_N,
+	FALCON_I80_HRDY,
+	FALCON_I80_HCS_N,
+	FALCON_I80_HDC,
+	FALCON_I80_HWE_N,
+	FALCON_I80_HRD_N,
+	// more for the parallel bus???
+};
+
 /**
  * Initializes control system dependent settings (e.g. I2C port) based on the selected system.
  * @param selection  defines which type of control system is used
@@ -214,6 +224,7 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 		p->sInterfaceType = PARALLEL;
 	}
 	else if (!strcmp(selection, "FALCON_I80" )){
+		p->it8951_pins = &g_it8951_falcon_pins;
 		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
 		p->s1d13541_pins = &g_s1d135xx_pins;
 		p->board_gpios = g_falcon_i80_gpios;

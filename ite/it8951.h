@@ -140,10 +140,11 @@ typedef struct
 
 struct it8951_pins {
 	unsigned reset_n;
-	unsigned busy_n;
-	unsigned hirq;
-	unsigned spi_cs;
-	unsigned vcc_en;
+	unsigned hrdy;
+	unsigned cs_n;
+	unsigned dc;
+	unsigned hwe_n;
+	unsigned hrd_n;
 } it8951_pins_t;
 
 typedef struct it8951 {
