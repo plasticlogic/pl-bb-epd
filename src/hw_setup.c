@@ -502,6 +502,9 @@ static int initialize_vcom_config(hw_setup_t *p, const char *selection){
 	else if (!strcmp(selection, "TPS65185" ))
 		p->vcomConfig = tps65185_get_vcom_config(get_tps65185_instance(p));
 
+	else if (!strcmp(selection, "IT8951" ))
+		p->vcomConfig = it8951_get_vcom_config(get_it8951_instance(p));
+
 	else if (!strcmp(selection, "NULL" ))
 		p->vcomConfig = NULL;
 
