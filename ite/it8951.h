@@ -73,8 +73,6 @@ typedef struct
 #define IT8951_TCON_LD_IMG_END   0x0022
 
 //I80 User defined command code
-#define USDEF_I80_CMD_POWER_CTR	   0x0038 // not verified yet
-#define USDEF_I80_CMD_VCOM_CTR	   0x0039
 #define USDEF_I80_CMD_DPY_AREA     0x0034
 #define USDEF_I80_CMD_GET_DEV_INFO 0x0302
 
@@ -159,14 +157,14 @@ typedef struct it8951 {
 
 it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interface, struct pl_i2c *i2c, const struct it8951_pins *pins);
 
-static void IT8951WaitForReady(struct pl_i80 *p);
-static void IT8951WriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
-static void IT8951WriteData(struct pl_i80 *p, TWord usData);
-static void IT8951WriteData_NoSwap(struct pl_i80 *p, TWord usData);
-static void IT8951WriteDataBurst(struct pl_i80 *p, TWord *usData, int size);
-static TWord IT8951ReadData(struct pl_i80 *p);
-static void IT8951ReadDataBurst(struct pl_i80 *p, TWord *usData, int size);
-static void IT8951SendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg);
+static void LCDWaitForReady(struct pl_i80 *p);
+static void LCDWriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
+static void LCDWriteData(struct pl_i80 *p, TWord usData);
+static void LCDWriteData_NoSwap(struct pl_i80 *p, TWord usData);
+static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size);
+static TWord LCDReadData(struct pl_i80 *p);
+static void LCDReadDataBurst(struct pl_i80 *p, TWord *usData, int size);
+static void LCDSendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg);
 
 
 static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd);
