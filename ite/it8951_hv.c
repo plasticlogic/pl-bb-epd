@@ -11,6 +11,8 @@
 #include <pl/generic_interface.h>
 #include <pl/i80.h>
 #include <pl/gpio.h>
+#include <pl/assert.h>
+#include <ite/it8951.h>
 #include <ite/it8951_hv.h>
 #define LOG_TAG "it8951_hv"
 

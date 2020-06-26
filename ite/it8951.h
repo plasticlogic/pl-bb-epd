@@ -159,14 +159,14 @@ typedef struct it8951 {
 
 it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interface, struct pl_i2c *i2c, const struct it8951_pins *pins);
 
-static void IT8951WaitForReady(struct pl_i80 *p);
-static void IT8951WriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
-static void IT8951WriteData(struct pl_i80 *p, TWord usData);
-static void IT8951WriteData_NoSwap(struct pl_i80 *p, TWord usData);
-static void IT8951WriteDataBurst(struct pl_i80 *p, TWord *usData, int size);
-static TWord IT8951ReadData(struct pl_i80 *p);
-static void IT8951ReadDataBurst(struct pl_i80 *p, TWord *usData, int size);
-static void IT8951SendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg);
+void IT8951WaitForReady(struct pl_i80 *p);
+void IT8951WriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
+void IT8951WriteData(struct pl_i80 *p, TWord usData);
+void IT8951WriteData_NoSwap(struct pl_i80 *p, TWord usData);
+void IT8951WriteDataBurst(struct pl_i80 *p, TWord *usData, int size);
+TWord IT8951ReadData(struct pl_i80 *p);
+void IT8951ReadDataBurst(struct pl_i80 *p, TWord *usData, int size);
+void IT8951SendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg);
 
 
 static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd);
