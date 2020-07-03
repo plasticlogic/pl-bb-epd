@@ -12,5 +12,6 @@
 #include <ite/it8951.h>
 
 pl_vcom_config_t *it8951_get_vcom_config(it8951_t *it8951);
+pl_hv_driver_t *it8951_get_hv_driver(it8951_t *it8951);
 
 #endif /* IT8951_HV_H_ */
