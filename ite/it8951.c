@@ -41,8 +41,6 @@ it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interfa
 
 void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf)
 {
-	int i = 0;
-
     TWord* pusWord = (TWord*)pBuf;
     I80IT8951DevInfo* pstDevInfo;
     //Send I80 CMD
@@ -53,20 +51,20 @@ void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf)
 //    LCDReadNData(pusWord, sizeof(I80IT8951DevInfo)/2);//Polling HRDY for each words(2-bytes) if possible
 //
 //    #else
-    //I80 interface - Single Read available
-//    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
-//    {
-//        pusWord[i] = LCDReadData(p);
-//    }
+    //I80 interface - Single Read availabl
+    int i;
+    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
+    {
+        pusWord[i] = IT8951ReadData(p);
+      }
 
-    IT8951ReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
+//    IT8951ReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
 
 //    #endif
 
     //Show Device information of IT8951
     pstDevInfo = (I80IT8951DevInfo*)pBuf;
-    printf("Panel(W,H) = (%d,%d)\r\n",
-    pstDevInfo->usPanelW, pstDevInfo->usPanelH );
+    printf("Panel(W,H) = (%d,%d)\n", pstDevInfo->usPanelW, pstDevInfo->usPanelH );
     printf("Image Buffer Address = %X\r\n",
     pstDevInfo->usImgBufAddrL | (pstDevInfo->usImgBufAddrH << 16));
     //Show Firmware and LUT Version
@@ -419,6 +417,7 @@ void IT8951LoadImgEnd(struct pl_i80 *p)
 {
 	IT8951WriteCmdCode(p, IT8951_TCON_LD_IMG_END);
 }
+
 
 //-------------------------------------------------------------------
 //Host controller Write command code for 16 bits using GPIO simulation
