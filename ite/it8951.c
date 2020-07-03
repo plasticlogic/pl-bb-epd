@@ -41,32 +41,30 @@ it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interfa
 
 void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf)
 {
-	int i = 0;
-
     TWord* pusWord = (TWord*)pBuf;
     I80IT8951DevInfo* pstDevInfo;
     //Send I80 CMD
-    LCDWriteCmdCode(p, USDEF_I80_CMD_GET_DEV_INFO);
+    IT8951WriteCmdCode(p, USDEF_I80_CMD_GET_DEV_INFO);
 //    #ifdef EN_SPI_2_I80
 //
 //    //Burst Read Request for SPI interface only
 //    LCDReadNData(pusWord, sizeof(I80IT8951DevInfo)/2);//Polling HRDY for each words(2-bytes) if possible
 //
 //    #else
-    //I80 interface - Single Read available
-//    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
-//    {
-//        pusWord[i] = LCDReadData(p);
-//    }
+    //I80 interface - Single Read availabl
+    int i;
+    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
+    {
+        pusWord[i] = IT8951ReadData(p);
+      }
 
-    LCDReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
+//    IT8951ReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
 
 //    #endif
 
     //Show Device information of IT8951
     pstDevInfo = (I80IT8951DevInfo*)pBuf;
-    printf("Panel(W,H) = (%d,%d)\r\n",
-    pstDevInfo->usPanelW, pstDevInfo->usPanelH );
+    printf("Panel(W,H) = (%d,%d)\n", pstDevInfo->usPanelW, pstDevInfo->usPanelH );
     printf("Image Buffer Address = %X\r\n",
     pstDevInfo->usImgBufAddrL | (pstDevInfo->usImgBufAddrH << 16));
     //Show Firmware and LUT Version
@@ -94,10 +92,10 @@ TWord IT8951ReadReg(struct pl_i80 *p, TWord usRegAddr)
     TWord usData;
     //----------I80 Mode-------------
     //Send Cmd and Register Address
-    LCDWriteCmdCode(p, IT8951_TCON_REG_RD);
-    LCDWriteData(p, usRegAddr);
+    IT8951WriteCmdCode(p, IT8951_TCON_REG_RD);
+    IT8951WriteData(p, usRegAddr);
     //Read data from Host Data bus
-    usData = LCDReadData(p);
+    usData = IT8951ReadData(p);
     return usData;
 }
 
@@ -108,9 +106,9 @@ void IT8951WriteReg(struct pl_i80 *p, TWord usRegAddr,TWord usValue)
 {
     //I80 Mode
     //Send Cmd , Register Address and Write Value
-    LCDWriteCmdCode(p, IT8951_TCON_REG_WR);
-    LCDWriteData(p, usRegAddr);
-    LCDWriteData(p, usValue);
+	IT8951WriteCmdCode(p, IT8951_TCON_REG_WR);
+	IT8951WriteData(p, usRegAddr);
+	IT8951WriteData(p, usValue);
 }
 
 //-----------------------------------------------------------
@@ -174,7 +172,7 @@ void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgI
         //printf("Height: %d --> Time: %f\n", j, tTotal);
 
     //}
-    LCDWriteDataBurst(p, pusFrameBuf, pstAreaImgInfo->usWidth/2 * pstAreaImgInfo->usHeight);
+    IT8951WriteDataBurst(p, pusFrameBuf, pstAreaImgInfo->usWidth/2 * pstAreaImgInfo->usHeight);
     gettimeofday(&tStop, NULL);
 
     tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
@@ -191,13 +189,13 @@ void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgI
 void IT8951DisplayArea(struct pl_i80 *p, TWord usX, TWord usY, TWord usW, TWord usH, TWord usDpyMode)
 {
     //Send I80 Display Command (User defined command of IT8951)
-	LCDWriteCmdCode(p, USDEF_I80_CMD_DPY_AREA); //0x0034
+	IT8951WriteCmdCode(p, USDEF_I80_CMD_DPY_AREA); //0x0034
     //Write arguments
-    LCDWriteData(p, usX);
-    LCDWriteData(p, usY);
-    LCDWriteData(p, usW);
-    LCDWriteData(p, usH);
-    LCDWriteData(p, usDpyMode);
+	IT8951WriteData(p, usX);
+	IT8951WriteData(p, usY);
+	IT8951WriteData(p, usW);
+	IT8951WriteData(p, usH);
+	IT8951WriteData(p, usDpyMode);
 }
 
 //-----------------------------------------------------------
@@ -327,7 +325,11 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 //-----------------------------------------------------------
 //Host controller function 4 ¡V Read Data from host data Bus
 //-----------------------------------------------------------
+<<<<<<< HEAD
 static TWord LCDReadData(struct pl_i80 *p)
+=======
+TWord IT8951ReadData(struct pl_i80 *p)
+>>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 {
     TWord usData;
     //wait for ready
@@ -346,7 +348,11 @@ static TWord LCDReadData(struct pl_i80 *p)
 //-----------------------------------------------------------
 //Host controller function 4 ¡V Read Data from host data Bus
 //-----------------------------------------------------------
+<<<<<<< HEAD
 static void LCDReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
+=======
+void IT8951ReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
+>>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 {
 	int iResult = 0;
 
@@ -383,15 +389,23 @@ static void LCDReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
 //-----------------------------------------------------------
 //Host controller function 5 ¡V Write command to host data Bus with aruments
 //-----------------------------------------------------------
+<<<<<<< HEAD
 static void LCDSendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg)
+=======
+void IT8951SendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg)
+>>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 {
      TWord i;
      //Send Cmd code
-     LCDWriteCmdCode(p, usCmdCode);
+     IT8951WriteCmdCode(p, usCmdCode);
      //Send Data
      for(i=0;i<usNumArg;i++)
      {
+<<<<<<< HEAD
          LCDWriteData(p, pArg[i]);
+=======
+    	 IT8951WriteData(p, pArg[i]);
+>>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
      }
 }
 
@@ -410,15 +424,20 @@ void IT8951LoadImgAreaStart(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo ,IT8
     usArg[3] = pstAreaImgInfo->usWidth;
     usArg[4] = pstAreaImgInfo->usHeight;
     //Send Cmd and Args
+<<<<<<< HEAD
     LCDSendCmdArg(p, IT8951_TCON_LD_IMG_AREA , usArg , 5);
+=======
+    IT8951SendCmdArg(p, IT8951_TCON_LD_IMG_AREA , usArg , 5);
+>>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 }
 //-----------------------------------------------------------
 //Host Cmd 12 - LD_IMG_END
 //-----------------------------------------------------------
 void IT8951LoadImgEnd(struct pl_i80 *p)
 {
-    LCDWriteCmdCode(p, IT8951_TCON_LD_IMG_END);
+	IT8951WriteCmdCode(p, IT8951_TCON_LD_IMG_END);
 }
+
 
 //-------------------------------------------------------------------
 //Host controller Write command code for 16 bits using GPIO simulation
