@@ -33,6 +33,7 @@ enum epd_controller_type {
 	S1D13524,
 	S1D13541,
 	SSD1606,
+	IT8951,
 };
 
 enum control_system {
@@ -48,6 +49,7 @@ enum driving_board {
 	FALCON_SERIAL,
 	FALCON_PARALLEL,
 	RUDDOCK_PARALLEL,
+	FALCON_I80,
 };
 
 enum nvm_version {
@@ -74,6 +76,7 @@ enum vcom_config_choises {
 	VCOM_CONFIG_MAX17135,
 	VCOM_CONFIG_MAX8520,
 	VCOM_CONFIG_TPS65185,
+	VCOM_CONFIG_IT8951,
 };
 
 enum hv_driver_choises {

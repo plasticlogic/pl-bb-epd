@@ -39,6 +39,7 @@
 #include "pl/hv.h"
 #include "pl/generic_controller.h"
 #include "pl/generic_interface.h"
+#include "ite/it8951.h"
 #include <errno.h>
 
 typedef struct hw_setup {

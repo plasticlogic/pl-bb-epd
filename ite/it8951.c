@@ -201,7 +201,7 @@ void IT8951DisplayArea(struct pl_i80 *p, TWord usX, TWord usY, TWord usW, TWord 
 //-----------------------------------------------------------
 //Host controller function 1 ¡V Wait for host data Bus Ready
 //-----------------------------------------------------------
-void LCDWaitForReady(struct pl_i80 *p)
+void IT8951WaitForReady(struct pl_i80 *p)
 {
 	//Regarding to HRDY
 	//you may need to use a GPIO pin connected to HRDY of IT8951
@@ -227,10 +227,10 @@ void LCDWaitForReady(struct pl_i80 *p)
 //-----------------------------------------------------------------
 //Host controller function 2 ¡V Write command code to host data Bus
 //-----------------------------------------------------------------
-static void LCDWriteCmdCode(struct pl_i80 *p, TWord usCmdCode)
+void IT8951WriteCmdCode(struct pl_i80 *p, TWord usCmdCode)
 {
     //wait for ready
-    LCDWaitForReady(p);
+	IT8951WaitForReady(p);
     // swap data
 
 #ifdef SWAPDATA
@@ -246,10 +246,10 @@ static void LCDWriteCmdCode(struct pl_i80 *p, TWord usCmdCode)
 //-----------------------------------------------------------
 //Host controller function 3 ¡V Write Data to host data Bus
 //-----------------------------------------------------------
-static void LCDWriteData(struct pl_i80 *p, TWord usData)
+void IT8951WriteData(struct pl_i80 *p, TWord usData)
 {
     //wait for ready
-    LCDWaitForReady(p);
+	IT8951WaitForReady(p);
     // swap data
 #ifdef SWAPDATA
     {
@@ -263,7 +263,7 @@ static void LCDWriteData(struct pl_i80 *p, TWord usData)
 //-----------------------------------------------------------
 //Host controller function 3 ¡V Write Data to host data Bus
 //-----------------------------------------------------------
-static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
+void IT8951WriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 {
 	int iResult = 0;
 
@@ -280,7 +280,7 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 #endif
 
     //wait for ready
-    LCDWaitForReady(p);
+    IT8951WaitForReady(p);
 
     //Switch C/D to Data => Data - H
     //GPIO_SET_H(CD);
@@ -307,7 +307,7 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 //    }
 
     iResult = write(p->fd, usData, size/2);
-    LCDWaitForReady(p);
+    IT8951WaitForReady(p);
     iResult = write(p->fd, usData + size/2, size/2);
 
 
@@ -316,7 +316,7 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
     printf("Data Transmission --> Time: %f\n", tTotal);
 
     //wait for ready
-    LCDWaitForReady(p);
+    IT8951WaitForReady(p);
 
     //CS
     gpio->set(p->hcs_n_gpio, 1);
@@ -325,15 +325,11 @@ static void LCDWriteDataBurst(struct pl_i80 *p, TWord *usData, int size)
 //-----------------------------------------------------------
 //Host controller function 4 ¡V Read Data from host data Bus
 //-----------------------------------------------------------
-<<<<<<< HEAD
-static TWord LCDReadData(struct pl_i80 *p)
-=======
 TWord IT8951ReadData(struct pl_i80 *p)
->>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 {
     TWord usData;
     //wait for ready
-    LCDWaitForReady(p);
+    IT8951WaitForReady(p);
     //read data from host data bus
     usData = gpio_i80_16b_data_in(p);
     // swap data
@@ -348,11 +344,8 @@ TWord IT8951ReadData(struct pl_i80 *p)
 //-----------------------------------------------------------
 //Host controller function 4 ¡V Read Data from host data Bus
 //-----------------------------------------------------------
-<<<<<<< HEAD
-static void LCDReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
-=======
+
 void IT8951ReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
->>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 {
 	int iResult = 0;
 
@@ -389,11 +382,8 @@ void IT8951ReadDataBurst(struct pl_i80 *p, TWord *usData, int size)
 //-----------------------------------------------------------
 //Host controller function 5 ¡V Write command to host data Bus with aruments
 //-----------------------------------------------------------
-<<<<<<< HEAD
-static void LCDSendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg)
-=======
+
 void IT8951SendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg)
->>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 {
      TWord i;
      //Send Cmd code
@@ -401,11 +391,7 @@ void IT8951SendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNum
      //Send Data
      for(i=0;i<usNumArg;i++)
      {
-<<<<<<< HEAD
-         LCDWriteData(p, pArg[i]);
-=======
     	 IT8951WriteData(p, pArg[i]);
->>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
      }
 }
 
@@ -424,11 +410,7 @@ void IT8951LoadImgAreaStart(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo ,IT8
     usArg[3] = pstAreaImgInfo->usWidth;
     usArg[4] = pstAreaImgInfo->usHeight;
     //Send Cmd and Args
-<<<<<<< HEAD
-    LCDSendCmdArg(p, IT8951_TCON_LD_IMG_AREA , usArg , 5);
-=======
     IT8951SendCmdArg(p, IT8951_TCON_LD_IMG_AREA , usArg , 5);
->>>>>>> 4620c5787a6530be9da4ea320745ab5a7bfab6c9
 }
 //-----------------------------------------------------------
 //Host Cmd 12 - LD_IMG_END
@@ -448,7 +430,7 @@ static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd)
 
 	struct pl_gpio * gpio = (struct pl_gpio *) i80_ref->hw_ref;
 
-    LCDWaitForReady(i80_ref);
+	IT8951WaitForReady(i80_ref);
     //Set GPIO 0~7 to Output mode
     //See your host setting of GPIO
     //Switch C/D to CMD => CMD - L
@@ -483,7 +465,7 @@ static void gpio_i80_16b_data_out(struct pl_i80 *i80_ref, TWord usData)
 
 	struct pl_gpio * gpio = (struct pl_gpio *) i80_ref->hw_ref;
 
-    LCDWaitForReady(i80_ref);
+	IT8951WaitForReady(i80_ref);
     //e.g. - Set GPIO 0~7 to Output mode
     //See your host setting of GPIO
     //GPIO_I80_Bus[16] = usData;
@@ -522,7 +504,7 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
 	// to go into read mode
 	// iResult = read(i80_ref->fd, &usData, 1);
 
-    LCDWaitForReady(i80_ref);
+	IT8951WaitForReady(i80_ref);
     //Set GPIO 0~7 to input mode
     //See your host setting of GPIO
     //Switch C/D to Data - DATA - H

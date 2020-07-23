@@ -94,6 +94,14 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 
 	//sleep(10);
 	//IT8951WriteCmdCode(i80, IT8951_TCON_STANDBY); //
+
+	//Set PMIC to standby after issuing VCom CTrl Command
+	//(VCom Ctrl CMD also turns HV creation on)
+	//GPIO Register Adress is 1E14
+	TWord data = IT8951ReadReg(i80, 0x1E14);
+	data &= ~(1 << 2); // switches GPIO5 of ITE (Power Up Pin) low
+	IT8951WriteReg(i80, 0x1E14, data);
+	IT8951WaitForReady(i80);
 	return 0;
 }
 
