@@ -151,6 +151,7 @@ const struct it8951_pins g_it8951_falcon_pins = {
 	FALCON_I80_HDC,
 	FALCON_I80_HWE_N,
 	FALCON_I80_HRD_N,
+	FALCON_SPI_CS_ITE,  //for SPI communication
 	// more for the parallel bus???
 };
 
@@ -228,9 +229,18 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
 		p->s1d13541_pins = &g_s1d135xx_pins;
 		p->board_gpios = g_falcon_i80_gpios;
-		p->gpio_count = ARRAY_SIZE(g_falcon_parallel_gpios);
+		p->gpio_count = ARRAY_SIZE(g_falcon_i80_gpios);
 		p->vddGPIO = RUDDOCK_5V_EN;
 		p->sInterfaceType = I80;
+	}
+	else if (!strcmp(selection, "FALCON_SPI" )){
+		p->it8951_pins = &g_it8951_falcon_pins;
+		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
+		p->s1d13541_pins = &g_s1d135xx_pins;
+		p->board_gpios = g_falcon_spi_gpios;
+		p->gpio_count = ARRAY_SIZE(g_falcon_spi_gpios);
+		p->vddGPIO = RUDDOCK_5V_EN;
+		p->sInterfaceType = SPI_HRDY;
 	}
 	else if (!strcmp(selection, "FALCON" )){
 		p->s1d13524_pins = &g_s1d135xx_pins;
@@ -314,7 +324,7 @@ static s1d135xx_t *get_s1d13541_instance(hw_setup_t *p){
  */
 static it8951_t *get_it8951_instance(hw_setup_t *p){
 	if (it8951 == NULL){
-		it8951 = it8951_new(&(p->gpios), (pl_generic_interface_t*) p->sInterface, &(p->host_i2c), p->it8951_pins);
+		it8951 = it8951_new(&(p->gpios), (pl_generic_interface_t*) p->sInterface, &(p->sInterfaceType), &(p->host_i2c), p->it8951_pins);
 	}
 
 	return it8951;
@@ -361,6 +371,8 @@ static int initialize_nvm(hw_setup_t *p, const char *selection, const char *form
 		if(!strcmp("FALCON_PARALLEL", p->boardname)){
 			p->nvmSPI->cs_gpio = FALCON_NVM_CS;
 		}else if(!strcmp("FALCON_I80", p->boardname)){
+			p->nvmSPI->cs_gpio = FALCON_FIRMWARE_NVM_CS;
+		}else if(!strcmp("FALCON_SPI", p->boardname)){
 			p->nvmSPI->cs_gpio = FALCON_FIRMWARE_NVM_CS;
 		}else if(!strcmp("CHIFFCHAFF", p->boardname)){
 			p->nvmSPI->cs_gpio = CHIFFCHAFF_NVM_CS;
@@ -608,6 +620,9 @@ static int initialize_hv_driver(hw_setup_t *p, const char *selection){
 
 	else if (!strcmp(selection, "S1D13541" ))
 		p->hvDriver = s1d135xx_get_hv_driver(get_s1d13541_instance(p));
+
+	else if (!strcmp(selection, "IT8951" ))
+		p->hvDriver = it8951_get_hv_driver(get_it8951_instance(p));
 
 	else if (!strcmp(selection, "GPIO" ))
 		p->hvDriver = beaglebone_get_hv_driver(&(p->gpios));

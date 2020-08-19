@@ -13,5 +13,7 @@
 
 pl_vcom_config_t *it8951_get_vcom_config(it8951_t *it8951);
 pl_hv_driver_t *it8951_get_hv_driver(it8951_t *it8951);
+static int it8951_hv_driver_on(struct pl_hv_driver *p);
+static int it8951_hv_driver_off(struct pl_hv_driver *p);
 
 #endif /* IT8951_HV_H_ */

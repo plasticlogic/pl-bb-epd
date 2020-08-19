@@ -108,27 +108,27 @@ static int trigger_update(struct pl_generic_controller *controller)
 	it8951_t *it8951 = controller->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
-	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
-
+	enum interfaceType *type = it8951->sInterfaceType;
+	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 
 	//Get the Device info such as Panel Type Width and height from DEVInfo struct
 	I80IT8951DevInfo devInfo;
-	GetIT8951SystemInfo(i80, &devInfo);
+	GetIT8951SystemInfo(bus, type, &devInfo);
 
 	//Turn On HV creation
 	//IT8951WriteCmdCode(i80, USDEF_I80_CMD_POWER_CTR);
 	//IT8951WriteData(i80, 0x01); // set Power Bit to low
 
 	//Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
-	IT8951WriteCmdCode(i80, USDEF_I80_CMD_DPY_AREA);
-	IT8951WriteData(i80, (TWord) 0);     				// Display X
-	IT8951WriteData(i80, (TWord) 0); 					// Display Y
-	IT8951WriteData(i80, (TWord) devInfo.usPanelW);     		    // Display W devInfo.usPanelW 1200
-	IT8951WriteData(i80, (TWord) devInfo.usPanelH); 			    // Display H devInfo.usPanelH 960
-	IT8951WriteData(i80, (TWord) 2); 					// Display Mode
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
+	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
+	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
+	IT8951WriteData(bus, type, (TWord) devInfo.usPanelW);     		    // Display W devInfo.usPanelW 1200
+	IT8951WriteData(bus, type, (TWord) devInfo.usPanelH); 			    // Display H devInfo.usPanelH 960
+	IT8951WriteData(bus, type, (TWord) 2); 					// Display Mode
 
 	//Wait until the Update has ended
-	IT8951WaitForDisplayReady(i80);
+	IT8951WaitForDisplayReady(bus, type);
 
 	//Turn of HV creation
 	//IT8951WriteCmdCode(i80, USDEF_I80_CMD_POWER_CTR);
@@ -149,9 +149,10 @@ static int init_controller(struct pl_generic_controller *controller, int use_wf_
 	assert(it8951 != NULL);
 
 	pl_generic_interface_t *bus = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
 
-	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
-	struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
+	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+	//struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
 
 //	uint8_t data_out [2];
 //	uint8_t data_in [40];
@@ -168,7 +169,7 @@ static int init_controller(struct pl_generic_controller *controller, int use_wf_
 	// does the same again - just for confirmation
 
 	I80IT8951DevInfo devInfo;
-	GetIT8951SystemInfo(i80, &devInfo);
+	GetIT8951SystemInfo(bus, type, &devInfo);
 
 	return 0;
 }
@@ -178,12 +179,13 @@ static int configure_update(struct pl_generic_controller *controller, int wfid, 
 	it8951_t *it8951 = controller->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
-	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
-	IT8951WaitForDisplayReady(i80);
+	enum interfaceType *type = it8951->sInterfaceType;
+	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+	IT8951WaitForDisplayReady(bus, type);
 
 	//Turn on HV creation
-	IT8951WriteCmdCode(i80, USDEF_I80_CMD_POWER_CTR);
-	IT8951WriteData(i80, 0x01); // set Power Bit to low
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+	IT8951WriteData(bus, type, 0x01); // set Power Bit to low
 
 	return 0;
 }
@@ -205,9 +207,10 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
 	assert(it8951 != NULL);
 
 	pl_generic_interface_t *bus = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
 
-	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
-	struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
+	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+	//struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
 
 	TDWord gulImgBufAddr;
 	TByte* gpFrameBuf;
@@ -221,13 +224,13 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
 	//------------------------------------------------------------------
     //Get Device Info
 	I80IT8951DevInfo devInfo;
-	GetIT8951SystemInfo(i80, &devInfo);
+	GetIT8951SystemInfo(bus, type, &devInfo);
 
     //Get Image Buffer Address of IT8951
     gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 
     //Set to Enable I80 Packed mode
-    IT8951WriteReg(i80, I80CPCR, 0x0001);
+    IT8951WriteReg(bus, type, I80CPCR, 0x0001);
     //-------------------------------------------------------------------
 
     int width = 0;
@@ -247,7 +250,7 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
 	}
 
     //Check TCon is free ? Wait TCon Ready (optional)
-    IT8951WaitForDisplayReady(i80);
+    IT8951WaitForDisplayReady(bus, type);
 
     //--------------------------------------------------------------------------------------------
     //      initial display - Display white only
@@ -266,7 +269,7 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
     stAreaImgInfo.usHeight = devInfo.usPanelH;
 
     //Load Image from Host to IT8951 Image Buffer
-    IT8951HostAreaPackedPixelWrite(i80, &stLdImgInfo, &stAreaImgInfo);//Display function 2
+    IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);//Display function 2
     //Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
     //IT8951DisplayArea(i80, 0,0, devInfo.usPanelW, devInfo.usPanelH, 2);
 
@@ -282,10 +285,12 @@ static int wait_update_end(struct pl_generic_controller *controller)
 	it8951_t *it8951 = controller->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
-	pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+	enum interfaceType *type = it8951->sInterfaceType;
+
+	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 
 	//Poll the TCON Register, to know when the update has finished
-	IT8951WaitForDisplayReady(i80);
+	IT8951WaitForDisplayReady(bus, type);
 	return 0;
 }
 

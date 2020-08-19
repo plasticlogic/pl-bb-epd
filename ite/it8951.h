@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#define WAIT_FOR_READY_TIMEOUT_I80 10000
+//#define WAIT_FOR_READY_TIMEOUT_I80 10000
 
 //typedef for variables
 typedef unsigned char TByte; //1 byte
@@ -56,6 +56,9 @@ typedef struct
     TWord usLUTVersion[8]; //16 Bytes String
 
 }I80IT8951DevInfo;
+
+#define WAIT_FOR_READY_TIMEOUT_SPI_HRDY 10000
+#define WAIT_FOR_READY_TIMEOUT_I80 10000
 
 
 //Built in I80 Command Code
@@ -147,44 +150,50 @@ struct it8951_pins {
 	unsigned dc;
 	unsigned hwe_n;
 	unsigned hrd_n;
+	unsigned cs_spi_n;
 } it8951_pins_t;
 
 typedef struct it8951 {
+	void *hw_ref;		// hardware reference
 	struct pl_gpio *gpio;
-	struct pl_spi *spi;
+	struct pl_spi_hrdy *spi;
 	struct pl_generic_interface *interface;
 	const struct it8951_pins *pins;
+	enum interfaceType *sInterfaceType;
 
 } it8951_t;
 
-it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interface, struct pl_i2c *i2c, const struct it8951_pins *pins);
+it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interface, enum interfaceType *sInterfaceType, struct pl_i2c *i2c, const struct it8951_pins *pins);
 
 
-void IT8951WaitForReady(struct pl_i80 *p);
-void IT8951WriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
-void IT8951WriteData(struct pl_i80 *p, TWord usData);
-void IT8951WriteData_NoSwap(struct pl_i80 *p, TWord usData);
-void IT8951WriteDataBurst(struct pl_i80 *p, TWord *usData, int size);
-TWord IT8951ReadData(struct pl_i80 *p);
-void IT8951ReadDataBurst(struct pl_i80 *p, TWord *usData, int size);
-void IT8951SendCmdArg(struct pl_i80 *p, TWord usCmdCode,TWord* pArg, TWord usNumArg);
+//void IT8951WaitForReady(struct pl_i80 *p);
+int IT8951WaitForReady(pl_generic_interface_t *bus, enum interfaceType *type);
+//void IT8951WriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
+void IT8951WriteCmdCode(pl_generic_interface_t *bus, enum interfaceType *type,  TWord usCmdCode);
+void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
+void IT8951WriteData_NoSwap(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
+void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
+TWord IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type);
+void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
+void IT8951SendCmdArg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usCmdCode,TWord* pArg, TWord usNumArg);
 
 
-static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd);
-static void gpio_i80_16b_data_out(struct pl_i80 *i80_ref, TWord usData);
-static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref);
+static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus, enum interfaceType *type, TWord usCmd);
+static void gpio_i80_16b_data_out(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
+static TWord gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceType *type);
 
-void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf);
+//void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf);
+void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  , void* pBuf);
 
-void IT8951HostAreaPackedPixelWrite(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo, IT8951AreaImgInfo* pstAreaImgInfo);
-void IT8951DisplayArea(struct pl_i80 *p, TWord usX, TWord usY, TWord usW, TWord usH, TWord usDpyMode);
+void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus, enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo, IT8951AreaImgInfo* pstAreaImgInfo);
+void IT8951DisplayArea(pl_generic_interface_t *bus, enum interfaceType *type, TWord usX, TWord usY, TWord usW, TWord usH, TWord usDpyMode);
 
-void IT8951LoadImgEnd(struct pl_i80 *p);
-void IT8951LoadImgAreaStart(struct pl_i80 *p, IT8951LdImgInfo* pstLdImgInfo ,IT8951AreaImgInfo* pstAreaImgInfo);
+void IT8951LoadImgEnd(pl_generic_interface_t *bus, enum interfaceType *type);
+void IT8951LoadImgAreaStart(pl_generic_interface_t *bus, enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo ,IT8951AreaImgInfo* pstAreaImgInfo);
 
-void IT8951WaitForDisplayReady(struct pl_i80 *p);
+void IT8951WaitForDisplayReady(pl_generic_interface_t *bus, enum interfaceType *type);
 
-TWord IT8951ReadReg(struct pl_i80 *p, TWord usRegAddr);
-void IT8951WriteReg(struct pl_i80 *p, TWord usRegAddr,TWord usValue);
+TWord IT8951ReadReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr);
+void IT8951WriteReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr,TWord usValue);
 
 #endif /* IT8951_H_ */

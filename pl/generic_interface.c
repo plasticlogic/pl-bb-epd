@@ -25,7 +25,9 @@
 
 #include <pl/generic_interface.h>
 #include <beaglebone/beaglebone-i80.h>
+#include <beaglebone/beaglebone-spi_hrdy.h>
 #include <pl/i80.h>
+#include <pl/spi_hrdy.h>
 #include <src/pindef.h>
 
 struct pl_gpio;
@@ -50,6 +52,13 @@ pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpi
 		i80_ref->hcs_n_gpio =  FALCON_I80_HCS_N;
 		i80_ref->hdc_gpio =  FALCON_I80_HDC;
 		i80_ref->hrdy_gpio =  FALCON_I80_HRDY;
+	}
+	else if(type == SPI_HRDY)
+	{
+		interface = (pl_generic_interface_t*) beaglebone_spi_hrdy_new(spi_channel, p_gpio);
+		pl_spi_hrdy_t* spi_ref = (pl_spi_hrdy_t*) interface->hw_ref;
+		spi_ref->hrdy_gpio = FALCON_I80_HRDY;
+		spi_ref->cs_gpio = FALCON_SPI_CS_ITE;
 	}
 
 	return interface;
