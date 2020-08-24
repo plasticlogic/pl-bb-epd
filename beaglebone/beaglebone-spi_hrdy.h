@@ -13,11 +13,11 @@
 
 #define USE_8BIT_MODE                 ( 1 )
 
-#define SPI_HRDY_TRANSFER_RATE_IN_HZ       ( 15000000 ) // spi transfer rate is compiled into the kernel
+#define SPI_HRDY_TRANSFER_RATE_IN_HZ       ( 2000000 ) // spi transfer rate is compiled into the kernel
 #define SPI_HRDY_TRANSFER_MODE       ( 0 )
 
-#define MAX_SPI_TRANSFER_BUFFERS      ( 64 )
-#define MAX_SPI_BYTES_PER_TRANSFER    ( 64 )
+#define MAX_SPI_TRANSFER_BUFFERS_hrdy     ( 64 )
+#define MAX_SPI_BYTES_PER_TRANSFER_hrdy    ( 64 )
 
 //******************************************************************************
 // Definitions

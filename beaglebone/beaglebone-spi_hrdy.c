@@ -12,7 +12,7 @@
 
 // function prototypes
 static int spi_hrdy_close(struct pl_spi_hrdy *psSPI);
-static int spi_hrdy_read_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff, size_t size);
+static TWord spi_hrdy_read_bytes(struct pl_spi_hrdy *psSPI, TWord *buff, size_t size);
 static int spi_hrdy_write_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff, size_t size);
 static int spi_hrdy_set_cs(struct pl_spi_hrdy *psSPI, uint8_t cs);
 static int spi_hrdy_init(pl_spi_hrdy_t *psSPI);
@@ -89,7 +89,7 @@ static int spi_hrdy_init(pl_spi_hrdy_t *psSPI)
 //		return FALSE;
 //	}
 //	psSPI->mSpi->mode = tmp8;
-	psSPI->mSpi->mode = SPI_HRDY_TRANSFER_MODE;
+//	psSPI->mSpi->mode = SPI_HRDY_TRANSFER_MODE;
 
 	if ( ioctl( psSPI->fd, SPI_IOC_RD_BITS_PER_WORD, &tmp8 ) == -1 )
   {
@@ -158,9 +158,9 @@ int wait_for_ready(struct pl_spi_hrdy *p)
  * @param size size of the buffer
  * @return status
  */
-static int spi_hrdy_read_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff, size_t size){
+static TWord spi_hrdy_read_bytes(struct pl_spi_hrdy *psSPI, TWord *buff, size_t size){
 
-	  int iResult;
+	  TWord iResult;
 
 	  int i;
 #if VERBOSE
@@ -168,9 +168,9 @@ static int spi_hrdy_read_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff, size_t 
 #endif
 	  // enough transfer buffers for 64 * 64 bytes or 4K
 	  pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) psSPI ->hw_ref;
-	  struct spi_ioc_transfer asTrans[ MAX_SPI_TRANSFER_BUFFERS ];
+	  struct spi_ioc_transfer asTrans[ MAX_SPI_TRANSFER_BUFFERS_hrdy];
 	  struct spi_ioc_transfer *psTrans;
-	  uint8_t *rxBuffer = buff;
+	  TWord *rxBuffer = buff;
 	  bool boLast;
 
 	  memset( &asTrans, 0, sizeof( asTrans ) );
@@ -178,16 +178,15 @@ static int spi_hrdy_read_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff, size_t 
 	  // fill in the array of transfer buffers, limiting each one to transferring
 	  // MAX_SPI_PER_TRANSFER bytes.
 	  i = 0;
-	  while ( ( i < MAX_SPI_TRANSFER_BUFFERS ) && ( size > 0 ) )
+	  while ( ( i < MAX_SPI_TRANSFER_BUFFERS_hrdy ) && ( size > 0 ) )
 	  {
-		wait_for_ready(spi);
-		boLast = ( size < MAX_SPI_BYTES_PER_TRANSFER );
+		boLast = ( size < MAX_SPI_BYTES_PER_TRANSFER_hrdy );
 		psTrans = &asTrans[ i ];
 		psTrans->tx_buf = (unsigned long)NULL;
 		psTrans->rx_buf = (unsigned long)rxBuffer;
 		// length is the number of bytes in the buffer, so for 9-bit mode it is
 		// 2 bytes per word.
-		psTrans->len = boLast ? size : MAX_SPI_BYTES_PER_TRANSFER;
+		psTrans->len = boLast ? size : MAX_SPI_BYTES_PER_TRANSFER_hrdy;
 		psTrans->delay_usecs = 20;
 		//psSPI->msh = 12000000;
 		psTrans->speed_hz = psSPI->mSpi->msh; //SPI_TRANSFER_RATE_IN_HZ;
@@ -233,7 +232,7 @@ static int spi_hrdy_write_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff, size_t
 	  int i;
 	  // enough transfer buffers for 64 * 64 bytes or 4K
 	  pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) psSPI ->hw_ref;
-	  struct spi_ioc_transfer asTrans[ MAX_SPI_TRANSFER_BUFFERS ];
+	  struct spi_ioc_transfer asTrans[ MAX_SPI_TRANSFER_BUFFERS_hrdy ];
 	  struct spi_ioc_transfer *psTrans;
 	  uint8_t *pbBuffer = buff;
 	  bool boLast;
@@ -251,16 +250,16 @@ static int spi_hrdy_write_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff, size_t
 	  // fill in the array of transfer buffers, limiting each one to transferring
 	  // MAX_SPI_PER_TRANSFER bytes.
 	  i = 0;
-	  while ( ( i < MAX_SPI_TRANSFER_BUFFERS ) && ( size > 0 ) )
+	  while ( ( i < MAX_SPI_TRANSFER_BUFFERS_hrdy ) && ( size > 0 ) )
 	  {
 		wait_for_ready(spi);
-		boLast = ( size < MAX_SPI_BYTES_PER_TRANSFER );
+		boLast = ( size < MAX_SPI_BYTES_PER_TRANSFER_hrdy );
 		psTrans = &asTrans[ i ];
 		psTrans->tx_buf = (unsigned long)pbBuffer;
 		psTrans->rx_buf = (unsigned long)NULL;
 		// length is the number of bytes in the buffer, so for 9-bit mode it is
 		// 2 bytes per word.
-		psTrans->len = boLast ? size : MAX_SPI_BYTES_PER_TRANSFER;
+		psTrans->len = boLast ? size : MAX_SPI_BYTES_PER_TRANSFER_hrdy;
 		psTrans->delay_usecs = 0;
 		psTrans->speed_hz = psSPI->mSpi->msh; //SPI_TRANSFER_RATE_IN_HZ;
 		psTrans->bits_per_word =  psSPI->mSpi->bpw; //SPI_BITS_PER_WORD;

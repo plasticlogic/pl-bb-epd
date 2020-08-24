@@ -173,14 +173,15 @@ void IT8951WriteCmdCode(pl_generic_interface_t *bus, enum interfaceType *type,  
 void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
 void IT8951WriteData_NoSwap(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
 void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
-TWord IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type);
+TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type, int size);
 void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
 void IT8951SendCmdArg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usCmdCode,TWord* pArg, TWord usNumArg);
+TWord swap_endianess(TWord in);
 
 
 static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus, enum interfaceType *type, TWord usCmd);
 static void gpio_i80_16b_data_out(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
-static TWord gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceType *type);
+static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceType *type, int size);
 
 //void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf);
 void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  , void* pBuf);

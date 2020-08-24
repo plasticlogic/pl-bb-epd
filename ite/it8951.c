@@ -87,18 +87,20 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  
 //
 //    #else
     //I80 interface - Single Read availabl
-    int i;
-    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
-    {
-        pusWord[i] = IT8951ReadData(bus, type);
-      }
+    //int i;
+    //for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
+    //{
+    //    pusWord[i] = IT8951ReadData(bus, type);
+    //  }
+
+    pusWord = IT8951ReadData(bus, type, sizeof(I80IT8951DevInfo)/2);
 
 //    IT8951ReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
 
 //    #endif
 
     //Show Device information of IT8951
-    pstDevInfo = (I80IT8951DevInfo*)pBuf;
+    pstDevInfo = (I80IT8951DevInfo*)pusWord;
     printf("Panel(W,H) = (%d,%d)\n", pstDevInfo->usPanelW, pstDevInfo->usPanelH );
     printf("Image Buffer Address = %X\r\n",
     pstDevInfo->usImgBufAddrL | (pstDevInfo->usImgBufAddrH << 16));
@@ -130,7 +132,7 @@ TWord IT8951ReadReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord
     IT8951WriteCmdCode(bus, type, IT8951_TCON_REG_RD);
     IT8951WriteData(bus, type, usRegAddr);
     //Read data from Host Data bus
-    usData = IT8951ReadData(bus, type);
+    usData = IT8951ReadData(bus, type, 1);
     return usData;
 }
 
@@ -457,13 +459,13 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 //-----------------------------------------------------------
 //Host controller function 4 ¡V Read Data from host data Bus
 //-----------------------------------------------------------
-TWord IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type)
+TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type, int size)
 {
-    TWord usData;
+    TWord* usData;
     //wait for ready
     IT8951WaitForReady(bus, type);
     //read data from host data bus
-    usData = gpio_i80_16b_data_in(bus, type);
+    usData = gpio_i80_16b_data_in(bus, type, size);
     // swap data
 #ifdef SWAPDATA
     {
@@ -641,7 +643,6 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus, enum interfaceType
 			//gpio->set(spi->cs_gpio, 0);
 			//iResult = write(spi->fd, &usCmd, 1);
 
-			stat = bus->set_cs(spi, 1);
 			stat = bus->set_cs(spi, 0);
 			stat = bus->write_bytes(bus, usCmd_, 4);
 			//stat = send_cmd(spi, &usCmd);			// read command
@@ -704,8 +705,12 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus, enum interfaceTyp
 	int iResult = 0;
 
 	if(*type == SPI_HRDY){
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
-		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
+			pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
+			struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
+
+			uint8_t preamble_[4];
+			preamble_[0] = (uint8_t) 0x00;
+			preamble_[1] = (uint8_t) 0x00;
 
 			IT8951WaitForReady(bus, type);
 			//e.g. - Set GPIO 0~7 to Output mode
@@ -768,40 +773,52 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus, enum interfaceTyp
 //-------------------------------------------------------------------
 //Host controller Read Data for 16 bits using GPIO simulation
 //-------------------------------------------------------------------
-static TWord gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceType *type)
+static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceType *type, int size)
 {
-    TWord usData;
 
-	int iResult = 0;
+	TWord usData;
+	//int iResult = 0;
+	TWord* iResult;
+
 
 	if(*type == SPI_HRDY){
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
-		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
+			pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
+			spi->mSpi = bus->mSpi;
+			struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 
-			// to go into read mode
-			// iResult = read(i80_ref->fd, &usData, 1);
+			TByte preamble_[2];
+			preamble_[0] = (TByte) 0x10;
+			preamble_[1] = (TByte) 0x00;
 
-			IT8951WaitForReady(bus, type);
-			//Set GPIO 0~7 to input mode
-			//See your host setting of GPIO
-			//Switch C/D to Data - DATA - H
-			//GPIO_SET_H(CD);
-			//CS-L
-			//GPIO_SET_L(CS);
+			// open SPI Bus
+			int stat = -EINVAL;
+			stat = bus->open(spi);
+
+			//Set SPI-CS low
 			gpio->set(spi->cs_gpio, 0);
-			//RD Enable
-			//GPIO_SET_L(REN);
-			//gpio->set(i80_ref->hrd_n_gpio, 0);
-			//Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
-			//See your host setting of GPIO
-			//usData = GPIO_I80_Bus[16];
-			iResult = read(spi->fd, &usData, 1);
 
-			//WR Enable - H
-			//GPIO_SET_H(WEN);
-			//gpio->set(i80_ref->hrd_n_gpio, 1);
-			//CS-H
-			//GPIO_SET_H(CS);
+			//send SPI read data preamble
+			stat = bus->write_bytes(bus, preamble_, 2);
+
+			//Loop through the various data
+			int i = 0;
+			for(i=0; i<(size+1); i++){
+				// throw away first read, as this only contains rubbish (as documented by ITE)
+				if(i==0){
+					IT8951WaitForReady(bus, type);
+					bus->read_bytes(spi, &usData, sizeof(TWord));
+				}
+				//next read will give the value that you want to receive
+				else{
+					IT8951WaitForReady(bus, type);
+					bus->read_bytes(spi, &usData, sizeof(TWord));
+					iResult[i-1] = swap_endianess(usData);
+
+				}
+				//iResult = read(spi->fd, &usData, );
+			}
+
+			//Set SPI-CS high
 			gpio->set(spi->cs_gpio, 1);
 			}
 		else if(*type == I80){
@@ -826,7 +843,13 @@ static TWord gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceTyp
 			//Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
 			//See your host setting of GPIO
 			//usData = GPIO_I80_Bus[16];
-			iResult = read(i80->fd, &usData, 1);
+
+			//
+			int i = 0;
+			for(i=0; i<size; i++){
+				read(i80->fd, &usData, 1);
+				iResult[i] = usData;
+			}
 
 			//WR Enable - H
 			//GPIO_SET_H(WEN);
@@ -839,7 +862,8 @@ static TWord gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceTyp
 				//error
 			}
 
-    return usData;
+    //return usData;
+	return iResult;
 }
 
 static void swap_data(TWord *buff, int size)
@@ -871,6 +895,21 @@ static void swap_data(TWord *buff, int size)
 	}
 
 	//printf("swap: 0x%x | 0x%x --> 0x%x | 0x%x\n", tmp[0], tmp[1], buff[i*2], buff[i*2+1]);
+}
+
+TWord swap_endianess(TWord in){
+
+	uint8_t buff[2];
+
+	buff[0] = (uint8_t)  in;
+	buff[1] = (uint8_t) (in >> 8);
+
+	TWord out;
+
+	out =        buff[1];
+	out = out | (buff[0] << 8);
+
+	return out;
 }
 
 static TWord swap_data_in(TWord in)

@@ -173,7 +173,7 @@ static int get_vcom(struct pl_vcom_config *p){
 
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
 	IT8951WriteData(bus, type, 0x00); // read VCOM
-	int value = (int) IT8951ReadData(bus, type);
+	int value = (int) IT8951ReadData(bus, type, 1);
 
 	return value;
 }
