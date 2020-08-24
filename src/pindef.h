@@ -49,7 +49,7 @@
 #define FALCON_I80_HCS_N	BEAGLEBONE_GPIO(0,5)   //P9-17
 //#define FALCON_I80_HCS_N	BEAGLEBONE_GPIO(1,14)  //P8-16 --> waveshare eval wiring
 #define FALCON_I80_HDC		BEAGLEBONE_GPIO(1,17)  //P9-23
-//#define FALCON_I80_HDC		BEAGLEBONE_GPIO(0,22)  //P8-19 --> waveshare eval wiring
+//#define FALCON_I80_HDC	BEAGLEBONE_GPIO(0,22)  //P8-19 --> waveshare eval wiring
 #define FALCON_I80_HRDY		BEAGLEBONE_GPIO(3,19)  //P9-27
 #define FALCON_I80_RESET_N	BEAGLEBONE_GPIO(0,26)  //P8-14
 #define FALCON_SPI_CS_ITE	BEAGLEBONE_GPIO(1,18)  //P9-14
