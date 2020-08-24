@@ -50,6 +50,7 @@ enum driving_board {
 	FALCON_PARALLEL,
 	RUDDOCK_PARALLEL,
 	FALCON_I80,
+	FALCON_SPI,
 };
 
 enum nvm_version {

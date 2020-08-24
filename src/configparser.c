@@ -123,7 +123,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 		return -ENODEV;
 	}
 
-	if (setup->sInterface->open(setup->sInterface) != 1)
+ 	if (setup->sInterface->open(setup->sInterface) != 1)
 		return -EBUSY;
 
 	// nvm spi device
