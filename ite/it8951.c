@@ -76,7 +76,7 @@ it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interfa
 
 void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  , void* pBuf)
 {
-    TWord* pusWord = (TWord*)pBuf;
+    //TWord* pusWord = (TWord*)pBuf;
     I80IT8951DevInfo* pstDevInfo;
     //Send I80 CMD
     IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_GET_DEV_INFO);
@@ -93,14 +93,14 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  
     //    pusWord[i] = IT8951ReadData(bus, type);
     //  }
 
-    pusWord = IT8951ReadData(bus, type, sizeof(I80IT8951DevInfo)/2);
+    pstDevInfo = IT8951ReadData(bus, type, sizeof(I80IT8951DevInfo)/2);
 
 //    IT8951ReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
 
 //    #endif
 
     //Show Device information of IT8951
-    pstDevInfo = (I80IT8951DevInfo*)pusWord;
+    //pstDevInfo = (I80IT8951DevInfo*)pusWord;
     printf("Panel(W,H) = (%d,%d)\n", pstDevInfo->usPanelW, pstDevInfo->usPanelH );
     printf("Image Buffer Address = %X\r\n",
     pstDevInfo->usImgBufAddrL | (pstDevInfo->usImgBufAddrH << 16));
@@ -778,7 +778,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceTy
 
 	TWord usData;
 	//int iResult = 0;
-	TWord* iResult;
+	TWord* iResult = (TWord*) malloc(size*sizeof(TWord));
 
 
 	if(*type == SPI_HRDY){
@@ -848,7 +848,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceTy
 			int i = 0;
 			for(i=0; i<size; i++){
 				read(i80->fd, &usData, 1);
-				iResult[i] = usData;
+				iResult [i] = usData;
 			}
 
 			//WR Enable - H

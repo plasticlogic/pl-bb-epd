@@ -192,15 +192,15 @@ static int init_vcom(pl_vcom_config_t *p){
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 
-	enum interfaceType *type = it8951->sInterfaceType;
+	enum interfaceType* type = it8951->sInterfaceType;
 
-	if(type == SPI_HRDY ){
+	if(*type == SPI_HRDY ){
 		//struct pl_spi_hrdy *spi = (struct pl_spi_hrdy)malloc(sizeof(struct pl_spi_hrdy));
 		pl_spi_hrdy_t *spi = malloc(sizeof(pl_spi_hrdy_t));
 		spi->hw_ref = bus ->hw_ref;
 		assert(spi != NULL);
 	}
-	else if(type == I80){
+	else if(*type == I80){
 		pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 		assert(i80 != NULL);
 	}
