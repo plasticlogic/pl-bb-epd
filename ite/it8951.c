@@ -708,32 +708,33 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus, enum interfaceTyp
 			pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
 			struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 
-			uint8_t preamble_[4];
+
+			// Prepare SPI preamble to enable ITE Write Data mode via SPI
+			uint8_t preamble_[2];
 			preamble_[0] = (uint8_t) 0x00;
 			preamble_[1] = (uint8_t) 0x00;
 
+			// Split TWord Data (2byte) into its uint8 (1byte) subunits
+			uint8_t data_[2];
+			data_[0] = (uint8_t) (usData >> 8);
+			data_[1] = (uint8_t) usData;
+
 			IT8951WaitForReady(bus, type);
-			//e.g. - Set GPIO 0~7 to Output mode
-			//See your host setting of GPIO
-			//GPIO_I80_Bus[16] = usData;
 
-		    //Switch C/D to Data => Data - H
-			//GPIO_SET_H(CD);
-		    //CS-L
-		    //GPIO_SET_L(CS);
-		    gpio->set(spi->cs_gpio, 0);
-		    //WR Enable
-		    //GPIO_SET_L(WEN);
-		    //gpio->set(i80_ref->hwe_n_gpio, 0);
-		    //Set 16 bits Bus Data
-		    //See your host setting of GPIO
-		    iResult = write(spi->fd, &usData, 1);
+			// open SPI Bus
+			int stat = -EINVAL;
+			stat = bus->open(spi);
 
-		    //WR Enable - H
-		    //GPIO_SET_H(WEN);
-		    //gpio->set(i80_ref->hwe_n_gpio, 1);
-		    //CS-H
-		    //GPIO_SET_H(CS);
+			// Set CS to low
+			gpio->set(spi->cs_gpio, 0);
+
+			//send SPI write data preamble
+			stat = bus->write_bytes(bus, preamble_, 2);
+
+			//send SPI data
+			stat = bus->write_bytes(bus, data_, 2);
+
+			// Set CS to high and end SPI communication
 		    gpio->set(spi->cs_gpio, 1);
 
 			}
