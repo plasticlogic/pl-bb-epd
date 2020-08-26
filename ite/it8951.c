@@ -126,22 +126,22 @@ void IT8951SetImgBufBaseAddr(pl_generic_interface_t *bus, enum interfaceType *ty
 //-----------------------------------------------------------
 TWord IT8951ReadReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr)
 {
-    TWord usData;
+	TWord*usData;
     //----------I80 Mode-------------
     //Send Cmd and Register Address
     IT8951WriteCmdCode(bus, type, IT8951_TCON_REG_RD);
     IT8951WriteData(bus, type, usRegAddr);
     //Read data from Host Data bus
-    usData = IT8951ReadData(bus, type, 1);
-    return usData;
+    usData = IT8951ReadData(bus, type, 2);
+    return *usData;
 }
 
 //-----------------------------------------------------------
 //Host Cmd 5 - REG_WR
 //-----------------------------------------------------------
-void IT8951WriteReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr,TWord usValue)
+void IT8951WriteReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr, TWord usValue)
 {
-    //I80 Mode
+
     //Send Cmd , Register Address and Write Value
 	IT8951WriteCmdCode(bus, type, IT8951_TCON_REG_WR);
 	IT8951WriteData(bus, type, usRegAddr);

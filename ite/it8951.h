@@ -173,7 +173,7 @@ void IT8951WriteCmdCode(pl_generic_interface_t *bus, enum interfaceType *type,  
 void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
 void IT8951WriteData_NoSwap(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
 void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
-TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type, int size);
+TWord *IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type, int size);
 void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
 void IT8951SendCmdArg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usCmdCode,TWord* pArg, TWord usNumArg);
 TWord swap_endianess(TWord in);
