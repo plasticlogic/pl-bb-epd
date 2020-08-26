@@ -185,7 +185,7 @@ static int configure_update(struct pl_generic_controller *controller, int wfid, 
 
 	//Turn on HV creation
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	IT8951WriteData(bus, type, 0x01); // set Power Bit to low
+	IT8951WriteData(bus, type, 0x01); // set Power Bit to high
 
 	return 0;
 }
