@@ -41,43 +41,11 @@ it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interfa
 	return p;
 }
 
-//void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf)
-//{
-//    TWord* pusWord = (TWord*)pBuf;
-//    I80IT8951DevInfo* pstDevInfo;
-//    //Send I80 CMD
-//    IT8951WriteCmdCode(p, USDEF_I80_CMD_GET_DEV_INFO);
-////    #ifdef EN_SPI_2_I80
-////
-////    //Burst Read Request for SPI interface only
-////    LCDReadNData(pusWord, sizeof(I80IT8951DevInfo)/2);//Polling HRDY for each words(2-bytes) if possible
-////
-////    #else
-//    //I80 interface - Single Read availabl
-//    int i;
-//    for(i=0; i<sizeof(I80IT8951DevInfo)/2; i++)
-//    {
-//        pusWord[i] = IT8951ReadData(p);
-//      }
-//
-////    IT8951ReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
-//
-////    #endif
-//
-//    //Show Device information of IT8951
-//    pstDevInfo = (I80IT8951DevInfo*)pBuf;
-//    printf("Panel(W,H) = (%d,%d)\n", pstDevInfo->usPanelW, pstDevInfo->usPanelH );
-//    printf("Image Buffer Address = %X\r\n",
-//    pstDevInfo->usImgBufAddrL | (pstDevInfo->usImgBufAddrH << 16));
-//    //Show Firmware and LUT Version
-//    //printf("FW Version = %s\r\n", stI80IT8951DevInfo.usFWVersion);
-//    //printf("LUT Version = %s\r\n", stI80IT8951DevInfo.usLUTVersion);
-//}
 
 void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  , void* pBuf)
 {
-    //TWord* pusWord = (TWord*)pBuf;
     I80IT8951DevInfo* pstDevInfo;
+    I80IT8951DevInfo* pBuf_ = (I80IT8951DevInfo*)pBuf;
     //Send I80 CMD
     IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_GET_DEV_INFO);
 //    #ifdef EN_SPI_2_I80
@@ -93,7 +61,21 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  
     //    pusWord[i] = IT8951ReadData(bus, type);
     //  }
 
-    pstDevInfo = IT8951ReadData(bus, type, sizeof(I80IT8951DevInfo)/2);
+    pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(bus, type, sizeof(I80IT8951DevInfo)/2);
+
+    //transfer info between pointers
+    pBuf_->usPanelW 		= pstDevInfo->usPanelW;
+    pBuf_->usPanelH 		= pstDevInfo->usPanelH;
+    pBuf_->usImgBufAddrH 	= pstDevInfo->usImgBufAddrH;
+    pBuf_->usImgBufAddrL 	= pstDevInfo->usImgBufAddrL;
+
+    int i=0;
+    int size = sizeof(pstDevInfo->usFWVersion)/2;
+    for(i=0; i<size; i++){
+    	pBuf_->usFWVersion[i] 	= pstDevInfo->usFWVersion[i];
+    	pBuf_->usLUTVersion[i] 	= pstDevInfo->usLUTVersion[i];
+    }
+
 
 //    IT8951ReadDataBurst(p, pusWord, sizeof(I80IT8951DevInfo)/2);
 
@@ -346,55 +328,88 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 	//TWord usData_;
 
 	if(*type == SPI_HRDY){
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
-		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
+//		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
+//		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
+//
+//	    // swap data
+//	#ifdef SWAPDATA
+//	    {
+//	    swap_data(usData, size);
+//	    }
+//	#endif
+//
+//	    //wait for ready
+//	    IT8951WaitForReady(bus, type);
+//
+//	    //Switch C/D to Data => Data - H
+//	    //GPIO_SET_H(CD);
+//
+//	    //CS
+//	    gpio->set(spi->cs_gpio, 0);
+//
+//	    struct timeval tStop, tStart; // time variables
+//	    float tTotal;
+//
+//	    gettimeofday(&tStart, NULL);
+//	    //for(i=0; i<size; i++)
+//	//    {
+//	////    	usData_ = usData[i];
+//	////        // swap data
+//	////    	usData_ = swap_data(usData_);
+//	////		//Set 16 bits Bus Data
+//	////		//See your host setting of GPIO
+//	////		iResult = write(p->fd, &usData_, 1);
+//	//
+//	//		// unswaped data
+//	//		iResult = write(p->fd, usData[i], 1);
+//	//    }
+//
+//	    iResult = write(spi->fd, usData, size/2);
+//	    IT8951WaitForReady(bus, type);
+//	    iResult = write(spi->fd, usData + size/2, size/2);
+//
+//
+//	    gettimeofday(&tStop, NULL);
+//	    tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
+//	    printf("Data Transmission --> Time: %f\n", tTotal);
+//
+//	    //wait for ready
+//	    IT8951WaitForReady(bus, type);
+//
+//	    //CS
+//	    gpio->set(spi->cs_gpio, 1);
 
-	    // swap data
-	#ifdef SWAPDATA
-	    {
-	    swap_data(usData, size);
-	    }
-	#endif
 
-	    //wait for ready
+
+	    pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
+	    struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
+
+
+	    // Prepare SPI preamble to enable ITE Write Data mode via SPI
+	    uint8_t preamble_[2];
+	    preamble_[0] = (uint8_t) 0x00;
+	    preamble_[1] = (uint8_t) 0x00;
+
+
+
 	    IT8951WaitForReady(bus, type);
 
-	    //Switch C/D to Data => Data - H
-	    //GPIO_SET_H(CD);
+	    // open SPI Bus
+	    int stat = -EINVAL;
+	    stat = bus->open(spi);
 
-	    //CS
+	    // Set CS to low
 	    gpio->set(spi->cs_gpio, 0);
 
-	    struct timeval tStop, tStart; // time variables
-	    float tTotal;
+	    //send SPI write data preamble
+	    stat = bus->write_bytes(bus, preamble_, 2);
 
-	    gettimeofday(&tStart, NULL);
-	    //for(i=0; i<size; i++)
-	//    {
-	////    	usData_ = usData[i];
-	////        // swap data
-	////    	usData_ = swap_data(usData_);
-	////		//Set 16 bits Bus Data
-	////		//See your host setting of GPIO
-	////		iResult = write(p->fd, &usData_, 1);
-	//
-	//		// unswaped data
-	//		iResult = write(p->fd, usData[i], 1);
-	//    }
-
-	    iResult = write(spi->fd, usData, size/2);
+	    //send SPI data
+	    stat = bus->write_bytes(bus, usData, size/2);
 	    IT8951WaitForReady(bus, type);
-	    iResult = write(spi->fd, usData + size/2, size/2);
+	    stat = bus->write_bytes(bus, usData + size/2, size/2);
 
-
-	    gettimeofday(&tStop, NULL);
-	    tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
-	    printf("Data Transmission --> Time: %f\n", tTotal);
-
-	    //wait for ready
-	    IT8951WaitForReady(bus, type);
-
-	    //CS
+	    // Set CS to high and end SPI communication
 	    gpio->set(spi->cs_gpio, 1);
 
 		}
