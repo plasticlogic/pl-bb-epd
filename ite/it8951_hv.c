@@ -35,9 +35,35 @@ pl_hv_driver_t *it8951_get_hv_driver(it8951_t *it8951){
 	p->hw_ref = it8951;
 	p->switch_on = it8951_hv_driver_on;
 	p->switch_off = it8951_hv_driver_off;
-	p->init = NULL;
+	p->init = it8951_hv_init;
 
 	return p;
+}
+
+static int it8951_hv_init(pl_vcom_config_t *p){
+	assert(p != NULL);
+	it8951_t *it8951 = (it8951_t*)p->hw_ref;
+	assert(it8951 != NULL);
+	pl_generic_interface_t *bus = it8951->interface;
+	assert(bus != NULL);
+
+	enum interfaceType* type = it8951->sInterfaceType;
+
+	if(*type == SPI_HRDY ){
+		//struct pl_spi_hrdy *spi = (struct pl_spi_hrdy)malloc(sizeof(struct pl_spi_hrdy));
+		pl_spi_hrdy_t *spi = malloc(sizeof(pl_spi_hrdy_t));
+		spi->hw_ref = bus ->hw_ref;
+		assert(spi != NULL);
+	}
+	else if(*type == I80){
+		pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+		assert(i80 != NULL);
+	}
+	else{
+		//error
+	}
+
+	return 0;
 }
 
 ///**
@@ -60,16 +86,15 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p){
 		return -ETIME;
 
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	IT8951WriteData(bus, type, (TWord) 1);
+	IT8951WriteData(bus, type, 0x01);
 	IT8951WaitForReady(bus, type);
 
-	TWord data = IT8951ReadReg(bus, type, 0x1E14);
+	TWord data;
 	do {
-
-		data |= (1 << 3); // switches GPIO5 of ITE (Power Up Pin) high
+		data =IT8951ReadReg(bus, type, 0x1e16);
 		usleep(250);
 		timeout--;
-	} while (!(data & 0x04) && timeout);
+	} while (!(data & 0x2000) && timeout);
 
 
 	if (!(data & 0x04)) {
@@ -99,7 +124,7 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p){
 		return -ETIME;
 
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	IT8951WriteData(bus, type, (TWord) 0);
+	IT8951WriteData(bus, type, 0x00);
 	IT8951WaitForReady(bus, type);
 
 //	TWord data = IT8951ReadReg(bus, type, 0x1E14);
