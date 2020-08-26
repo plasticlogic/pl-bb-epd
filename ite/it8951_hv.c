@@ -144,21 +144,27 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 
 	//Configure the VCom Value
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
-	IT8951WriteData(bus, type, 0x01); // write VCOM
+	IT8951WriteData(bus, type, 0x01); // command parameter for setting the VCOM Value
 	IT8951WriteData(bus, type, (TWord) vcomInMillivolt);
 	IT8951WaitForReady(bus, type);
 
-	//sleep(10);
-	//IT8951WriteCmdCode(i80, IT8951_TCON_STANDBY); //
+	// Unfortunately Configure VCom Command turns PMIC on completely, so we ahve to set it back to standby manually
+	// Read GPIO/PMIC Registers
+	// GPIO/PMIC Register is 32 Bit, first 16 Bit are found at address 1E14 next 16bit can be found at next address 1e16
+	// address 1e16 actually holds the output values
 
-	//Set PMIC to standby after issuing VCom CTrl Command
-	//(VCom Ctrl CMD also turns HV creation on)
-	//GPIO Register Adress is 1E14
+	//Get current Register setting
+	TWord data;
+	TWord data2;
+	data =IT8951ReadReg(bus, type, 0x1e16);
+	data2 = data;
 
-	//TWord data = IT8951ReadReg(bus, type, 0x1E14);
-	//data &= ~(1 << 2); // switches GPIO5 of ITE (Power Up Pin) low
-	//IT8951WriteReg(bus, type, 0x1E14, data);
-	//IT8951WaitForReady(bus, type);
+	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
+	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+
+	//Write adjusted data to register
+	IT8951WriteReg(bus, type, 0x1e16,data);
+
 	return 0;
 }
 
@@ -171,9 +177,11 @@ static int get_vcom(struct pl_vcom_config *p){
 	enum interfaceType *type = it8951->sInterfaceType;
 
 
+	//read VCom
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
-	IT8951WriteData(bus, type, 0x00); // read VCOM
-	int value = (int) IT8951ReadData(bus, type, 1);
+	IT8951WriteData(bus, type, 0x00); // command parameter for reading the VCOM Value
+	TWord *result_ = IT8951ReadData(bus, type, 1);
+	int value = (int) *result_;
 
 	return value;
 }
