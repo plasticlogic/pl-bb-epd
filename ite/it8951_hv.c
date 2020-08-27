@@ -85,19 +85,35 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p){
 	if (IT8951WaitForReady(bus,type))
 		return -ETIME;
 
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	IT8951WriteData(bus, type, 0x01);
-	IT8951WaitForReady(bus, type);
+//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+//	IT8951WriteData(bus, type, 0x01);
+//	IT8951WaitForReady(bus, type);
 
+	//Get current Register setting
 	TWord data;
+	TWord data2;
+	data =IT8951ReadReg(bus, type, 0x1e16);
+	data2 = data;
+
+	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
+	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+
+	//Write adjusted data to register
+	IT8951WriteReg(bus, type, 0x1e16,data);
+
+
+	//Poll the HV Good Pin on TI TPS65185, to wait for HV ready
+	TWord tmp_;
+	int test;
 	do {
-		data =IT8951ReadReg(bus, type, 0x1e16);
+		tmp =IT8951ReadReg(bus, type, 0x1e16);
 		usleep(250);
 		timeout--;
-	} while (!(data & 0x2000) && timeout);
+		test = (tmp & 0x20);
+	} while (test != 0x20 && timeout);
 
 
-	if (!(data & 0x04)) {
+	if ((tmp & 0x20) != 0x20) {
 		LOG("Failed to turn the EPDC power on");
 		return -EEPDC;
 	}
