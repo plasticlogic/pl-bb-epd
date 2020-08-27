@@ -183,9 +183,9 @@ static int configure_update(struct pl_generic_controller *controller, int wfid, 
 	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 	IT8951WaitForDisplayReady(bus, type);
 
-	//Turn on HV creation
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	IT8951WriteData(bus, type, 0x01); // set Power Bit to high
+	//Set to Enable I80 Packed mode
+	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
+
 
 	return 0;
 }
@@ -209,8 +209,6 @@ static int load_png_image(struct pl_generic_controller *controller, const char *
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
 
-	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
-	//struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
 
 	TDWord gulImgBufAddr;
 	TByte* gpFrameBuf;

@@ -405,9 +405,9 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 	    stat = bus->write_bytes(bus, preamble_, 2);
 
 	    //send SPI data
-	    stat = bus->write_bytes(bus, usData, size/2);
+	    stat = bus->write_bytes(bus, usData, size);
 	    IT8951WaitForReady(bus, type);
-	    stat = bus->write_bytes(bus, usData + size/2, size/2);
+	    stat = bus->write_bytes(bus, usData + size/2, size);
 
 	    // Set CS to high and end SPI communication
 	    gpio->set(spi->cs_gpio, 1);
