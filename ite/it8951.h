@@ -196,5 +196,6 @@ void IT8951WaitForDisplayReady(pl_generic_interface_t *bus, enum interfaceType *
 
 TWord IT8951ReadReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr);
 void IT8951WriteReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr,TWord usValue);
+int IT8951_update_reg(pl_generic_interface_t *bus, enum interfaceType *type, uint16_t reg, uint16_t val, const uint32_t bitmask);
 
 #endif /* IT8951_H_ */

@@ -130,6 +130,27 @@ void IT8951WriteReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord
 	IT8951WriteData(bus, type, usValue);
 }
 
+
+/**
+ * update register
+ *
+ * @param bus it8951 bus structure
+ * @param type it8951 interface tyoe variable
+ * @param reg register address
+ * @param val register value
+ * @param bitmask register bitmask
+ * @return status
+ */
+int IT8951_update_reg(pl_generic_interface_t *bus, enum interfaceType *type, uint16_t reg, uint16_t val, const uint32_t bitmask)
+{
+
+	uint16_t current_val = IT8951ReadReg(bus, type, reg);
+	uint16_t new_val = (val & bitmask) | (current_val & (~bitmask));
+
+	IT8951WriteReg(bus, type, reg, new_val);
+
+	return 0;
+}
 //-----------------------------------------------------------
 //Display function 1 - Wait for LUT Engine Finish
 //                     Polling Display Engine Ready by LUTNo

@@ -294,11 +294,25 @@ static int wait_update_end(struct pl_generic_controller *controller)
 
 static int read_register(struct pl_generic_controller *controller, const regSetting_t* setting)
 {
+	it8951_t *it8951 = controller->hw_ref;
+	assert(it8951 != NULL);
+	pl_generic_interface_t *bus = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
+
+	*(setting->val) = IT8951ReadReg(bus, type, setting->addr);
+
 	return 0;
 }
 
 static int write_register(struct pl_generic_controller *controller, const regSetting_t setting, const uint32_t bitmask)
 {
+	it8951_t *it8951 = controller->hw_ref;
+	assert(it8951 != NULL);
+	pl_generic_interface_t *bus = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
+
+	IT8951_update_reg(bus, type, setting.addr, setting.val, bitmask);
+
 	return 0;
 }
 
