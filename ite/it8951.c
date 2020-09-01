@@ -884,6 +884,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceTy
 			//
 			int i = 0;
 			for(i=0; i<size; i++){
+				IT8951WaitForReady(bus, type);
 				read(i80->fd, &usData, 1);
 				iResult [i] = usData;
 			}
