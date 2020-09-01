@@ -53,6 +53,7 @@ static pl_pmic_t *get_tps65185_instance(hw_setup_t *p);
 static s1d135xx_t *get_s1d13524_instance(hw_setup_t *p);
 static s1d135xx_t *get_s1d13541_instance(hw_setup_t *p);
 static it8951_t *get_it8951_instance(hw_setup_t *p);
+static pl_pmic_t *get_it8951_pmic_instance(hw_setup_t *p);
 
 static int initialize_control_system(hw_setup_t *p, const char *selection);
 static int initialize_driver_board(hw_setup_t *p, const char *selection);
@@ -66,6 +67,7 @@ static int initialize_hv_driver(hw_setup_t *p, const char *selection);
 static int initialize_controller(hw_setup_t *p, const char *selection);
 
 static it8951_t * it8951;						//!< pointer to an ITE IT8951 implementation
+static pl_pmic_t * it8951_pmic;					//!< pointer to an ITE IT8951 implementation
 static s1d135xx_t *s1d13541;					//!< pointer to an Epson S1D13541 implementation
 static s1d135xx_t *s1d13524;					//!< pointer to an Epson S1D13524 implementation
 static pl_pmic_t *max17135;						//!< pointer to MAX17135 PMIC object
@@ -331,6 +333,21 @@ static it8951_t *get_it8951_instance(hw_setup_t *p){
 }
 
 /**
+ * Implements singleton pattern for ITE IT8951 variable.
+ * @return instance of IT8951
+ * @see it8951_t
+ */
+static pl_pmic_t *get_it8951_pmic_instance(hw_setup_t *p){
+	if (it8951_pmic == NULL){
+		it8951_pmic = (pl_pmic_t *)malloc(sizeof(pl_pmic_t));
+		it8951_pmic->hw_ref = it8951_new(&(p->gpios), (pl_generic_interface_t*) p->sInterface, &(p->sInterfaceType), &(p->host_i2c), p->it8951_pins);
+		it8951_pmic->cal = &p->g_vcom_cal;
+	}
+
+	return it8951_pmic;
+}
+
+/**
  * Implements singleton pattern for Texas Instruments TPS65185 PMIC variable.
  * @return instance of TPS65185 pmic
  * @see pl_pmic_t
@@ -515,7 +532,7 @@ static int initialize_vcom_config(hw_setup_t *p, const char *selection){
 		p->vcomConfig = tps65185_get_vcom_config(get_tps65185_instance(p));
 
 	else if (!strcmp(selection, "IT8951" ))
-			p->vcomConfig = it8951_get_vcom_config(get_it8951_instance(p));
+			p->vcomConfig = it8951_get_vcom_config(get_it8951_pmic_instance(p));
 
 	else if (!strcmp(selection, "NULL" ))
 		p->vcomConfig = NULL;

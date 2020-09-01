@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include <pl/hv.h>
+#include <pl/pmic.h>
 #include <pl/generic_interface.h>
 #include <pl/i80.h>
 #include <pl/spi_hrdy.h>
@@ -42,8 +43,12 @@ pl_hv_driver_t *it8951_get_hv_driver(it8951_t *it8951){
 
 static int it8951_hv_init(pl_vcom_config_t *p){
 	assert(p != NULL);
-	it8951_t *it8951 = (it8951_t*)p->hw_ref;
+
+	pl_pmic_t *it8951_pmic = (pl_pmic_t*)p->hw_ref;
+	assert(it8951_pmic != NULL);
+	it8951_t *it8951 = (it8951_t*)it8951_pmic->hw_ref;
 	assert(it8951 != NULL);
+
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 
@@ -164,11 +169,11 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p){
 // -----------------------------------------------------------------------------
 // vcom_config - interface implementation
 // ------------------------------
-pl_vcom_config_t *it8951_get_vcom_config(it8951_t *it8951){
-	assert(it8951 != NULL);
+pl_vcom_config_t *it8951_get_vcom_config(pl_pmic_t *it8951_pmic){
+	assert(it8951_pmic != NULL);
 
 	struct pl_vcom_config *p = vcom_config_new();
-	p->hw_ref = it8951;
+	p->hw_ref = it8951_pmic;
 	p->set_vcom = set_vcom;
 	p->get_vcom = get_vcom;
 	p->init = init_vcom;
@@ -177,16 +182,29 @@ pl_vcom_config_t *it8951_get_vcom_config(it8951_t *it8951){
 
 static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	assert(p != NULL);
-	it8951_t *it8951 = (it8951_t*)p->hw_ref;
+	pl_pmic_t *it8951_pmic = (pl_pmic_t*)p->hw_ref;
+	it8951_t *it8951 = (it8951_t*)it8951_pmic->hw_ref;
+
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 	enum interfaceType *type = it8951->sInterfaceType;
 
+	//recalculate the VCom value utilizing the PL DAC structure
+	int dac_value;
+	struct vcom_cal *v = it8951_pmic->cal;
+	dac_value = vcom_calculate(v, vcomInMillivolt);
+	LOG("calculate: %i, %i", vcomInMillivolt, dac_value);
+
+	if (dac_value < IT8951_HVPMIC_DAC_MIN)
+		dac_value = IT8951_HVPMIC_DAC_MIN;
+	else if (dac_value > IT8951_HVPMIC_DAC_MAX)
+		dac_value = IT8951_HVPMIC_DAC_MAX;
+
 	//Configure the VCom Value
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
 	IT8951WriteData(bus, type, 0x01); // command parameter for setting the VCOM Value
-	IT8951WriteData(bus, type, (TWord) vcomInMillivolt);
+	IT8951WriteData(bus, type, (TWord) dac_value);
 	IT8951WaitForReady(bus, type);
 
 	// Unfortunately Configure VCom Command turns PMIC on completely, so we ahve to set it back to standby manually
@@ -236,7 +254,9 @@ static int get_vcom(struct pl_vcom_config *p){
  */
 static int init_vcom(pl_vcom_config_t *p){
 	assert(p != NULL);
-	it8951_t *it8951 = (it8951_t*)p->hw_ref;
+	pl_pmic_t *it8951_pmic = (pl_pmic_t*)p->hw_ref;
+	assert(it8951_pmic != NULL);
+	it8951_t *it8951 = (it8951_t*)it8951_pmic->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);

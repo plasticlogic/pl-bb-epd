@@ -24,11 +24,14 @@
  */
 
 #include <errno.h>
+#include <stdint.h>
 #ifndef PMIC_H_
 #define PMIC_H_
 
 
 typedef struct pl_pmic {
+	void *hw_ref;
+
 	struct pl_i2c *i2c;
 	uint8_t i2c_addr;
 	struct vcom_cal *cal;
