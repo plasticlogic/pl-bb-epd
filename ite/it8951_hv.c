@@ -94,9 +94,7 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p){
 
 	//Get current Register setting
 	TWord data;
-	TWord data2;
 	data =IT8951ReadReg(bus, type, 0x1e16);
-	data2 = data;
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
@@ -142,9 +140,15 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p){
 	if (IT8951WaitForReady(bus,type))
 		return -ETIME;
 
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	IT8951WriteData(bus, type, 0x00);
-	IT8951WaitForReady(bus, type);
+	//Get current Register setting
+	TWord data;
+	data =IT8951ReadReg(bus, type, 0x1e16);
+
+	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
+	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+
+	//Write adjusted data to register
+	IT8951WriteReg(bus, type, 0x1e16,data);
 
 //	TWord data = IT8951ReadReg(bus, type, 0x1E14);
 //
