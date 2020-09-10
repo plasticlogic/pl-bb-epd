@@ -74,6 +74,7 @@ typedef struct
 #define IT8951_TCON_LD_IMG       0x0020
 #define IT8951_TCON_LD_IMG_AREA  0x0021
 #define IT8951_TCON_LD_IMG_END   0x0022
+#define IT8951_TCON_BYPASS_I2C   0x003E
 
 //I80 User defined command code
 #define USDEF_I80_CMD_DPY_AREA     0x0034

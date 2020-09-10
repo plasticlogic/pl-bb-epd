@@ -79,8 +79,6 @@ static int it8951_hv_init(pl_vcom_config_t *p){
 // */
 static int it8951_hv_driver_on(struct pl_hv_driver *p){
 
-	uint16_t tmp, timeout = 400;
-
 	it8951_t *it8951 = (it8951_t *)p->hw_ref;
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
@@ -101,14 +99,14 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p){
 	data2 = data;
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
-	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
 
 	//Write adjusted data to register
 	IT8951WriteReg(bus, type, 0x1e16,data);
 
 
 	//Poll the HV Good Pin on TI TPS65185, to wait for HV ready
-	TWord tmp_;
+	uint16_t tmp, timeout = 400;
 	int test;
 	do {
 		tmp =IT8951ReadReg(bus, type, 0x1e16);
@@ -133,7 +131,7 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p){
 // * @return PASS(==0) / FAIL(!=0) information
 // */
 static int it8951_hv_driver_off(struct pl_hv_driver *p){
-	uint16_t tmp, timeout = 400;
+
 
 	it8951_t *it8951 = (it8951_t *)p->hw_ref;
 	pl_generic_interface_t *bus = it8951->interface;
@@ -162,7 +160,6 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p){
 //		LOG("Failed to turn the EPDC power off");
 //		return -EEPDC;
 //	}
-
 	return 0;
 }
 
@@ -201,11 +198,54 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	else if (dac_value > IT8951_HVPMIC_DAC_MAX)
 		dac_value = IT8951_HVPMIC_DAC_MAX;
 
+	uint8_t vcomval_[2];
+	vcomval_[0] = (uint8_t) dac_value;
+	vcomval_[1] = (uint8_t) (dac_value>>8);
+
+	//set unused Register Bit of TPS65185 to 1, normal reset state
+	vcomval_[1] |= (1 << 2);
+
+	//Make sure TIs TPS65185 is not in sleep, but standby mode (so it can receive i2C command)
+	//Get current Register setting of it8951 PMIC GPIOS
+	TWord data;
+	data =IT8951ReadReg(bus, type, 0x1e16);
+
+	//FLIP Bit 10 which corresponds to GPIO10/Pin 64 on ITE
+	data |= (1 << 10); // switches GPIO10 of ITE (Wake Up Pin) high
+
+	//Write adjusted data to register
+	IT8951WriteReg(bus, type, 0x1e16,data);
+
+	// Set Power Up Sequence
+	// Send I2C Command via ITE8951
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x01); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x0A); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	IT8951WriteData(bus, type, 0xFF); // Register Content (Maximal length for power Up Sequence)
+
+	// Set VCom Value
+	// Send I2C Command via ITE8951
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x01); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x03); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	IT8951WriteData(bus, type, vcomval_[0]); // Register Content
+
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x01); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x04); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	IT8951WriteData(bus, type, vcomval_[1]); // Register Content
+
 	//Configure the VCom Value
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
-	IT8951WriteData(bus, type, 0x01); // command parameter for setting the VCOM Value
-	IT8951WriteData(bus, type, (TWord) dac_value);
-	IT8951WaitForReady(bus, type);
+	//IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
+	//IT8951WriteData(bus, type, 0x01); // command parameter for setting the VCOM Value
+	//IT8951WriteData(bus, type, (TWord) dac_value);
+	//IT8951WaitForReady(bus, type);
 
 	// Unfortunately Configure VCom Command turns PMIC on completely, so we ahve to set it back to standby manually
 	// Read GPIO/PMIC Registers
@@ -213,16 +253,15 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	// address 1e16 actually holds the output values
 
 	//Get current Register setting
-	TWord data;
-	TWord data2;
-	data =IT8951ReadReg(bus, type, 0x1e16);
-	data2 = data;
+	//TWord data2;
+	//data =IT8951ReadReg(bus, type, 0x1e16);
+	//data2 = data;
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
-	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+	//data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
 
 	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16,data);
+	//IT8951WriteReg(bus, type, 0x1e16,data);
 
 	return 0;
 }
