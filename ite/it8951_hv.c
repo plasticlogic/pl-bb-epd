@@ -104,14 +104,22 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p){
 
 
 	//Poll the HV Good Pin on TI TPS65185, to wait for HV ready
-	uint16_t tmp, timeout = 400;
+//	uint16_t tmp, timeout = 2000;
+//	int test;
+//	do {
+//		tmp =IT8951ReadReg(bus, type, 0x1e16);
+//		usleep(250);
+//		timeout--;
+//		test = (tmp & 0x20);
+//	} while (test != 0x20 && timeout);
+
+	uint16_t tmp;
 	int test;
 	do {
 		tmp =IT8951ReadReg(bus, type, 0x1e16);
 		usleep(250);
-		timeout--;
 		test = (tmp & 0x20);
-	} while (test != 0x20 && timeout);
+	} while (test != 0x20 );
 
 
 	if ((tmp & 0x20) != 0x20) {
@@ -146,6 +154,8 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p){
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+	//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE
+	data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
 
 	//Write adjusted data to register
 	IT8951WriteReg(bus, type, 0x1e16,data);
@@ -225,7 +235,16 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
 	IT8951WriteData(bus, type, 0x01); // I2C write command
 	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0A); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x09); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	IT8951WriteData(bus, type, 0x78); // Register Content (Maximal length for power Up Sequence) 27 6C
+
+	// Set Power Up Sequence Timing
+	// Send I2C Command via ITE8951
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x01); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x0A); // Power Up Timing Register
 	IT8951WriteData(bus, type, 0x01); // Write Size
 	IT8951WriteData(bus, type, 0xFF); // Register Content (Maximal length for power Up Sequence)
 
