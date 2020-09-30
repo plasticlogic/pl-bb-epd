@@ -130,6 +130,26 @@ static int trigger_update(struct pl_generic_controller *controller)
 	//Wait until the Update has ended
 	IT8951WaitForDisplayReady(bus, type);
 
+	// Readout PMIC Fault registers
+	// Send I2C Command via ITE8951
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x00); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x07); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	TWord* data07 = IT8951ReadData(bus, type, 1);  //read data
+
+	printf("PMIC Register 7 after update: %d\n", *data07);
+
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x00); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x08); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	TWord* data08 = IT8951ReadData(bus, type, 1);  //read data
+
+	printf("PMIC Register 8 after update: %d\n", *data08);
+
 	//Turn of HV creation
 	//IT8951WriteCmdCode(i80, USDEF_I80_CMD_POWER_CTR);
 	//IT8951WriteData(i80, 0x00); // set Power Bit to low
