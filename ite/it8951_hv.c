@@ -264,6 +264,15 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	IT8951WriteData(bus, type, 0x01); // Write Size
 	IT8951WriteData(bus, type, vcomval_[1]); // Register Content
 
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_FORCE_SET_TEMP);
+
+	TWord data2[2];
+	data2[0] = 0x0001;
+	data2[1] = 0x0025;
+
+	IT8951WriteDataBurst(bus, type, data2, 2);
+	IT8951WaitForReady(bus, type);
+
 	//Configure the VCom Value
 	//IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
 	//IT8951WriteData(bus, type, 0x01); // command parameter for setting the VCOM Value

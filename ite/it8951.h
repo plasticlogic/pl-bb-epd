@@ -77,10 +77,11 @@ typedef struct
 #define IT8951_TCON_BYPASS_I2C   0x003E
 
 //I80 User defined command code
-#define USDEF_I80_CMD_DPY_AREA     0x0034
-#define USDEF_I80_CMD_GET_DEV_INFO 0x0302
-#define USDEF_I80_CMD_POWER_CTR	   0x0038
-#define USDEF_I80_CMD_VCOM_CTR     0x0039
+#define USDEF_I80_CMD_DPY_AREA     		0x0034
+#define USDEF_I80_CMD_GET_DEV_INFO 		0x0302
+#define USDEF_I80_CMD_POWER_CTR	  		0x0038
+#define USDEF_I80_CMD_VCOM_CTR     		0x0039
+#define USDEF_I80_CMD_FORCE_SET_TEMP	0x0040
 
 //Panel
 #define IT8951_PANEL_WIDTH   1024 //it Get Device information

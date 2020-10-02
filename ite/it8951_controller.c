@@ -125,6 +125,7 @@ static int trigger_update(struct pl_generic_controller *controller)
 	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
 	IT8951WriteData(bus, type, (TWord) devInfo.usPanelW);     		    // Display W devInfo.usPanelW 1200
 	IT8951WriteData(bus, type, (TWord) devInfo.usPanelH); 			    // Display H devInfo.usPanelH 960
+
 	IT8951WriteData(bus, type, (TWord) 2); 					// Display Mode
 
 	//Wait until the Update has ended
