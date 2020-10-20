@@ -56,6 +56,9 @@ int vcom_calculate(const struct vcom_cal *v, int input_mv)
 	LOG("input: %d, scaled: %d, DAC reg: 0x%02X",
 	    input_mv, scaled_mv, dac_value);
 
+	//Debug purpose
+	//dac_value = 6000;
+
 	return dac_value;
 }
 

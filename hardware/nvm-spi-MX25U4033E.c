@@ -115,6 +115,7 @@ static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_
 
 	// open spi
 	stat = spi->open(spi);
+	//spi->mSpi->msh = 2000000;
 
 	// read chip id
 	uint8_t rdid_data[3];

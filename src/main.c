@@ -337,7 +337,7 @@ int execute_start_epdc(int argc, char **argv){
 		initFromEEprom = atoi(argv[2]);
 	}
 
-	stat = start_epdc(initFromEEprom, executeClear);
+  	stat = start_epdc(initFromEEprom, executeClear);
 
 	return stat;
 }

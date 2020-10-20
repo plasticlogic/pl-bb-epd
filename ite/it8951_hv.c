@@ -23,12 +23,11 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt);
 static int get_vcom(struct pl_vcom_config *p);
 static int init_vcom(pl_vcom_config_t *p);
 
-
 //----------------------------------------------------------------------
 //Implementation of ITE8951 as interface to PMIC (original interface to tp65185)
 //------------------------------------------------------------------------------
 
-pl_hv_driver_t *it8951_get_hv_driver(it8951_t *it8951){
+pl_hv_driver_t *it8951_get_hv_driver(it8951_t *it8951) {
 	assert(it8951 != NULL);
 
 	struct pl_hv_driver *p = hv_driver_new();
@@ -41,12 +40,12 @@ pl_hv_driver_t *it8951_get_hv_driver(it8951_t *it8951){
 	return p;
 }
 
-static int it8951_hv_init(pl_vcom_config_t *p){
+static int it8951_hv_init(pl_vcom_config_t *p) {
 	assert(p != NULL);
 
-	pl_pmic_t *it8951_pmic = (pl_pmic_t*)p->hw_ref;
+	pl_pmic_t *it8951_pmic = (pl_pmic_t*) p->hw_ref;
 	assert(it8951_pmic != NULL);
-	it8951_t *it8951 = (it8951_t*)it8951_pmic->hw_ref;
+	it8951_t *it8951 = (it8951_t*) it8951_pmic->hw_ref;
 	assert(it8951 != NULL);
 
 	pl_generic_interface_t *bus = it8951->interface;
@@ -54,17 +53,15 @@ static int it8951_hv_init(pl_vcom_config_t *p){
 
 	enum interfaceType* type = it8951->sInterfaceType;
 
-	if(*type == SPI_HRDY ){
+	if (*type == SPI_HRDY) {
 		//struct pl_spi_hrdy *spi = (struct pl_spi_hrdy)malloc(sizeof(struct pl_spi_hrdy));
 		pl_spi_hrdy_t *spi = malloc(sizeof(pl_spi_hrdy_t));
-		spi->hw_ref = bus ->hw_ref;
+		spi->hw_ref = bus->hw_ref;
 		assert(spi != NULL);
-	}
-	else if(*type == I80){
+	} else if (*type == I80) {
 		pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 		assert(i80 != NULL);
-	}
-	else{
+	} else {
 		//error
 	}
 
@@ -77,50 +74,47 @@ static int it8951_hv_init(pl_vcom_config_t *p){
 // * @param p pointer to a hv driver object
 // * @return PASS(==0) / FAIL(!=0) information
 // */
-static int it8951_hv_driver_on(struct pl_hv_driver *p){
+static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 
-	it8951_t *it8951 = (it8951_t *)p->hw_ref;
+	it8951_t *it8951 = (it8951_t *) p->hw_ref;
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 	enum interfaceType *type = it8951->sInterfaceType;
 
-
-	if (IT8951WaitForReady(bus,type))
+	if (IT8951WaitForReady(bus, type))
 		return -ETIME;
 
 //	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
 //	IT8951WriteData(bus, type, 0x01);
 //	IT8951WaitForReady(bus, type);
 
-	//Get current Register setting
+//Get current Register setting
 	TWord data;
-	data =IT8951ReadReg(bus, type, 0x1e16);
+	data = IT8951ReadReg(bus, type, 0x1e16);
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
 
 	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16,data);
-
+	IT8951WriteReg(bus, type, 0x1e16, data);
 
 	//Poll the HV Good Pin on TI TPS65185, to wait for HV ready
-//	uint16_t tmp, timeout = 2000;
+	uint16_t tmp, timeout = 2000;
+	int test;
+	do {
+		tmp = IT8951ReadReg(bus, type, 0x1e16);
+		usleep(25000);
+		timeout--;
+		test = (tmp & 0x20);
+	} while (test != 0x20 && timeout);
+
+//	uint16_t tmp;
 //	int test;
 //	do {
 //		tmp =IT8951ReadReg(bus, type, 0x1e16);
 //		usleep(250);
-//		timeout--;
 //		test = (tmp & 0x20);
-//	} while (test != 0x20 && timeout);
-
-	uint16_t tmp;
-	int test;
-	do {
-		tmp =IT8951ReadReg(bus, type, 0x1e16);
-		usleep(250);
-		test = (tmp & 0x20);
-	} while (test != 0x20 );
-
+//	} while (test != 0x20 );
 
 	if ((tmp & 0x20) != 0x20) {
 		LOG("Failed to turn the EPDC power on");
@@ -136,21 +130,19 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p){
 // * @param p pointer to a hv driver object
 // * @return PASS(==0) / FAIL(!=0) information
 // */
-static int it8951_hv_driver_off(struct pl_hv_driver *p){
+static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 
-
-	it8951_t *it8951 = (it8951_t *)p->hw_ref;
+	it8951_t *it8951 = (it8951_t *) p->hw_ref;
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 	enum interfaceType *type = it8951->sInterfaceType;
 
-
-	if (IT8951WaitForReady(bus,type))
+	if (IT8951WaitForReady(bus, type))
 		return -ETIME;
 
 	//Get current Register setting
 	TWord data;
-	data =IT8951ReadReg(bus, type, 0x1e16);
+	data = IT8951ReadReg(bus, type, 0x1e16);
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
@@ -158,7 +150,7 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p){
 	data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
 
 	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16,data);
+	IT8951WriteReg(bus, type, 0x1e16, data);
 
 //	TWord data = IT8951ReadReg(bus, type, 0x1E14);
 //
@@ -180,7 +172,7 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p){
 // -----------------------------------------------------------------------------
 // vcom_config - interface implementation
 // ------------------------------
-pl_vcom_config_t *it8951_get_vcom_config(pl_pmic_t *it8951_pmic){
+pl_vcom_config_t *it8951_get_vcom_config(pl_pmic_t *it8951_pmic) {
 	assert(it8951_pmic != NULL);
 
 	struct pl_vcom_config *p = vcom_config_new();
@@ -191,10 +183,10 @@ pl_vcom_config_t *it8951_get_vcom_config(pl_pmic_t *it8951_pmic){
 	return p;
 }
 
-static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
+static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	assert(p != NULL);
-	pl_pmic_t *it8951_pmic = (pl_pmic_t*)p->hw_ref;
-	it8951_t *it8951 = (it8951_t*)it8951_pmic->hw_ref;
+	pl_pmic_t *it8951_pmic = (pl_pmic_t*) p->hw_ref;
+	it8951_t *it8951 = (it8951_t*) it8951_pmic->hw_ref;
 
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
@@ -214,7 +206,7 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 
 	uint8_t vcomval_[2];
 	vcomval_[0] = (uint8_t) dac_value;
-	vcomval_[1] = (uint8_t) (dac_value>>8);
+	vcomval_[1] = (uint8_t) (dac_value >> 8);
 
 	//set unused Register Bit of TPS65185 to 1, normal reset state
 	vcomval_[1] |= (1 << 2);
@@ -222,13 +214,13 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	//Make sure TIs TPS65185 is not in sleep, but standby mode (so it can receive i2C command)
 	//Get current Register setting of it8951 PMIC GPIOS
 	TWord data;
-	data =IT8951ReadReg(bus, type, 0x1e16);
+	data = IT8951ReadReg(bus, type, 0x1e16);
 
 	//FLIP Bit 10 which corresponds to GPIO10/Pin 64 on ITE
 	data |= (1 << 10); // switches GPIO10 of ITE (Wake Up Pin) high
 
 	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16,data);
+	IT8951WriteReg(bus, type, 0x1e16, data);
 
 	// Set Power Up Sequence
 	// Send I2C Command via ITE8951
@@ -239,6 +231,10 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	IT8951WriteData(bus, type, 0x01); // Write Size
 	IT8951WriteData(bus, type, 0x78); // Register Content (Maximal length for power Up Sequence) 27 6C
 
+//	TWord* usData1[] = { 0x01, 0x68, 0x09, 0x01, 0x78 };
+//	IT8951WriteDataBurst(bus, type, usData1, 5);
+	IT8951WaitForReady(bus, type);
+
 	// Set Power Up Sequence Timing
 	// Send I2C Command via ITE8951
 	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
@@ -246,38 +242,43 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
 	IT8951WriteData(bus, type, 0x0A); // Power Up Timing Register
 	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0xFF); // Register Content (Maximal length for power Up Sequence)
+	IT8951WriteData(bus, type, 0x00); // Register Content (Maximal length for power Up Sequence) there was an ff in there for longer power up time ???????
 
-	// Set VCom Value
-	// Send I2C Command via ITE8951
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x03); // Power Up Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, vcomval_[0]); // Register Content
-
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x04); // Power Up Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, vcomval_[1]); // Register Content
-
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_FORCE_SET_TEMP);
-
-	TWord data2[2];
-	data2[0] = 0x0001;
-	data2[1] = 0x0025;
-
-	IT8951WriteDataBurst(bus, type, data2, 2);
+//	TWord* usData2[] = { 0x01, 0x68, 0x0A, 0x01, 0xFF };
+//	IT8951WriteDataBurst(bus, type, usData2, 5);
 	IT8951WaitForReady(bus, type);
 
+//	// Set VCom Value
+//	// Send I2C Command via ITE8951
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x03); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, vcomval_[0]); // Register Content
+//
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x04); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, vcomval_[1]); // Register Content
+
+	// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
+//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_FORCE_SET_TEMP);
+//
+//	TWord dataTemp[2];
+//	dataTemp[0] = 0x0001;
+//	dataTemp[1] = 0x0025;
+//
+//	IT8951WriteDataBurst(bus, type, dataTemp, 2);
+//	IT8951WaitForReady(bus, type);
+
 	//Configure the VCom Value
-	//IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
-	//IT8951WriteData(bus, type, 0x01); // command parameter for setting the VCOM Value
-	//IT8951WriteData(bus, type, (TWord) dac_value);
-	//IT8951WaitForReady(bus, type);
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
+	IT8951WriteData(bus, type, 0x01); // command parameter for setting the VCOM Value
+	IT8951WriteData(bus, type, (TWord) dac_value);
+	IT8951WaitForReady(bus, type);
 
 	// Unfortunately Configure VCom Command turns PMIC on completely, so we ahve to set it back to standby manually
 	// Read GPIO/PMIC Registers
@@ -285,27 +286,26 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt){
 	// address 1e16 actually holds the output values
 
 	//Get current Register setting
-	//TWord data2;
-	//data =IT8951ReadReg(bus, type, 0x1e16);
-	//data2 = data;
+	TWord data2;
+	data = IT8951ReadReg(bus, type, 0x1e16);
+	data2 = data;
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
-	//data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
 
 	//Write adjusted data to register
-	//IT8951WriteReg(bus, type, 0x1e16,data);
+	IT8951WriteReg(bus, type, 0x1e16, data);
 
 	return 0;
 }
 
-static int get_vcom(struct pl_vcom_config *p){
+static int get_vcom(struct pl_vcom_config *p) {
 	assert(p != NULL);
-	it8951_t *it8951 = (it8951_t*)p->hw_ref;
+	it8951_t *it8951 = (it8951_t*) p->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 	enum interfaceType *type = it8951->sInterfaceType;
-
 
 	//read VCom
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
@@ -323,28 +323,26 @@ static int get_vcom(struct pl_vcom_config *p){
  * @param p pointer to an vcom_config implementation
  * @return success of operation: 0 if passed; otherwise != 0
  */
-static int init_vcom(pl_vcom_config_t *p){
+static int init_vcom(pl_vcom_config_t *p) {
 	assert(p != NULL);
-	pl_pmic_t *it8951_pmic = (pl_pmic_t*)p->hw_ref;
+	pl_pmic_t *it8951_pmic = (pl_pmic_t*) p->hw_ref;
 	assert(it8951_pmic != NULL);
-	it8951_t *it8951 = (it8951_t*)it8951_pmic->hw_ref;
+	it8951_t *it8951 = (it8951_t*) it8951_pmic->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 
 	enum interfaceType* type = it8951->sInterfaceType;
 
-	if(*type == SPI_HRDY ){
+	if (*type == SPI_HRDY) {
 		//struct pl_spi_hrdy *spi = (struct pl_spi_hrdy)malloc(sizeof(struct pl_spi_hrdy));
 		pl_spi_hrdy_t *spi = malloc(sizeof(pl_spi_hrdy_t));
-		spi->hw_ref = bus ->hw_ref;
+		spi->hw_ref = bus->hw_ref;
 		assert(spi != NULL);
-	}
-	else if(*type == I80){
+	} else if (*type == I80) {
 		pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 		assert(i80 != NULL);
-	}
-	else{
+	} else {
 		//error
 	}
 

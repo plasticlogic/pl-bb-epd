@@ -1,21 +1,21 @@
 /*
-  Plastic Logic EPD project on BeagleBone
+ Plastic Logic EPD project on BeagleBone
 
-  Copyright (C) 2018 Plastic Logic
+ Copyright (C) 2018 Plastic Logic
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 /*
  * utils.c -- random homeless functions
  *
@@ -35,9 +35,7 @@
 #include "parser.h"
 #include <libpng-1.2.51/png.h>
 
-
-void swap32(void *x)
-{
+void swap32(void *x) {
 	uint8_t *b = x;
 	uint8_t tmp;
 
@@ -49,14 +47,12 @@ void swap32(void *x)
 	b[2] = tmp;
 }
 
-void swap32_array(int32_t **x, uint16_t n)
-{
+void swap32_array(int32_t **x, uint16_t n) {
 	while (n--)
 		swap32(*x++);
 }
 
-void swap16(void *x)
-{
+void swap16(void *x) {
 	uint8_t *b = x;
 	uint8_t tmp;
 
@@ -65,26 +61,22 @@ void swap16(void *x)
 	b[1] = tmp;
 }
 
-void swap16_array(int16_t *x, uint16_t n)
-{
+void swap16_array(int16_t *x, uint16_t n) {
 	while (n--)
 		swap16(x++);
 }
 
-int is_file_present(const char *path)
-{
+int is_file_present(const char *path) {
 
 	return 1;
 }
 
-int join_path(char *path, size_t n, const char *dir, const char *file)
-{
+int join_path(char *path, size_t n, const char *dir, const char *file) {
 	return (snprintf(path, n, "%s/%s", dir, file) >= n) ? -1 : 0;
 }
 
 int open_image(const char *dir, const char *file, FILE *f,
-	       struct pnm_header *hdr)
-{
+		struct pnm_header *hdr) {
 	char path[MAX_PATH_LEN];
 
 	if (snprintf(path, MAX_PATH_LEN, "%s/%s", dir, file) >= MAX_PATH_LEN) {
@@ -92,17 +84,17 @@ int open_image(const char *dir, const char *file, FILE *f,
 		return -ENAMETOOLONG;
 	}
 
-/**
-	if (f_open(f, path, FA_READ) != FR_OK) {
-		LOG("Failed to open image file");
-		return -1;
-	}*/
+	/**
+	 if (f_open(f, path, FA_READ) != FR_OK) {
+	 LOG("Failed to open image file");
+	 return -1;
+	 }*/
 
 	/**
-	if (pnm_read_header(f, hdr) < 0) {
-		LOG("Failed to parse PGM header");
-		return -1;
-	}*/
+	 if (pnm_read_header(f, hdr) < 0) {
+	 LOG("Failed to parse PGM header");
+	 return -1;
+	 }*/
 
 	return 0;
 }
@@ -111,19 +103,15 @@ int open_image(const char *dir, const char *file, FILE *f,
  * Debug utilies
  */
 
-
 void abort_now(const char *abort_msg, enum abort_error error_code);
 
-void abort_now(const char *abort_msg, enum abort_error error_code)
-{
+void abort_now(const char *abort_msg, enum abort_error error_code) {
 	if (abort_msg != NULL)
 		fprintf(stderr, "%s\r\n", abort_msg);
 }
 
-static void do_abort_msg(const char *file, unsigned line,
-			 const char *error_str, const char *message,
-			 enum abort_error error_code)
-{
+static void do_abort_msg(const char *file, unsigned line, const char *error_str,
+		const char *message, enum abort_error error_code) {
 	/* Following conversion of line to a string is a workaround
 	 * for a problem with fprintf(stderr, "%u", line) that only
 	 * occurs when NOT debugging and prevents further code execution
@@ -136,22 +124,18 @@ static void do_abort_msg(const char *file, unsigned line,
 	abort_now(error_str, error_code);
 }
 
-void do_abort_msg_assert(const char *file, unsigned line, const char *message)
-{
+void do_abort_msg_assert(const char *file, unsigned line, const char *message) {
 	do_abort_msg(file, line, "Assertion failed\n", message, ABORT_ASSERT);
 }
 
-void do_abort_msg_error(const char *file, unsigned line, const char *message, enum abort_error error_code)
-{
+void do_abort_msg_error(const char *file, unsigned line, const char *message,
+		enum abort_error error_code) {
 	do_abort_msg(file, line, "Fatal error\n", message, error_code);
 }
 
-void dump_hex(const void *data, uint16_t len)
-{
-	static const char hex[16] = {
-		'0', '1', '2', '3', '4', '5', '6', '7',
-		'8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-	};
+void dump_hex(const void *data, uint16_t len) {
+	static const char hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
+			'9', 'A', 'B', 'C', 'D', 'E', 'F' };
 	char s[] = "[XXXX] XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX XX";
 	char *cur;
 	uint16_t i;
@@ -160,7 +144,7 @@ void dump_hex(const void *data, uint16_t len)
 		return;
 
 	for (i = 0, cur = s; i < len; ++i) {
-		const uint8_t byte = ((const uint8_t *)data)[i];
+		const uint8_t byte = ((const uint8_t *) data)[i];
 
 		if (!(i & 0xF)) {
 			uint16_t addr = i;
@@ -195,13 +179,11 @@ void dump_hex(const void *data, uint16_t len)
 	puts(s);
 }
 
-void dump_hex16(const void *data, uint16_t len)
-{
-	static const char hex[16] = {
-		'0', '1', '2', '3', '4', '5', '6', '7',
-		'8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-	};
-	char s[] = "[XXXX] XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX";
+void dump_hex16(const void *data, uint16_t len) {
+	static const char hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
+			'9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	char s[] =
+			"[XXXX] XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX";
 	char *cur;
 	uint16_t i;
 
@@ -209,7 +191,7 @@ void dump_hex16(const void *data, uint16_t len)
 		return;
 
 	for (i = 0, cur = s; i < len; ++i) {
-		const uint16_t word = ((const uint16_t *)data)[i];
+		const uint16_t word = ((const uint16_t *) data)[i];
 
 		if (!(i & 0xF)) {
 			uint16_t addr = i;
@@ -246,232 +228,234 @@ void dump_hex16(const void *data, uint16_t len)
 	puts(s);
 }
 
-int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * height)
-{
-  LOG("filename %s", file_name);
+int read_png(const char* file_name, png_byte ** image_ptr, int * width,
+		int * height) {
+	LOG("filename %s", file_name);
 
-  png_structp png_ptr;
-  png_infop info_ptr;
-  FILE *fp;
+	png_structp png_ptr;
+	png_infop info_ptr;
+	FILE *fp;
 
-  errno = 0;
-  if ((fp = fopen(file_name, "rb")) == NULL)
-     return (-errno);
+	errno = 0;
+	if ((fp = fopen(file_name, "rb")) == NULL)
+		return (-errno);
 
-  /* Create and initialize the png_struct with the desired error handler
-    * functions.  If you want to use the default stderr and longjump method,
-    * you can supply NULL for the last three parameters.  We also supply the
-    * the compiler header file version, so that we know if the application
-    * was compiled with a compatible version of the library.  REQUIRED
-    */
-   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-      NULL, NULL, NULL);
+	/* Create and initialize the png_struct with the desired error handler
+	 * functions.  If you want to use the default stderr and longjump method,
+	 * you can supply NULL for the last three parameters.  We also supply the
+	 * the compiler header file version, so that we know if the application
+	 * was compiled with a compatible version of the library.  REQUIRED
+	 */
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+	NULL, NULL, NULL);
 
-   if (png_ptr == NULL)
-   {
-      fclose(fp);
-      return (-ENOMEM);
-   }
+	if (png_ptr == NULL) {
+		fclose(fp);
+		return (-ENOMEM);
+	}
 
-   /* Allocate/initialize the memory for image information.  REQUIRED. */
-   info_ptr = png_create_info_struct(png_ptr);
-   if (info_ptr == NULL)
-   {
-      fclose(fp);
-      png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
-      return (-ENOMEM);
-   }
+	/* Allocate/initialize the memory for image information.  REQUIRED. */
+	info_ptr = png_create_info_struct(png_ptr);
+	if (info_ptr == NULL) {
+		fclose(fp);
+		png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+		return (-ENOMEM);
+	}
 
-   /* Set error handling if you are using the setjmp/longjmp method (this is
-    * the normal method of doing things with libpng).  REQUIRED unless you
-    * set up your own error handlers in the png_create_read_struct() earlier.
-    */
+	/* Set error handling if you are using the setjmp/longjmp method (this is
+	 * the normal method of doing things with libpng).  REQUIRED unless you
+	 * set up your own error handlers in the png_create_read_struct() earlier.
+	 */
 
-   if (setjmp(png_jmpbuf(png_ptr)))
-   {
-      /* Free all of the memory associated with the png_ptr and info_ptr */
-      png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
-      fclose(fp);
-      /* If we get here, we had a problem reading the file */
-      return (-EINVAL);
-   }
+	if (setjmp(png_jmpbuf(png_ptr))) {
+		/* Free all of the memory associated with the png_ptr and info_ptr */
+		png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+		fclose(fp);
+		/* If we get here, we had a problem reading the file */
+		return (-EINVAL);
+	}
 
-   /* Set up the input control if you are using standard C streams */
-   png_init_io(png_ptr, fp);
+	/* Set up the input control if you are using standard C streams */
+	png_init_io(png_ptr, fp);
 
-   // read the header
-  png_read_info(png_ptr, info_ptr);
+	// read the header
+	png_read_info(png_ptr, info_ptr);
 
-  *width = (int)png_get_image_width(png_ptr, info_ptr);
-  *height = (int) png_get_image_height(png_ptr, info_ptr);
-  int _bit_depth = (int) png_get_bit_depth(png_ptr, info_ptr);
-  int _channels = (int) png_get_channels(png_ptr, info_ptr);
+	*width = (int) png_get_image_width(png_ptr, info_ptr);
+	*height = (int) png_get_image_height(png_ptr, info_ptr);
+	int _bit_depth = (int) png_get_bit_depth(png_ptr, info_ptr);
+	int _channels = (int) png_get_channels(png_ptr, info_ptr);
 
-  LOG("width %d, height %d, bit_depth %d, channels %d", *width, *height, _bit_depth, _channels);
+	LOG("width %d, height %d, bit_depth %d, channels %d", *width, *height,
+			_bit_depth, _channels);
 
-  png_bytep row_pointers[*height];
+	png_bytep row_pointers[*height];
 
-  int row;
-  /* Clear the pointer array */
-  for (row = 0; row < (*height); row++)
-     row_pointers[row] = NULL;
+	int row;
+	/* Clear the pointer array */
+	for (row = 0; row < (*height); row++)
+		row_pointers[row] = NULL;
 
-  for (row = 0; row < (*height); row++)
-     row_pointers[row] = png_malloc(png_ptr, png_get_rowbytes(png_ptr,
-        info_ptr));
+	for (row = 0; row < (*height); row++)
+		row_pointers[row] = png_malloc(png_ptr,
+				png_get_rowbytes(png_ptr, info_ptr));
 
-  /* Now it's time to read the image.  One of these methods is REQUIRED */
-  /* Read the entire image in one go */
-  png_read_image(png_ptr, row_pointers);
+	/* Now it's time to read the image.  One of these methods is REQUIRED */
+	/* Read the entire image in one go */
+	png_read_image(png_ptr, row_pointers);
 
-  png_read_end(png_ptr, info_ptr);
+	png_read_end(png_ptr, info_ptr);
 
-  // copy rows to buffer
-  png_byte * image_buffer;
-  image_buffer = malloc((*height)*(*width)*sizeof(png_byte));
+	// copy rows to buffer
+	png_byte * image_buffer;
+	image_buffer = malloc((*height) * (*width) * sizeof(png_byte));
 
-  int h, w;
-  for(h=0; h<(*height); h++)
-    for (w=0; w<(*width); w++)
-    {
-        image_buffer[h*(*width)+w] = (png_byte) *(row_pointers[h]+_channels*w);
-        //image[h*_width+w] = (uint8_t) *(row_pointers[h]+w);
-    }
+	int h, w;
+	for (h = 0; h < (*height); h++)
+		for (w = 0; w < (*width); w++) {
+			image_buffer[h * (*width) + w] = (png_byte) *(row_pointers[h]
+					+ _channels * w);
+			//image[h*_width+w] = (uint8_t) *(row_pointers[h]+w);
+		}
 
-  *image_ptr = image_buffer;
+	*image_ptr = image_buffer;
 
-  /* Clean up after the read, and free any memory allocated - REQUIRED */
-  png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+	/* Clean up after the read, and free any memory allocated - REQUIRED */
+	png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
 
-  /* Close the file */
-  fclose(fp);
+	/* Close the file */
+	fclose(fp);
 
-  return 0;
+	return 0;
 }
 
-int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width, int * height)
-{
+int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
+		int * height) {
 
-  LOG("filename %s", file_name);
+	LOG("filename %s", file_name);
 
-  png_structp png_ptr;
-  png_infop info_ptr;
-  FILE *fp;
+	png_structp png_ptr;
+	png_infop info_ptr;
+	FILE *fp;
 	errno = 0;
 
-  if ((fp = fopen(file_name, "rb")) == NULL)
-     return (-errno);
+	if ((fp = fopen(file_name, "rb")) == NULL)
+		return (-errno);
 
-  /* Create and initialize the png_struct with the desired error handler
-    * functions.  If you want to use the default stderr and longjump method,
-    * you can supply NULL for the last three parameters.  We also supply the
-    * the compiler header file version, so that we know if the application
-    * was compiled with a compatible version of the library.  REQUIRED
-    */
-   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-      NULL, NULL, NULL);
+	/* Create and initialize the png_struct with the desired error handler
+	 * functions.  If you want to use the default stderr and longjump method,
+	 * you can supply NULL for the last three parameters.  We also supply the
+	 * the compiler header file version, so that we know if the application
+	 * was compiled with a compatible version of the library.  REQUIRED
+	 */
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+	NULL, NULL, NULL);
 
-   if (png_ptr == NULL)
-   {
-      fclose(fp);
-      return (-ENOMEM);
-   }
+	if (png_ptr == NULL) {
+		fclose(fp);
+		return (-ENOMEM);
+	}
 
-   /* Allocate/initialize the memory for image information.  REQUIRED. */
-   info_ptr = png_create_info_struct(png_ptr);
-   if (info_ptr == NULL)
-   {
-      fclose(fp);
-      png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
-      return (-ENOMEM);
-   }
+	/* Allocate/initialize the memory for image information.  REQUIRED. */
+	info_ptr = png_create_info_struct(png_ptr);
+	if (info_ptr == NULL) {
+		fclose(fp);
+		png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+		return (-ENOMEM);
+	}
 
-   /* Set error handling if you are using the setjmp/longjmp method (this is
-    * the normal method of doing things with libpng).  REQUIRED unless you
-    * set up your own error handlers in the png_create_read_struct() earlier.
-    */
+	/* Set error handling if you are using the setjmp/longjmp method (this is
+	 * the normal method of doing things with libpng).  REQUIRED unless you
+	 * set up your own error handlers in the png_create_read_struct() earlier.
+	 */
 
-   if (setjmp(png_jmpbuf(png_ptr)))
-   {
-      /* Free all of the memory associated with the png_ptr and info_ptr */
-      png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
-      fclose(fp);
-      /* If we get here, we had a problem reading the file */
-      return (-EINVAL);
-   }
+	if (setjmp(png_jmpbuf(png_ptr))) {
+		/* Free all of the memory associated with the png_ptr and info_ptr */
+		png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+		fclose(fp);
+		/* If we get here, we had a problem reading the file */
+		return (-EINVAL);
+	}
 
-   /* Set up the input control if you are using standard C streams */
-   png_init_io(png_ptr, fp);
+	/* Set up the input control if you are using standard C streams */
+	png_init_io(png_ptr, fp);
 
-   // read the header
-  png_read_info(png_ptr, info_ptr);
+	// read the header
+	png_read_info(png_ptr, info_ptr);
 
-  *width = (int)png_get_image_width(png_ptr, info_ptr);
-  *height = (int) png_get_image_height(png_ptr, info_ptr);
-  int _bit_depth = (int) png_get_bit_depth(png_ptr, info_ptr);
-  int _channels = (int) png_get_channels(png_ptr, info_ptr);
-  int color_type = (int) png_get_color_type(png_ptr, info_ptr);
-  uint8_t color_offset;
-  switch(color_type){
-	  case 2:{
-		  color_offset = 3;
-		  break;
-	  }
-	  case 6:
-	  default:{
-		  color_offset = 4;
-		  break;
-	  }
-  }
+	*width = (int) png_get_image_width(png_ptr, info_ptr);
+	*height = (int) png_get_image_height(png_ptr, info_ptr);
+	int _bit_depth = (int) png_get_bit_depth(png_ptr, info_ptr);
+	int _channels = (int) png_get_channels(png_ptr, info_ptr);
+	int color_type = (int) png_get_color_type(png_ptr, info_ptr);
+	uint8_t color_offset;
+	switch (color_type) {
+	case 2: {
+		color_offset = 3;
+		break;
+	}
+	case 6:
+	default: {
+		color_offset = 4;
+		break;
+	}
+	}
 
-  LOG("width %d, height %d, bit_depth %d, channels %d, color type: %d", *width, *height, _bit_depth, _channels, color_type);
+	LOG("width %d, height %d, bit_depth %d, channels %d, color type: %d",
+			*width, *height, _bit_depth, _channels, color_type);
 
-  png_bytep row_pointers[*height];
+	png_bytep row_pointers[*height];
 
-  int row;
-  /* Clear the pointer array */
-  for (row = 0; row < (*height); row++)
-     row_pointers[row] = NULL;
+	int row;
+	/* Clear the pointer array */
+	for (row = 0; row < (*height); row++)
+		row_pointers[row] = NULL;
 
-  for (row = 0; row < (*height); row++)
-     row_pointers[row] = png_malloc(png_ptr, png_get_rowbytes(png_ptr,
-        info_ptr));
+	for (row = 0; row < (*height); row++)
+		row_pointers[row] = png_malloc(png_ptr,
+				png_get_rowbytes(png_ptr, info_ptr));
 
-  /* Now it's time to read the image.  One of these methods is REQUIRED */
-  /* Read the entire image in one go */
-  png_read_image(png_ptr, row_pointers);
+	/* Now it's time to read the image.  One of these methods is REQUIRED */
+	/* Read the entire image in one go */
+	png_read_image(png_ptr, row_pointers);
 
-  png_set_expand(png_ptr);
+	png_set_expand(png_ptr);
 
-  png_read_end(png_ptr, info_ptr);
+	png_read_end(png_ptr, info_ptr);
 
-  // copy rows to buffer
-  rgbw_pixel_t * image_buffer;
-  image_buffer = malloc((*height)*(*width)*sizeof(rgbw_pixel_t));
+	// copy rows to buffer
+	rgbw_pixel_t * image_buffer;
+	image_buffer = malloc((*height) * (*width) * sizeof(rgbw_pixel_t));
 
-  int h, w;
-  for(h=0; h<(*height); h++)
-    for (w=0; w<(*width); w++)
-    {
-    	image_buffer[h*(*width)+w].r = (uint8_t) *(row_pointers[h]+0+color_offset*w);
-    	image_buffer[h*(*width)+w].g = (uint8_t) *(row_pointers[h]+1+color_offset*w);
-    	image_buffer[h*(*width)+w].b = (uint8_t) *(row_pointers[h]+2+color_offset*w);
-		image_buffer[h*(*width)+w].w = (uint8_t) (((image_buffer[h*(*width)+w].r * 299) + (image_buffer[h*(*width)+w].g * 587) + (image_buffer[h*(*width)+w].b * 114)) / 1000);
+	int h, w;
+	for (h = 0; h < (*height); h++)
+		for (w = 0; w < (*width); w++) {
+			image_buffer[h * (*width) + w].r = (uint8_t) *(row_pointers[h] + 0
+					+ color_offset * w);
+			image_buffer[h * (*width) + w].g = (uint8_t) *(row_pointers[h] + 1
+					+ color_offset * w);
+			image_buffer[h * (*width) + w].b = (uint8_t) *(row_pointers[h] + 2
+					+ color_offset * w);
+			image_buffer[h * (*width) + w].w = (uint8_t) (((image_buffer[h
+					* (*width) + w].r * 299)
+					+ (image_buffer[h * (*width) + w].g * 587)
+					+ (image_buffer[h * (*width) + w].b * 114)) / 1000);
 
-    }
+		}
 
-  *image_ptr = image_buffer;
+	*image_ptr = image_buffer;
 
-  /* Clean up after the read, and free any memory allocated - REQUIRED */
-  png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+	/* Clean up after the read, and free any memory allocated - REQUIRED */
+	png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
 
-  /* Close the file */
-  fclose(fp);
+	/* Close the file */
+	fclose(fp);
 
-  return 0;
+	return 0;
 }
 
-int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to_settings){
+int read_register_settings_from_file(const char* filename,
+		regSetting_t** ptr_to_settings) {
 
 	static const char sep[] = ", ";
 	FILE *file;
@@ -483,7 +467,8 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 
 	file = fopen(filename, "r");
 	if (file == NULL) {
-		printf("Specified register override file '%s' could not be opened.\n", filename);
+		printf("Specified register override file '%s' could not be opened.\n",
+				filename);
 		return -ENOENT;
 	}
 
@@ -491,13 +476,14 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 	char* line = malloc(count * sizeof(char));
 	int len;
 
-	regSetting_t *settings = (regSetting_t *)calloc(mem_alloc_item_count, sizeof(regSetting_t));
-	if (settings==NULL){
+	regSetting_t *settings = (regSetting_t *) calloc(mem_alloc_item_count,
+			sizeof(regSetting_t));
+	if (settings == NULL) {
 		printf("Couldn't allocate enough memory.\n");
 		return -ENOMEM;
 	}
 
-	while ((len = getline(&line, &count, file))>=0) {
+	while ((len = getline(&line, &count, file)) >= 0) {
 
 		if (line[len - 1] == '\n') {
 			line[len - 1] = '\0';
@@ -513,10 +499,11 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 		}
 
 		// check if we need to allocate more memory
-		if (settingsCount >= mem_alloc_item_count){
+		if (settingsCount >= mem_alloc_item_count) {
 			mem_alloc_item_count *= 2;
-			settings = (regSetting_t *)realloc(settings, mem_alloc_item_count*sizeof(regSetting_t));
-			if (settings==NULL){
+			settings = (regSetting_t *) realloc(settings,
+					mem_alloc_item_count * sizeof(regSetting_t));
+			if (settings == NULL) {
 				printf("Couldn't allocate enough memory.\n");
 				return -ENOMEM;
 			}
@@ -524,29 +511,33 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
 
 		len = parser_read_word(line, sep, &(settings[settingsCount].addr));
 		int positionInLine = len;
-		if (len <= 0){
+		if (len <= 0) {
 			printf("Error reading address.\n");
 			return -ENXIO;
 		}
 
-		len = parser_read_word(line + positionInLine, sep, &(settings[settingsCount].valCount));
+		len = parser_read_word(line + positionInLine, sep,
+				&(settings[settingsCount].valCount));
 		positionInLine += len;
-		if (len <= 0){
+		if (len <= 0) {
 			printf("Error reading value count.\n");
 			return len;
 		}
 
-		uint16_t *data = malloc(settings[settingsCount].valCount*sizeof(uint16_t));
+		uint16_t *data = malloc(
+				settings[settingsCount].valCount * sizeof(uint16_t));
 		settings[settingsCount].val = data;
-		for(currentValueCount=0; currentValueCount<settings[settingsCount].valCount; currentValueCount++){
+		for (currentValueCount = 0;
+				currentValueCount < settings[settingsCount].valCount;
+				currentValueCount++) {
 			len = parser_read_word(line + positionInLine, sep, &val);
 			positionInLine += len;
-			if (len <= 0){
+			if (len <= 0) {
 				printf("Error reading value.\n");
 				return len;
 			}
 
-			data[currentValueCount] =  val;
+			data[currentValueCount] = val;
 		}
 
 		settingsCount++;
@@ -566,12 +557,12 @@ int read_register_settings_from_file(const char* filename, regSetting_t** ptr_to
  * @param settings pointer to  list of register settings
  * @param n number of register settings to be dumped
  */
-void dump_register_settings(regSetting_t *settings, int n){
-	int i,j;
+void dump_register_settings(regSetting_t *settings, int n) {
+	int i, j;
 
-	for(i = 0; i< n; i++){
+	for (i = 0; i < n; i++) {
 		printf("%d %x : %i ", i, settings[i].addr, settings[i].valCount);
-		for(j = 0; j<settings[i].valCount; j++){
+		for (j = 0; j < settings[i].valCount; j++) {
 			printf(": %x ", settings[i].val[j]);
 		}
 		printf("\n");
@@ -586,14 +577,10 @@ void dump_register_settings(regSetting_t *settings, int n){
  * The function returns "0" if parameter max was not exceeded and otherwise "-1";
  *
  */
-int maxstrcpy(char* to, char* from, size_t maxStrLen)
-{
-	if(strlen(from) <= maxStrLen)
-	{
+int maxstrcpy(char* to, char* from, size_t maxStrLen) {
+	if (strlen(from) <= maxStrLen) {
 		strcpy(to, from);
-	}
-	else
-	{
+	} else {
 		memcpy(to, from, maxStrLen);
 		to[maxStrLen] = '\0';
 		return -1;
@@ -611,26 +598,21 @@ int maxstrcpy(char* to, char* from, size_t maxStrLen)
  * max field size. Otherwise if the string is shorter than the max field size, "\0" defines where the string ends.
  *
  */
-int maxstr2memcpy(char* to, char* from, size_t maxMemSize)
-{
-	if(strlen(from) < maxMemSize)
-	{
+int maxstr2memcpy(char* to, char* from, size_t maxMemSize) {
+	if (strlen(from) < maxMemSize) {
 		strcpy(to, from);
-	}
-	else
-	{
+	} else {
 		memcpy(to, from, maxMemSize);
 	}
 
-	if (strlen(to) > maxMemSize)
-	{
+	if (strlen(to) > maxMemSize) {
 		return -1;
 	}
 
 	return 0;
 }
 
-void start_stopwatch(struct timespec* starttime){
+void start_stopwatch(struct timespec* starttime) {
 #if 1
 	struct timespec clock_resolution;
 	clock_getres(CLOCK_REALTIME, &clock_resolution);
@@ -640,45 +622,49 @@ void start_stopwatch(struct timespec* starttime){
 #endif
 }
 
-unsigned long long read_stopwatch(struct timespec* starttime, char* label, int reset){
+unsigned long long read_stopwatch(struct timespec* starttime, char* label,
+		int reset) {
 	struct timespec readtime;
 	unsigned long long elapsedTime = 0;
 #if 1
 
 	clock_gettime(CLOCK_REALTIME, &readtime);
 	elapsedTime = ((readtime.tv_sec * 1000000000L) + readtime.tv_nsec)
-				- ((starttime->tv_sec * 1000000000L) + starttime->tv_nsec);
-	printf("Action %s took %lld us\n",label!=NULL?label:"", (unsigned long long)elapsedTime/1000);
-	if (reset) clock_gettime(CLOCK_REALTIME, starttime);
+			- ((starttime->tv_sec * 1000000000L) + starttime->tv_nsec);
+	printf("Action %s took %lld us\n", label != NULL ? label : "",
+			(unsigned long long) elapsedTime / 1000);
+	if (reset)
+		clock_gettime(CLOCK_REALTIME, starttime);
 #endif
 	return elapsedTime;
 }
 
-uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, rgbw_pixel_t pixel){
-	if(cfa_overlay.r_position == pixel_position)
+uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay,
+		rgbw_pixel_t pixel) {
+	if (cfa_overlay.r_position == pixel_position)
 		return pixel.r;
-	if(cfa_overlay.g_position == pixel_position)
+	if (cfa_overlay.g_position == pixel_position)
 		return pixel.g;
-	if(cfa_overlay.b_position == pixel_position)
+	if (cfa_overlay.b_position == pixel_position)
 		return pixel.b;
-	if(cfa_overlay.w_position == pixel_position)
+	if (cfa_overlay.w_position == pixel_position)
 		return pixel.w;
 	return -EINVAL;
 }
 
-void rotate_8bit_image(int *h, int *w, uint8_t* data){
+void rotate_8bit_image(int *h, int *w, uint8_t* data) {
 	int row, col, height, width, i;
 	char new[*h * *w];
 
 	height = *h;
 	width = *w;
-	for(row=0; row<height; row++){
-		for(col=0; col<width; col++){
-			new[col*height+height-row] = data[row*width+col];
+	for (row = 0; row < height; row++) {
+		for (col = 0; col < width; col++) {
+			new[col * height + height - row] = data[row * width + col];
 		}
 	}
 
-	for(i=0;i<height*width;i++){
+	for (i = 0; i < height * width; i++) {
 		data[i] = new[i];
 	}
 
@@ -686,7 +672,7 @@ void rotate_8bit_image(int *h, int *w, uint8_t* data){
 	*w = height;
 }
 
-void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data){
+void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data) {
 
 	int row, col, height, width, i, oldpos, newpos;
 	rgbw_pixel_t new[*h * *w];
@@ -694,10 +680,10 @@ void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data){
 	height = *h;
 	width = *w;
 	LOG("%s %ix%i", __func__, height, width);
-	for(row=0; row<height; row++){
-		for(col=0; col<width; col++){
-			newpos = col*height+height-row;
-			oldpos = row*width+col;
+	for (row = 0; row < height; row++) {
+		for (col = 0; col < width; col++) {
+			newpos = col * height + height - row;
+			oldpos = row * width + col;
 			new[newpos].r = data[oldpos].r;
 			new[newpos].g = data[oldpos].g;
 			new[newpos].b = data[oldpos].b;
@@ -705,7 +691,7 @@ void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data){
 		}
 	}
 
-	for(i=0;i<height*width;i++){
+	for (i = 0; i < height * width; i++) {
 		data[i].r = new[i].r;
 		data[i].g = new[i].g;
 		data[i].b = new[i].b;
@@ -714,7 +700,6 @@ void rotate_rgbw_image(int *h, int *w, rgbw_pixel_t * data){
 
 	*h = width;
 	*w = height;
-
 
 }
 
