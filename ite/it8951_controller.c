@@ -332,6 +332,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	TByte* targetBuf = malloc(controller->yres * controller->xres);
 
+
 	memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
 			controller->xres, controller->yoffset, controller->xoffset);
 

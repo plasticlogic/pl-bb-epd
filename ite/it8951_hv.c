@@ -301,7 +301,8 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 
 static int get_vcom(struct pl_vcom_config *p) {
 	assert(p != NULL);
-	it8951_t *it8951 = (it8951_t*) p->hw_ref;
+	pl_pmic_t *it8951_pmic = (pl_pmic_t*) p->hw_ref;
+	it8951_t *it8951 = (it8951_t*) it8951_pmic->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
@@ -312,7 +313,7 @@ static int get_vcom(struct pl_vcom_config *p) {
 	IT8951WriteData(bus, type, 0x00); // command parameter for reading the VCOM Value
 	TWord *result_ = IT8951ReadData(bus, type, 1);
 	int value = (int) *result_;
-
+	value = value * 4;
 	return value;
 }
 
