@@ -39,6 +39,7 @@ static int do_clear_update(struct pl_generic_epdc *p);
 static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content);
 static int generic_update(struct pl_generic_epdc *p, int wfID,
 		enum pl_update_mode mode, const struct pl_area *area);
+static int get_resolution(struct pl_generic_controller *p, int* xres, int* yres);
 
 static int unpack_nvm_content(uint8_t *buffer, int bufferSize);
 static int read_vcom_from_file(const char *filename, int *vcomInMillivolts);
@@ -70,6 +71,7 @@ struct pl_generic_epdc *generic_epdc_new() {
 	p->read_register = read_register;
 	p->write_register = write_register;
 	p->send_cmd = send_cmd;
+	p->get_resolution = get_resolution;
 
 	p->clear_init = do_clear_update;
 
@@ -242,6 +244,15 @@ int do_load_nvm_content(struct pl_generic_epdc *p) {
 	}
 	return 0;
 
+}
+
+static int get_resolution(struct pl_generic_controller *p, int* xres, int* yres) {
+	assert(p!=NULL);
+	int stat = 0;
+
+	stat = p->get_resolution;
+
+	return stat;
 }
 
 /**

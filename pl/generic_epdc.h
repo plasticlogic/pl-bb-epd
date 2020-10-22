@@ -46,6 +46,7 @@ typedef struct pl_generic_epdc{
 	int (*read_register)(struct pl_generic_epdc *p, const regSetting_t* setting);
 	int (*write_register)(struct pl_generic_epdc *p, const regSetting_t setting, const uint32_t bitmask);
 	int (*send_cmd)(struct pl_generic_epdc *p, const regSetting_t setting);
+	int (*get_resolution)(struct pl_generic_controller *p, int* xres, int* yres);
 
 } pl_generic_epdc_t;
 

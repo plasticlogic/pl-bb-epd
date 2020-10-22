@@ -67,6 +67,7 @@ static int set_registers(struct pl_generic_controller *controller,
 static int set_temp_mode(struct pl_generic_controller *controller,
 		enum pl_epdc_temp_mode mode);
 static int update_temp(struct pl_generic_controller *controller);
+static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres);
 
 int it8951_controller_setup(struct pl_generic_controller *controller,
 		it8951_t *it8951) {
@@ -91,6 +92,7 @@ int it8951_controller_setup(struct pl_generic_controller *controller,
 
 	controller->set_temp_mode = set_temp_mode;
 	controller->update_temp = update_temp;
+	controller->get_resolution = get_resolution;
 
 	return 0;
 }
@@ -332,7 +334,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	TByte* targetBuf = malloc(controller->yres * controller->xres);
 
-
 	memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
 			controller->xres, controller->yoffset, controller->xoffset);
 
@@ -562,5 +563,23 @@ static int update_temp(struct pl_generic_controller *controller) {
 	stat = 1;
 
 	return stat;
+}
+
+static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres) {
+	it8951_t *it8951 = p->hw_ref;
+	I80IT8951DevInfo* pstDevInfo;
+	assert(it8951 != NULL);
+	IT8951WriteCmdCode(it8951->interface, it8951->sInterfaceType,
+			USDEF_I80_CMD_GET_DEV_INFO);
+	if (xres && yres) {
+		// TODO: Check if scrambled!!!
+		pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface, it8951->sInterfaceType,
+				sizeof(I80IT8951DevInfo) / 2);
+
+		*xres = pstDevInfo->usPanelW;
+		*yres = pstDevInfo->usPanelH;
+		return 0;
+	}
+	return -EINVAL;
 }
 
