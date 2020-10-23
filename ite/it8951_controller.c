@@ -202,11 +202,6 @@ static int configure_update(struct pl_generic_controller *controller, int wfid,
 	return 0;
 }
 
-static int fill(struct pl_generic_controller *controller,
-		const struct pl_area *a, uint8_t grey) {
-	return 0;
-}
-
 static int load_wflib(struct pl_generic_controller *controller,
 		const char *filename) {
 	return 0;
@@ -299,29 +294,28 @@ static int load_png_image(struct pl_generic_controller *controller,
 	int width = 0;
 	int height = 0;
 
-	if (0) {
-		//Host Frame Buffer allocation
-		gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
-		//Write pixel 0xF0(White) to Frame Buffer
-		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
-	} else {
-		if (read_png(path, &gpFrameBuf, &width, &height))
-			return -ENOENT;
-	}
+//	if (0) {
+//		//Host Frame Buffer allocation
+//		gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
+//		//Write pixel 0xF0(White) to Frame Buffer
+//		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
+//	} else {
+//		if (read_png(path, &gpFrameBuf, &width, &height))
+//			return -ENOENT;
+//	}
 
-	//Scramblin Debug
-//	width = 1380;
-//	height = 96;
-//
+	//Scrambling Debug
+	width = 1280;
+	height = 960;
+
 	//Host Frame Buffer allocation
-	//gpFrameBuf = malloc(width * height);
-//	//Write pixel 0xF0(White) to Frame Buffer
-//	memset(gpFrameBuf, 0xff, width * height);
-//
-//	int t = 0;
+	gpFrameBuf = malloc(width * height);
+	//Write pixel 0xF0(White) to Frame Buffer
+	memset(gpFrameBuf, 0xff, width * height);
+
+	int t = 0;
 //	for (t = 0; t < height; t++) {
-//		gpFrameBuf[50 + (1380 * t)] = 0x00;
-//
+//		gpFrameBuf[50 + (1280 * t)] = 0x00;
 //	}
 
 	controller->yres = devInfo.usPanelH;
@@ -334,8 +328,13 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	TByte* targetBuf = malloc(controller->yres * controller->xres);
 
-	memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
-			controller->xres, controller->yoffset, controller->xoffset);
+	if (controller->display_scrambling == 0) {
+		memcpy(targetBuf, scrambledPNG, controller->yres * controller->xres);
+	} else {
+
+		memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
+				controller->xres, controller->yoffset, controller->xoffset);
+	}
 
 	//Check TCon is free ? Wait TCon Ready (optional)
 	IT8951WaitForDisplayReady(bus, type);
@@ -570,16 +569,24 @@ static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres) {
 	I80IT8951DevInfo* pstDevInfo;
 	assert(it8951 != NULL);
 	IT8951WriteCmdCode(it8951->interface, it8951->sInterfaceType,
-			USDEF_I80_CMD_GET_DEV_INFO);
+	USDEF_I80_CMD_GET_DEV_INFO);
 	if (xres && yres) {
 		// TODO: Check if scrambled!!!
-		pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface, it8951->sInterfaceType,
-				sizeof(I80IT8951DevInfo) / 2);
+		pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface,
+				it8951->sInterfaceType, sizeof(I80IT8951DevInfo) / 2);
 
 		*xres = pstDevInfo->usPanelW;
 		*yres = pstDevInfo->usPanelH;
 		return 0;
 	}
 	return -EINVAL;
+}
+
+static int fill(struct pl_generic_controller *controller,
+		const struct pl_area *a, uint8_t grey) {
+
+	LOG("Not implemented yet !");
+
+	return 0;
 }
 

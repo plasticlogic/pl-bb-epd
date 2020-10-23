@@ -40,6 +40,7 @@ pl_spi_hrdy_t *beaglebone_spi_hrdy_new(uint8_t spi_channel,
 	spi_ref->hw_ref = hw_ref;
 	p->hw_ref = spi_ref;
 	p->mSpi->channel = spi_channel;
+	p->fd = -1;
 
 	p->open = spi_hrdy_init;
 	p->close = spi_hrdy_close;
@@ -83,13 +84,16 @@ static int spi_hrdy_init(pl_spi_hrdy_t *psSPI) {
 			psSPI->mSpi->channel);
 
 	int cnt = 0;
-	while ((psSPI->fd = open(userlandSpiDevice, O_RDWR, 0)) == -1) {
-		cnt++;
-		printf("Try to open spi %d\n", cnt);
-		usleep(100000);
+	if(psSPI->fd <= 0)
+	{
+		while ((psSPI->fd = open(userlandSpiDevice, O_RDWR, 0)) == -1) {
+			cnt++;
+			printf("Try to open spi %d\n", cnt);
+			usleep(100000);
 
-		if (cnt >= 100)
-			break;
+			if (cnt >= 100)
+				break;
+		}
 	}
 	printf("got fd %d\n", psSPI->fd);
 

@@ -183,6 +183,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 	IT8951SetImgBufBaseAddr(bus, type, pstLdImgInfo->ulImgBufBaseAddr);
 	//Send Load Image start Cmd
 	IT8951LoadImgAreaStart(bus, type, pstLdImgInfo, pstAreaImgInfo);
+	//IT8951LoadImgStart(bus, type, pstLdImgInfo);
 	//Host Write Data
 	gettimeofday(&tStart, NULL);
 //    for(j=0;j< pstAreaImgInfo->usHeight;j++)
@@ -219,14 +220,25 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 //		IT8951WriteData(bus, type, pusFrameBuf);
 //		pusFrameBuf += pstAreaImgInfo->usWidth / 2; //Change to Next line of loaded image (supposed the Continuous image content in host frame buffer )
 //	}
+	if (*type == SPI_HRDY) {
+		int j = 0;
+		for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
+			IT8951WriteDataBurst(bus, type, pusFrameBuf,
+					pstAreaImgInfo->usWidth / 2);
+			pusFrameBuf += pstAreaImgInfo->usWidth / 2;
+		}
 
-	IT8951WriteDataBurst(bus, type, pusFrameBuf,
-			pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight);
+	} else if (*type == I80) {
+
+		IT8951WriteDataBurst(bus, type, pusFrameBuf,
+				pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight);
+	}
+
 	gettimeofday(&tStop, NULL);
 
 	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
 			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-	printf("Height: %d --> Time: %f\n", j, tTotal);
+	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
 
 	//Send Load Img End Command
 	IT8951LoadImgEnd(bus, type);
@@ -450,6 +462,8 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		// Set CS to high and end SPI communication
 		gpio->set(spi->cs_gpio, 1);
 
+//		stat = bus->close(spi->fd);
+
 	} else if (*type == I80) {
 		pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 		struct pl_gpio * gpio = (struct pl_gpio *) i80->hw_ref;
@@ -629,6 +643,18 @@ void IT8951LoadImgAreaStart(pl_generic_interface_t *bus,
 	//Send Cmd and Args
 	IT8951SendCmdArg(bus, type, IT8951_TCON_LD_IMG_AREA, usArg, 5);
 }
+
+//Host CMD IT8951_TCON_LD_IMG
+void IT8951LoadImgStart(pl_generic_interface_t *bus, enum interfaceType *type,
+		IT8951LdImgInfo* pstLdImgInfo) {
+	TWord usArg[5];
+	//Setting Argument for Load image start
+	usArg[0] = (pstLdImgInfo->usEndianType << 8)
+			| (pstLdImgInfo->usPixelFormat << 4) | (pstLdImgInfo->usRotate);
+	//Send Cmd and Args
+	IT8951SendCmdArg(bus, type, IT8951_TCON_LD_IMG, usArg, 1);
+}
+
 //-----------------------------------------------------------
 //Host Cmd 12 - LD_IMG_END
 //-----------------------------------------------------------
@@ -653,6 +679,8 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
 
 		int stat = -EINVAL;
 		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus->hw_ref;
+		bus->cs_gpio = spi->cs_gpio;
+
 //			spi->close 			= (pl_spi_hrdy_t*) bus->close;
 //			spi->open 			= (pl_spi_hrdy_t*) bus->open;
 //			spi->read_bytes 	= (pl_spi_hrdy_t*) bus->read_bytes;

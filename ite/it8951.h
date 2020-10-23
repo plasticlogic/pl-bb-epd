@@ -193,6 +193,7 @@ void IT8951DisplayArea(pl_generic_interface_t *bus, enum interfaceType *type, TW
 
 void IT8951LoadImgEnd(pl_generic_interface_t *bus, enum interfaceType *type);
 void IT8951LoadImgAreaStart(pl_generic_interface_t *bus, enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo ,IT8951AreaImgInfo* pstAreaImgInfo);
+void IT8951LoadImgStart(pl_generic_interface_t *bus, enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo);
 
 void IT8951WaitForDisplayReady(pl_generic_interface_t *bus, enum interfaceType *type);
 
