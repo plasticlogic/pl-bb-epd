@@ -117,7 +117,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	// initialize spi devices
 	// ----------------------
 
-	setup->sInterface = interface_new(epdc_spi_channel,&(setup->gpios), setup->sInterfaceType);
+	setup->sInterface = interface_new(epdc_spi_channel, &(setup->gpios), setup->sInterfaceType);
 	if (setup->sInterface == NULL){
 		LOG("EPD Interface init has failed");
 		return -ENODEV;

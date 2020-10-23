@@ -17,6 +17,7 @@ typedef struct pl_spi_hrdy
 
   // control signal interface
   int cs_gpio; 		// chip select gpio
+  int hrdy_gpio;
 
   int (*open)(struct pl_spi_hrdy * p);
   int (*close)(struct pl_spi_hrdy * p);
@@ -26,8 +27,6 @@ typedef struct pl_spi_hrdy
   void (*delete)(struct pl_spi_hrdy *p);
 
   struct spi_hrdy_metadata *mSpi;
-
-  int hrdy_gpio;	// hardware ready gpio
 
   /*uint8_t channel;  // SPI channel number
   uint8_t mode;     // current SPI mode

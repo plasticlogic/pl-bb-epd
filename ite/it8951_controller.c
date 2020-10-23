@@ -314,9 +314,9 @@ static int load_png_image(struct pl_generic_controller *controller,
 	memset(gpFrameBuf, 0xff, width * height);
 
 	int t = 0;
-//	for (t = 0; t < height; t++) {
-//		gpFrameBuf[50 + (1280 * t)] = 0x00;
-//	}
+	for (t = 0; t < height; t++) {
+		gpFrameBuf[50 + (1280 * t)] = 0x00;
+	}
 
 	controller->yres = devInfo.usPanelH;
 	controller->xres = devInfo.usPanelW;

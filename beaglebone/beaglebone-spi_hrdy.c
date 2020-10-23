@@ -30,15 +30,13 @@ int fd;
  * @return pl_spi structure
  */
 pl_spi_hrdy_t *beaglebone_spi_hrdy_new(uint8_t spi_channel,
-		struct pl_gpio * hw_ref) {
-	pl_spi_hrdy_t *spi_ref = (pl_spi_hrdy_t *) malloc(sizeof(pl_spi_hrdy_t));
-	pl_spi_t *p = (pl_spi_t *) malloc(sizeof(pl_spi_t));
+		struct pl_gpio* hw_ref) {
+	pl_spi_hrdy_t *p = (pl_spi_hrdy_t *) malloc(sizeof(pl_spi_hrdy_t));
 
 	struct p *meta = malloc(sizeof(struct spi_hrdy_metadata));
 	p->mSpi = meta;
 
-	spi_ref->hw_ref = hw_ref;
-	p->hw_ref = spi_ref;
+	p->hw_ref = hw_ref;
 	p->mSpi->channel = spi_channel;
 	p->fd = -1;
 
@@ -95,7 +93,7 @@ static int spi_hrdy_init(pl_spi_hrdy_t *psSPI) {
 				break;
 		}
 	}
-	printf("got fd %d\n", psSPI->fd);
+	//printf("got fd %d\n", psSPI->fd);
 
 	if (psSPI->fd == -1) {
 		char errorStr[bufferSize];
@@ -247,7 +245,7 @@ static int spi_hrdy_write_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff,
 #endif
 	int i;
 	// enough transfer buffers for 64 * 64 bytes or 4K
-	pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) psSPI->hw_ref;
+	pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) psSPI;
 	struct spi_ioc_transfer asTrans[MAX_SPI_TRANSFER_BUFFERS_hrdy];
 	struct spi_ioc_transfer *psTrans;
 	uint8_t *pbBuffer = buff;

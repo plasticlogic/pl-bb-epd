@@ -57,8 +57,8 @@ pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpi
 	{
 		interface = (pl_generic_interface_t*) beaglebone_spi_hrdy_new(spi_channel, p_gpio);
 		pl_spi_hrdy_t* spi_ref = (pl_spi_hrdy_t*) interface->hw_ref;
-		spi_ref->hrdy_gpio = FALCON_I80_HRDY;
-		spi_ref->cs_gpio = FALCON_SPI_CS_ITE;
+		interface->hrdy_gpio = FALCON_I80_HRDY;
+		interface->cs_gpio = FALCON_SPI_CS_ITE;
 	}
 
 	return interface;

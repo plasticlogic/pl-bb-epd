@@ -274,7 +274,7 @@ int IT8951WaitForReady(pl_generic_interface_t *bus, enum interfaceType *type) {
 //    }
 
 	if (*type == SPI_HRDY) {
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus->hw_ref;
+		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
 		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 		int i = 0;
 
@@ -416,7 +416,7 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 //	    //CS
 //	    gpio->set(spi->cs_gpio, 1);
 
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus->hw_ref;
+		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
 		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 
 		// Prepare SPI preamble to enable ITE Write Data mode via SPI
@@ -552,7 +552,7 @@ void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 	IT8951WaitForReady(bus, type);
 
 	if (*type == SPI_HRDY) {
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus->hw_ref;
+		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
 		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 
 		//-------------------------real function start-------------------------------------
@@ -678,8 +678,7 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
 		usCmd_[3] = (uint8_t) usCmd;
 
 		int stat = -EINVAL;
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus->hw_ref;
-		bus->cs_gpio = spi->cs_gpio;
+		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
 
 //			spi->close 			= (pl_spi_hrdy_t*) bus->close;
 //			spi->open 			= (pl_spi_hrdy_t*) bus->open;
@@ -712,12 +711,12 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
 		//gpio->set(spi->cs_gpio, 0);
 		//iResult = write(spi->fd, &usCmd, 1);
 
-		stat = bus->set_cs(spi, 0);
+		stat = bus->set_cs(bus, 0);
 		stat = bus->write_bytes(bus, usCmd_, 4);
 		//stat = send_cmd(spi, &usCmd);			// read command
 		//stat = spi.write_bytes(&spi, reg, 3);			// write 3-byte address
 		//stat = stat = spi.read_bytes(&spi, data, transferChunkSize);		// read data
-		stat = bus->set_cs(spi, 1);
+		stat = bus->set_cs(bus, 1);
 
 		//gpio->set(spi->cs_gpio, 1);
 
@@ -769,7 +768,7 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus,
 	int iResult = 0;
 
 	if (*type == SPI_HRDY) {
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus->hw_ref;
+		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
 		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 
 		// Prepare SPI preamble to enable ITE Write Data mode via SPI
@@ -845,7 +844,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 	TWord* iResult = (TWord*) malloc(size * sizeof(TWord));
 
 	if (*type == SPI_HRDY) {
-		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus->hw_ref;
+		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
 		spi->mSpi = bus->mSpi;
 		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 
