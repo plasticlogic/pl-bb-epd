@@ -215,11 +215,11 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 	//printf("Height: %d --> Time: %f\n", j, tTotal);
 
 	//}
-//	for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
-//		//IT8951WriteData(pusFrameBuf, pstAreaImgInfo->usWidth / 2);
-//		IT8951WriteData(bus, type, pusFrameBuf);
-//		pusFrameBuf += pstAreaImgInfo->usWidth / 2; //Change to Next line of loaded image (supposed the Continuous image content in host frame buffer )
-//	}
+	for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
+		//IT8951WriteData(pusFrameBuf, pstAreaImgInfo->usWidth / 2);
+		IT8951WriteData(bus, type, pusFrameBuf);
+		pusFrameBuf += pstAreaImgInfo->usWidth / 2; //Change to Next line of loaded image (supposed the Continuous image content in host frame buffer )
+	}
 	if (*type == SPI_HRDY) {
 		int j = 0;
 		for (j = 0; j < pstAreaImgInfo->usHeight; j++) {

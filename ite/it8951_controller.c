@@ -294,29 +294,29 @@ static int load_png_image(struct pl_generic_controller *controller,
 	int width = 0;
 	int height = 0;
 
-//	if (0) {
-//		//Host Frame Buffer allocation
-//		gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
-//		//Write pixel 0xF0(White) to Frame Buffer
-//		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
-//	} else {
-//		if (read_png(path, &gpFrameBuf, &width, &height))
-//			return -ENOENT;
-//	}
+	if (0) {
+		//Host Frame Buffer allocation
+		gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
+		//Write pixel 0xF0(White) to Frame Buffer
+		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
+	} else {
+		if (read_png(path, &gpFrameBuf, &width, &height))
+			return -ENOENT;
+	}
 
-	//Scrambling Debug
-	width = 1280;
-	height = 960;
-
-	//Host Frame Buffer allocation
-	gpFrameBuf = malloc(width * height);
-	//Write pixel 0xF0(White) to Frame Buffer
-	memset(gpFrameBuf, 0xff, width * height);
+//	//Scrambling Debug
+//	width = 1280;
+//	height = 960;
+//
+//	//Host Frame Buffer allocation
+//	gpFrameBuf = malloc(width * height);
+//	//Write pixel 0xF0(White) to Frame Buffer
+//	memset(gpFrameBuf, 0xff, width * height);
 
 	int t = 0;
-	for (t = 0; t < height; t++) {
-		gpFrameBuf[50 + (1280 * t)] = 0x00;
-	}
+//	for (t = 0; t < height; t++) {
+//		gpFrameBuf[50 + (1280 * t)] = 0x00;
+//	}
 
 	controller->yres = devInfo.usPanelH;
 	controller->xres = devInfo.usPanelW;
@@ -359,9 +359,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
 	//Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
 	//IT8951DisplayArea(i80, 0,0, devInfo.usPanelW, devInfo.usPanelH, 2);
-
-	if (scrambledPNG)
-		free(scrambledPNG);
 
 	if (gpFrameBuf)
 		free(gpFrameBuf);
