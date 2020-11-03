@@ -28,6 +28,7 @@
 #include <pl/parser.h>
 #include <pl/assert.h>
 #include "iniparser.h"
+#include <src/pindef.h>
 
 #include "beaglebone/beaglebone-gpio.h"
 #include "beaglebone/beaglebone-i2c.h"
@@ -127,7 +128,18 @@ int parse_config(hw_setup_t *setup, const char *filename){
 		return -EBUSY;
 
 	// nvm spi device
-	setup->nvmSPI = beaglebone_spi_new((uint8_t) nvm_spi_channel, &(setup->gpios));
+// 	if (setup->sInterfaceType == I80 || setup->sInterfaceType == SPI_HRDY){
+// 		//setup->nvmSPI = setup->sInterface;
+//		setup->nvmSPI = beaglebone_spi_hrdy_new((uint8_t) nvm_spi_channel,
+//				&(setup->gpios));
+//		setup->nvmSPI->cs_gpio = FALCON_SPI_CS_ITE;
+//		setup->nvmSPI->hrdy_gpio = FALCON_I80_HRDY;
+//
+// 	}else {
+ 		setup->nvmSPI = beaglebone_spi_new((uint8_t) nvm_spi_channel, &(setup->gpios));
+	//}
+
+
 	if (setup->nvmSPI == NULL){
 		LOG("nvmSPI init has failed");
 		return -ENODEV;

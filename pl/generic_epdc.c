@@ -561,6 +561,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 		LOG("%s: stat: %i", __func__, stat);
 #endif
 		//read_stopwatch(&t,"cwait_update_end",1);
+		//sleep(10);
 		stat |= switch_hvs_off(hv);
 #if VERBOSE
 		LOG("%s: stat: %i", __func__, stat);

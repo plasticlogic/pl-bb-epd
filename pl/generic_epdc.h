@@ -50,6 +50,7 @@ typedef struct pl_generic_epdc{
 
 } pl_generic_epdc_t;
 
+#define TEST = 1;
 
 struct pl_generic_epdc *generic_epdc_new();
 int do_load_nvm_content(struct pl_generic_epdc *p);

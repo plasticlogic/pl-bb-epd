@@ -44,6 +44,10 @@ static const struct pl_wfid wf_table[] = { { "default", 2 }, { "0", 0 }, { "1",
 		7 }, { "8", 8 }, { "9", 9 }, { "10", 10 }, { "11", 11 }, { "12", 12 }, {
 		"13", 13 }, { "14", 14 }, { "15", 15 }, { NULL, -1 } };
 
+int modeToUse = 0;
+int wfidToUse = 2;
+bool clear = false;
+
 static int trigger_update(struct pl_generic_controller *controller);
 static int clear_update(pl_generic_controller_t *p);
 static int init_controller(struct pl_generic_controller *controller,
@@ -110,8 +114,8 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	GetIT8951SystemInfo(bus, type, &devInfo);
 
 	//Turn On HV creation
-	//IT8951WriteCmdCode(i80, USDEF_I80_CMD_POWER_CTR);
-	//IT8951WriteData(i80, 0x01); // set Power Bit to low
+//	IT8951WriteCmdCode(bus,type,USDEF_I80_CMD_POWER_CTR);
+//	IT8951WriteData(bus,type, 0x01); // set Power Bit to low
 
 	//Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
@@ -119,7 +123,7 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
 	IT8951WriteData(bus, type, (TWord) devInfo.usPanelW); // Display W devInfo.usPanelW 1200
 	IT8951WriteData(bus, type, (TWord) devInfo.usPanelH); // Display H devInfo.usPanelH 960
-	IT8951WriteData(bus, type, (TWord) 2); 					// Display Mode
+	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
 
 	//Wait until the Update has ended
 	IT8951WaitForDisplayReady(bus, type);
@@ -133,6 +137,7 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	IT8951WriteData(bus, type, 0x01); // Write Size
 	TWord* data07 = IT8951ReadData(bus, type, 1);  //read data
 
+
 	printf("PMIC Register 7 after update: %x\n", *data07);
 
 	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
@@ -145,13 +150,15 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	printf("PMIC Register 8 after update: %x\n", *data08);
 
 	//Turn of HV creation
-	//IT8951WriteCmdCode(i80, USDEF_I80_CMD_POWER_CTR);
-	//IT8951WriteData(i80, 0x00); // set Power Bit to low
+//	IT8951WriteCmdCode(bus,type, USDEF_I80_CMD_POWER_CTR);
+//	IT8951WriteData(bus, type, 0x00); // set Power Bit to low
 
 	return 0;
 }
 
 static int clear_update(pl_generic_controller_t *p) {
+	load_png_image(p,NULL,NULL,0,0);
+	trigger_update(p);
 	return 0;
 }
 
@@ -194,6 +201,8 @@ static int configure_update(struct pl_generic_controller *controller, int wfid,
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
 	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+	wfidToUse = wfid;
+	modeToUse = mode;
 	IT8951WaitForDisplayReady(bus, type);
 
 	//Set to Enable I80 Packed mode
@@ -294,11 +303,14 @@ static int load_png_image(struct pl_generic_controller *controller,
 	int width = 0;
 	int height = 0;
 
-	if (0) {
+	if (clear) {
 		//Host Frame Buffer allocation
+		configure_update(controller, 0, 0, area);
 		gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
 		//Write pixel 0xF0(White) to Frame Buffer
 		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
+		width = devInfo.usPanelW;
+		height = devInfo.usPanelH;
 	} else {
 		if (read_png(path, &gpFrameBuf, &width, &height))
 			return -ENOENT;
@@ -359,6 +371,9 @@ static int load_png_image(struct pl_generic_controller *controller,
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
 	//Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
 	//IT8951DisplayArea(i80, 0,0, devInfo.usPanelW, devInfo.usPanelH, 2);
+
+	if (scrambledPNG)
+		free(scrambledPNG);
 
 	if (gpFrameBuf)
 		free(gpFrameBuf);
@@ -582,8 +597,9 @@ static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres) {
 static int fill(struct pl_generic_controller *controller,
 		const struct pl_area *a, uint8_t grey) {
 
-	LOG("Not implemented yet !");
+	LOG("Not implemented yet, pipes through for testing !");
+	clear = true;
 
-	return 0;
+	return 1;
 }
 

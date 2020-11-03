@@ -37,6 +37,8 @@ it8951_t *it8951_new(struct pl_gpio *gpios,
 	p->pins = pins;
 	p->sInterfaceType = sInterfaceType;
 
+	//IT8951WriteCmdCode(interface, sInterfaceType, IT8951_TCON_SYS_RUN);
+
 	return p;
 }
 
@@ -215,19 +217,21 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 	//printf("Height: %d --> Time: %f\n", j, tTotal);
 
 	//}
-	for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
-		//IT8951WriteData(pusFrameBuf, pstAreaImgInfo->usWidth / 2);
-		IT8951WriteData(bus, type, pusFrameBuf);
-		pusFrameBuf += pstAreaImgInfo->usWidth / 2; //Change to Next line of loaded image (supposed the Continuous image content in host frame buffer )
-	}
+//	for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
+//		//IT8951WriteData(pusFrameBuf, pstAreaImgInfo->usWidth / 2);
+//		IT8951WriteData(bus, type, pusFrameBuf);
+//		pusFrameBuf += pstAreaImgInfo->usWidth / 2; //Change to Next line of loaded image (supposed the Continuous image content in host frame buffer )
+//	}
 	if (*type == SPI_HRDY) {
-		int j = 0;
-		for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
+		struct pl_gpio * gpio = (struct pl_gpio *) bus->hw_ref;
+		int b = 0;
+		for (b = 0; b < pstAreaImgInfo->usHeight; b++) {
+
 			IT8951WriteDataBurst(bus, type, pusFrameBuf,
 					pstAreaImgInfo->usWidth / 2);
 			pusFrameBuf += pstAreaImgInfo->usWidth / 2;
+			j = b;
 		}
-
 	} else if (*type == I80) {
 
 		IT8951WriteDataBurst(bus, type, pusFrameBuf,
@@ -365,57 +369,7 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 	//TWord usData_;
 
 	if (*type == SPI_HRDY) {
-//		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus ->hw_ref;
-//		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 //
-//	    // swap data
-//	#ifdef SWAPDATA
-//	    {
-//	    swap_data(usData, size);
-//	    }
-//	#endif
-//
-//	    //wait for ready
-//	    IT8951WaitForReady(bus, type);
-//
-//	    //Switch C/D to Data => Data - H
-//	    //GPIO_SET_H(CD);
-//
-//	    //CS
-//	    gpio->set(spi->cs_gpio, 0);
-//
-//	    struct timeval tStop, tStart; // time variables
-//	    float tTotal;
-//
-//	    gettimeofday(&tStart, NULL);
-//	    //for(i=0; i<size; i++)
-//	//    {
-//	////    	usData_ = usData[i];
-//	////        // swap data
-//	////    	usData_ = swap_data(usData_);
-//	////		//Set 16 bits Bus Data
-//	////		//See your host setting of GPIO
-//	////		iResult = write(p->fd, &usData_, 1);
-//	//
-//	//		// unswaped data
-//	//		iResult = write(p->fd, usData[i], 1);
-//	//    }
-//
-//	    iResult = write(spi->fd, usData, size/2);
-//	    IT8951WaitForReady(bus, type);
-//	    iResult = write(spi->fd, usData + size/2, size/2);
-//
-//
-//	    gettimeofday(&tStop, NULL);
-//	    tTotal = (float)(tStop.tv_sec - tStart.tv_sec) + ((float)(tStop.tv_usec - tStart.tv_usec)/1000000);
-//	    printf("Data Transmission --> Time: %f\n", tTotal);
-//
-//	    //wait for ready
-//	    IT8951WaitForReady(bus, type);
-//
-//	    //CS
-//	    gpio->set(spi->cs_gpio, 1);
-
 		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
 		struct pl_gpio * gpio = (struct pl_gpio *) spi->hw_ref;
 
@@ -426,17 +380,8 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 
 		int var, test;
 
-		//LOG("Data before swap %x , %x", usData[0], usData[1]);
-//		for (var = 0; var < size; ++var) {
-//			LOG("Value: %x", usData[var]);
-//		}
-
+		//Swap Data from little to big endian for spi
 		swap16_array(usData, size);
-
-//		LOG("Data after swap %x , %x", usData[0], usData[1]);
-//		for (test = 0; test < size; ++test) {
-//			LOG("ValueS: %x", usData[test]);
-//		}
 
 		IT8951WaitForReady(bus, type);
 
@@ -448,13 +393,17 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		gpio->set(spi->cs_gpio, 0);
 
 		//send SPI write data preamble
-		stat = bus->write_bytes(bus, preamble_, 2);
+		//stat = bus->write_bytes(bus, preamble_, 2);
+
+		iResult = write(spi->fd, preamble_, 2);
 
 		//send SPI Image Buffer Adrress
 		//stat = bus->write_bytes(bus, imageBufferAdrr_, 2);
 
 		//send SPI data
-		stat = bus->write_bytes(bus, (uint8_t *) usData, size * 2);
+		//stat = bus->write_bytes(bus, (uint8_t *) usData, size * 2);
+		iResult = write(spi->fd, usData, size * 2);
+
 		IT8951WaitForReady(bus, type);
 //	    stat = bus->write_bytes(bus, usData + size/2, size);
 //	    IT8951WaitForReady(bus, type);
@@ -529,8 +478,9 @@ TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type,
 	TWord* usData;
 	//wait for ready
 	IT8951WaitForReady(bus, type);
-	//read data from host data bus
+
 	usData = gpio_i80_16b_data_in(bus, type, size);
+
 	// swap data
 #ifdef SWAPDATA
 	{
@@ -561,6 +511,9 @@ void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		gpio->set(spi->cs_gpio, 0);
 
 		int i = 0;
+
+		//swap_endianess(usData);
+
 		for (i = 0; i < size; i++) {
 			// Executing read within the loop is necessary,
 			// since executing read the does the HRD# pulse only once,
@@ -781,11 +734,13 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus,
 		data_[0] = (uint8_t) (usData >> 8);
 		data_[1] = (uint8_t) usData;
 
+		swap_endianess(data_);
+
 		IT8951WaitForReady(bus, type);
 
 		// open SPI Bus
 		int stat = -EINVAL;
-		stat = bus->open(spi);
+		stat = bus->open(bus);
 
 		// Set CS to low
 		gpio->set(spi->cs_gpio, 0);
@@ -797,7 +752,7 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus,
 		stat = bus->write_bytes(bus, data_, 2);
 
 		// Set CS to high and end SPI communication
-		gpio->set(spi->cs_gpio, 1);
+		gpio->set(bus->cs_gpio, 1);
 
 		//stat = bus->close(spi);
 
@@ -854,7 +809,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 
 		// open SPI Bus
 		int stat = -EINVAL;
-		stat = bus->open(spi);
+		stat = bus->open(bus);
 
 		//Set SPI-CS low
 		gpio->set(spi->cs_gpio, 0);

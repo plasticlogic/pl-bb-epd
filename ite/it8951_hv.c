@@ -96,25 +96,29 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
 
 	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16, data);
+	//IT8951WriteReg(bus, type, 0x1e16, data);
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+	IT8951WriteData(bus, type, 0x01);
+	IT8951WaitForReady(bus, type);
 
 	//Poll the HV Good Pin on TI TPS65185, to wait for HV ready
 	uint16_t tmp, timeout = 2000;
+//	int test;
+//	usleep(25000);
+//	do {
+//		tmp = IT8951ReadReg(bus, type, 0x1e16);
+//		usleep(25000);
+//		timeout--;
+//		test = (tmp & 0x20);
+//	} while (test != 0x20 && timeout);
+
+//	uint16_t tmp;
 	int test;
 	do {
 		tmp = IT8951ReadReg(bus, type, 0x1e16);
-		usleep(25000);
-		timeout--;
+		usleep(250);
 		test = (tmp & 0x20);
-	} while (test != 0x20 && timeout);
-
-//	uint16_t tmp;
-//	int test;
-//	do {
-//		tmp =IT8951ReadReg(bus, type, 0x1e16);
-//		usleep(250);
-//		test = (tmp & 0x20);
-//	} while (test != 0x20 );
+	} while (test != 0x20);
 
 	if ((tmp & 0x20) != 0x20) {
 		LOG("Failed to turn the EPDC power on");
@@ -140,7 +144,7 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 	if (IT8951WaitForReady(bus, type))
 		return -ETIME;
 
-	//Get current Register setting
+//	//Get current Register setting
 	TWord data;
 	data = IT8951ReadReg(bus, type, 0x1e16);
 
@@ -148,6 +152,14 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
 	//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE
 	data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
+
+	//IT8951WaitForReady(bus, type);
+
+	LOG("Try to turn the EPDC power off");
+
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+	IT8951WriteData(bus, type, 0x00);
+	IT8951WaitForReady(bus, type);
 
 	//Write adjusted data to register
 	IT8951WriteReg(bus, type, 0x1e16, data);
@@ -220,29 +232,29 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	data |= (1 << 10); // switches GPIO10 of ITE (Wake Up Pin) high
 
 	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16, data);
+	//IT8951WriteReg(bus, type, 0x1e16, data); -> Power up ????
 
 	// Set Power Up Sequence
 	// Send I2C Command via ITE8951
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x09); // Power Up Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x78); // Register Content (Maximal length for power Up Sequence) 27 6C
-
-//	TWord* usData1[] = { 0x01, 0x68, 0x09, 0x01, 0x78 };
-//	IT8951WriteDataBurst(bus, type, usData1, 5);
-	IT8951WaitForReady(bus, type);
-
-	// Set Power Up Sequence Timing
-	// Send I2C Command via ITE8951
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0A); // Power Up Timing Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x00); // Register Content (Maximal length for power Up Sequence) there was an ff in there for longer power up time ???????
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x09); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, 0x78); // Register Content (Maximal length for power Up Sequence) 27 6C
+//
+////	TWord* usData1[] = { 0x01, 0x68, 0x09, 0x01, 0x78 };
+////	IT8951WriteDataBurst(bus, type, usData1, 5);
+//	IT8951WaitForReady(bus, type);
+//
+//	// Set Power Up Sequence Timing
+//	// Send I2C Command via ITE8951
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x0A); // Power Up Timing Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, 0xff); // Register Content (Maximal length for power Up Sequence) there was an ff in there for longer power up time ???????
 
 //	TWord* usData2[] = { 0x01, 0x68, 0x0A, 0x01, 0xFF };
 //	IT8951WriteDataBurst(bus, type, usData2, 5);
@@ -293,8 +305,12 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
 
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+	IT8951WriteData(bus, type, 0x00);
+	IT8951WaitForReady(bus, type);
+
 	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16, data);
+	IT8951WriteReg(bus, type, 0x1e16, data); //-> Power Down ?
 
 	return 0;
 }
