@@ -162,6 +162,15 @@ static int read_wfdata_generic_format(struct pl_nvm *nvm, uint8_t **data, int *c
 	if (nvm->read(nvm, 0, buffer, nvm->size))
 		return -EIO;
 
+	FILE *fd = fopen("/tmp/dummy.plain.bin", "wb");
+	if (fd == NULL) {
+		LOG("error creating binary file.");
+		return -1;
+	}
+
+	int cnt = fwrite(buffer, sizeof(uint8_t), nvm->size, fd);
+	fclose(fd);
+
 	// check magic word
 	if(buffer[NVM_MAGIC_ID_POS] != 0x50 || buffer[NVM_MAGIC_ID_POS+1] != 0x4C)
 	{

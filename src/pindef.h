@@ -81,7 +81,7 @@
 #define HBZ1_3_PMIC_EN 		BEAGLEBONE_GPIO(3,21)  //P9-25
 #define HBZ1_3_3V3_EN		BEAGLEBONE_GPIO(1,28)  //P9-12
 
-#define FALCON_NVM_CS		BEAGLEBONE_GPIO(3,17)	//P9-28
+#define FALCON_DISPLAY_NVM_CS		BEAGLEBONE_GPIO(3,17)	//P9-28
 #define FALCON_FIRMWARE_NVM_CS		BEAGLEBONE_GPIO(1,19)	//P9-16
 
 
@@ -127,7 +127,7 @@ static const struct pl_gpio_config g_falcon_gpios[] = {
 	{ RUDDOCK_HDC,     		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_RESET,   		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ FALCON_NVM_CS,      	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ FALCON_DISPLAY_NVM_CS,      	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_RESERVE_2,   	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 };
 
@@ -173,7 +173,7 @@ static const  struct pl_gpio_config g_falcon_parallel_gpios[] = {
 	{ RUDDOCK_HDC,     		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_RESET,   		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ FALCON_NVM_CS,      	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ FALCON_DISPLAY_NVM_CS,      	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_RESERVE_2,   	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ RUDDOCK_HDB0,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HDB1,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
@@ -194,7 +194,7 @@ static const  struct pl_gpio_config g_falcon_parallel_gpios[] = {
 };
 
 static const  struct pl_gpio_config g_falcon_i80_gpios[] = {
-	{ FALCON_NVM_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ FALCON_DISPLAY_NVM_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_FIRMWARE_NVM_CS, 	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_SPI_CS_ITE, 		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HWE_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
@@ -222,7 +222,7 @@ static const  struct pl_gpio_config g_falcon_i80_gpios[] = {
 };
 
 static const  struct pl_gpio_config g_falcon_spi_gpios[] = {
-	{ FALCON_NVM_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ FALCON_DISPLAY_NVM_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HWE_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HRD_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HCS_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },

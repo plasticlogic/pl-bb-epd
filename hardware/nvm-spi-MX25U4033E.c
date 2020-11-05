@@ -71,6 +71,18 @@ static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr, uint8
 	// open spi
 	stat = spi.open(&spi);
 
+	// read chip id
+	uint8_t rdid_data[3];
+	stat = spi.set_cs(&spi, 1);
+	stat = spi.set_cs(&spi, 0);
+	stat = send_cmd(&spi, MX25U4033E_RDID);
+	stat = spi.read_bytes(&spi, rdid_data, 1);
+	stat = spi.read_bytes(&spi, rdid_data+1, 1);
+	stat = spi.read_bytes(&spi, rdid_data+2, 1);
+	stat = spi.set_cs(&spi, 1);
+
+	LOG("Manufacturing ID NVM: %x, %x, %x", rdid_data[0],rdid_data[1],rdid_data[2]);
+
 	while(bytes_to_transfer > 0){
 
 		// transfer chunkSize or bytes to transfer

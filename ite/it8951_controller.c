@@ -117,7 +117,7 @@ static int trigger_update(struct pl_generic_controller *controller) {
 //	IT8951WriteCmdCode(bus,type,USDEF_I80_CMD_POWER_CTR);
 //	IT8951WriteData(bus,type, 0x01); // set Power Bit to low
 
-	//Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
+//Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
 	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
 	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
@@ -127,27 +127,51 @@ static int trigger_update(struct pl_generic_controller *controller) {
 
 	//Wait until the Update has ended
 	IT8951WaitForDisplayReady(bus, type);
+	//	// Readout PMIC Fault registers
+//	// Send I2C Command via ITE8951
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x00); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x07); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	TWord* data07 = IT8951ReadData(bus, type, 1);  //read data
 
-	// Readout PMIC Fault registers
-	// Send I2C Command via ITE8951
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x00); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x07); // Power Up Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	TWord* data07 = IT8951ReadData(bus, type, 1);  //read data
+	printf("PMIC Register 7 after update: ");
 
+	regSetting_t reg;
+	reg.addr = (int) IT8951_TCON_BYPASS_I2C;
+	reg.valCount = (int) 4;
+	uint16_t *reg7;
+	reg7 = malloc(reg.valCount * sizeof(uint16_t));
+	reg7[0] = 0x00;
+	reg7[1] = 0x68;
+	reg7[2] = 0x07;
+	reg7[3] = 0x01;
+	reg.val = reg7;
 
-	printf("PMIC Register 7 after update: %x\n", *data07);
+	send_cmd(controller, reg);
 
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x00); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x08); // Power Up Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	TWord* data08 = IT8951ReadData(bus, type, 1);  //read data
+	//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	//	IT8951WriteData(bus, type, 0x00); // I2C write command
+	//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address0
+	//	IT8951WriteData(bus, type, 0x08); // Power Up Sequence Register
+	//	IT8951WriteData(bus, type, 0x01); // Write Size
+	//	TWord* data08 = IT8951ReadData(bus, type, 1);  //read data
 
-	printf("PMIC Register 8 after update: %x\n", *data08);
+	printf("PMIC Register 8 after update: ");
+
+	regSetting_t reg2;
+	reg2.addr = IT8951_TCON_BYPASS_I2C;
+	reg2.valCount = 4;
+	uint16_t *reg8;
+	reg8 = malloc(reg.valCount * sizeof(uint16_t));
+	reg8[0] = 0x00;
+	reg8[1] = 0x68;
+	reg8[2] = 0x08;
+	reg8[3] = 0x01;
+	reg2.val = reg8;
+
+	send_cmd(controller, reg2);
 
 	//Turn of HV creation
 //	IT8951WriteCmdCode(bus,type, USDEF_I80_CMD_POWER_CTR);
@@ -157,7 +181,7 @@ static int trigger_update(struct pl_generic_controller *controller) {
 }
 
 static int clear_update(pl_generic_controller_t *p) {
-	load_png_image(p,NULL,NULL,0,0);
+	load_png_image(p, NULL, NULL, 0, 0);
 	trigger_update(p);
 	return 0;
 }
@@ -429,6 +453,9 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting) {
 
 	for (i = 0; i < setting.valCount; i++)
 		IT8951WriteData(interface, type, setting.val[i]);
+
+	//sleep(1);
+	usleep(8000);
 
 	if (setting.val[0] == 0x00) {
 		TWord* value = IT8951ReadData(interface, type, 1);  //read data
