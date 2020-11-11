@@ -98,6 +98,7 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 	//Write adjusted data to register
 	//IT8951WriteReg(bus, type, 0x1e16, data);
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+	//usleep(8000);
 	IT8951WriteData(bus, type, 0x01);
 	IT8951WaitForReady(bus, type);
 
@@ -157,12 +158,15 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 
 	LOG("Try to turn the EPDC power off");
 
+	//Write adjusted data to register
+
+
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
 	IT8951WriteData(bus, type, 0x00);
 	IT8951WaitForReady(bus, type);
 
-	//Write adjusted data to register
 	IT8951WriteReg(bus, type, 0x1e16, data);
+
 
 //	TWord data = IT8951ReadReg(bus, type, 0x1E14);
 //
@@ -232,7 +236,7 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	data |= (1 << 10); // switches GPIO10 of ITE (Wake Up Pin) high
 
 	//Write adjusted data to register
-	//IT8951WriteReg(bus, type, 0x1e16, data); -> Power up ????
+	//IT8951WriteReg(bus, type, 0x1e16, data);// -> Power up ????
 
 	// Set Power Up Sequence
 	// Send I2C Command via ITE8951
@@ -248,7 +252,7 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 //	IT8951WaitForReady(bus, type);
 //
 //	// Set Power Up Sequence Timing
-//	// Send I2C Command via ITE8951
+	// Send I2C Command via ITE8951
 //	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
 //	IT8951WriteData(bus, type, 0x01); // I2C write command
 //	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
@@ -306,9 +310,11 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
 
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+	//usleep(8000);
 	IT8951WriteData(bus, type, 0x00);
 	IT8951WaitForReady(bus, type);
 
+	//usleep(8000);
 	//Write adjusted data to register
 	IT8951WriteReg(bus, type, 0x1e16, data); //-> Power Down ?
 

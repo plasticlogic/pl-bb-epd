@@ -120,7 +120,7 @@ int do_load_nvm_content(struct pl_generic_epdc *p) {
 	uint8_t *buffer = NULL;
 	int bufferSize;
 
-	// read NVM content to file
+// read NVM content to file
 	p->nvm->read_wfdata(p->nvm, &buffer, &bufferSize);
 	if (bufferSize <= 0) {
 		LOG("Cannot read NVM content!");
@@ -242,6 +242,7 @@ int do_load_nvm_content(struct pl_generic_epdc *p) {
 			return -1;
 		}
 	}
+
 	return 0;
 
 }
@@ -269,6 +270,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 	// initialize controller
 	pl_generic_controller_t *controller = p->controller;
 	assert(controller != NULL);
+
 	if (controller->init != NULL)
 		stat |= controller->init(controller, load_nvm_content);
 #if VERBOSE
@@ -414,6 +416,16 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 
 	}
 #else
+
+//	regSetting_t reg_t;
+//		reg_t.addr = 0x0003;
+//		reg_t.valCount = 0;
+//		uint16_t *reg_t_val;
+//		reg_t_val = malloc(1 * sizeof(uint16_t));
+//		reg_t_val[0] = 0x01;
+//		reg_t.val = reg_t_val;
+//		send_cmd(p, reg_t);
+
 	if (do_load_nvm_content(p) || !load_nvm_content) {
 		LOG("Loading wflib: %s", controller->waveform_file_path);
 		stat = controller->load_wflib(controller,
@@ -432,6 +444,8 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 		if (stat < 0)
 			return stat;
 	}
+//	reg_t.addr = 0x0001;
+//		send_cmd(p, reg_t);
 #endif
 
 	return stat;

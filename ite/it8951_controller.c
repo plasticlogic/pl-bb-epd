@@ -59,7 +59,7 @@ static int fill(struct pl_generic_controller *controller,
 static int load_wflib(struct pl_generic_controller *controller,
 		const char *filename);
 static int load_png_image(struct pl_generic_controller *controller,
-		const char *path, const struct pl_area *area, int left, int top);
+		const char *path, struct pl_area *area, int left, int top);
 static int wait_update_end(struct pl_generic_controller *controller);
 static int read_register(struct pl_generic_controller *controller,
 		const regSetting_t* setting);
@@ -297,7 +297,7 @@ static void memory_padding_area(uint8_t *source, uint8_t *target,
 }
 
 static int load_png_image(struct pl_generic_controller *controller,
-		const char *path, const struct pl_area *area, int left, int top) {
+		const char *path, struct pl_area *area, int left, int top) {
 	it8951_t *it8951 = controller->hw_ref;
 
 	assert(it8951 != NULL);
@@ -307,6 +307,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	TDWord gulImgBufAddr;
 	TByte* gpFrameBuf;
+	rgbw_pixel_t *pngBuffer;
 
 	IT8951LdImgInfo stLdImgInfo;
 	IT8951AreaImgInfo stAreaImgInfo;
@@ -324,8 +325,20 @@ static int load_png_image(struct pl_generic_controller *controller,
 	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
 	//-------------------------------------------------------------------
 
+	controller->yres = devInfo.usPanelH;
+	controller->xres = devInfo.usPanelW;
+
+	int v_yres = 0;
+	int v_xres = 0;
+
+	if (!controller->display_scrambling) {
+		v_xres = controller->xres - (2 * controller->xoffset);
+		v_yres = controller->yres - controller->yoffset;
+	}
+
 	int width = 0;
 	int height = 0;
+	int debug = 1;
 
 	if (clear) {
 		//Host Frame Buffer allocation
@@ -335,9 +348,65 @@ static int load_png_image(struct pl_generic_controller *controller,
 		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
 		width = devInfo.usPanelW;
 		height = devInfo.usPanelH;
-	} else {
+
+	} else if (controller->cfa_overlay.r_position == -1) {
+		LOG("BW");
 		if (read_png(path, &gpFrameBuf, &width, &height))
 			return -ENOENT;
+	} else {
+
+		LOG("CFA");
+//				 read png image
+		if (read_rgbw_png(path, &pngBuffer, &width, &height))
+			return -ENOENT;
+
+		// apply cfa filter to resolution
+		v_xres = (controller->xres - (2 * controller->xoffset)) / 2;
+		v_yres = (controller->yres - controller->yoffset) / 2;
+
+		if (!controller->display_scrambling) {
+			//*
+			if (area) {
+				area->left *= 2;
+				area->top *= 2;
+				area->width *= 2;
+				area->height *= 2;
+			}
+			//*/
+			if (height == v_xres && width == v_yres && (height != width)) {
+				rotate_rgbw_image(&height, &width, pngBuffer);
+				LOG("CFA %ix%i -> %ix%i", height, width, controller->yres,
+						controller->xres);
+			}
+		} else {
+			if (controller->display_scrambling & SCRAMBLING_GATE_SCRAMBLE_MASK) {
+				v_xres = v_xres * 2;
+				v_yres = v_yres / 2;
+				if (area) {
+					area->top *= 4;
+					area->height *= 4;
+				}
+				if (height == (v_xres) && width == (v_yres)
+						&& (height != width)) {
+					rotate_rgbw_image(&height, &width, pngBuffer);
+				}
+			} else if (controller->display_scrambling
+					& SCRAMBLING_SOURCE_SCRAMBLE_MASK) {
+				v_xres = v_xres / 2;
+				v_yres = v_yres * 2;
+				if (area) {
+					area->left *= 4;
+					//area->top /= 2;
+					area->width *= 4;
+					//area->height /= 2;
+
+				}
+				if (height == (v_xres) && width == (v_yres)
+						&& (height != width)) {
+					rotate_rgbw_image(&height, &width, pngBuffer);
+				}
+			}
+		}
 	}
 
 //	//Scrambling Debug
@@ -354,18 +423,33 @@ static int load_png_image(struct pl_generic_controller *controller,
 //		gpFrameBuf[50 + (1280 * t)] = 0x00;
 //	}
 
-	controller->yres = devInfo.usPanelH;
-	controller->xres = devInfo.usPanelW;
-
 	// scramble image
-	TByte* scrambledPNG = malloc(width * height);
-	scramble_array(gpFrameBuf, scrambledPNG, &height, &width,
-			controller->display_scrambling);
+	TByte* scrambledPNG;
+	if (controller->cfa_overlay.r_position == -1 || clear) {
+		scrambledPNG = malloc(width * height);
+		scramble_array(gpFrameBuf, scrambledPNG, &height, &width,
+				controller->display_scrambling);
+	} else {
+		scrambledPNG =
+				malloc(4* max(height,controller->yres) * max(width, controller->xres));
+
+		uint8_t *colorBuffer =	malloc(4* max(height, controller->yres) * max(width, controller->xres));
+		rgbw_processing((uint32_t*) &width, (uint32_t*) &height, pngBuffer,
+				colorBuffer, (struct pl_area*) (area) ? NULL : area,
+				controller->cfa_overlay);
+		scramble_array(colorBuffer, scrambledPNG, &height, &width,
+				controller->display_scrambling);
+		free(colorBuffer);
+		if (pngBuffer)
+			free(pngBuffer);
+
+	}
 
 	TByte* targetBuf = malloc(controller->yres * controller->xres);
 
 	if (controller->display_scrambling == 0) {
 		memcpy(targetBuf, scrambledPNG, controller->yres * controller->xres);
+
 	} else {
 
 		memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
@@ -489,6 +573,8 @@ static int set_temp_mode(struct pl_generic_controller *p,
 		dataTemp[0] = 0x0001;
 		dataTemp[1] = p->manual_temp;
 
+		//usleep(250);
+
 		IT8951WriteDataBurst(interface, type, dataTemp, 2);
 		IT8951WaitForReady(interface, type);
 		stat = 1;
@@ -592,6 +678,8 @@ static int update_temp(struct pl_generic_controller *controller) {
 //	i80 ==> dataTemp[1] = 0x0025;
 //
 //	spi ==> dataTemp[1] = 0x2500;
+
+	//usleep(8000);
 
 	IT8951WriteDataBurst(interface, type, dataTemp, 2);
 	IT8951WaitForReady(interface, type);

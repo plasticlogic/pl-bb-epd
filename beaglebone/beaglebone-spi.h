@@ -37,7 +37,7 @@
 
 #define USE_8BIT_MODE                 ( 1 )
 
-#define SPI_TRANSFER_RATE_IN_HZ       ( 48000000 ) // spi transfer rate is compiled into the kernel
+#define SPI_TRANSFER_RATE_IN_HZ       ( 2000000 ) // spi transfer rate is compiled into the kernel
 #define MAX_SPI_TRANSFER_BUFFERS      ( 64 )
 #define MAX_SPI_BYTES_PER_TRANSFER    ( 64 )
 

@@ -218,7 +218,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 	//}
 //	for (j = 0; j < pstAreaImgInfo->usHeight; j++) {
-//		//IT8951WriteData(pusFrameBuf, pstAreaImgInfo->usWidth / 2);
+	//IT8951WriteData(pusFrameBuf, pstAreaImgInfo->usWidth / 2);
 //		IT8951WriteData(bus, type, pusFrameBuf);
 //		pusFrameBuf += pstAreaImgInfo->usWidth / 2; //Change to Next line of loaded image (supposed the Continuous image content in host frame buffer )
 //	}
@@ -228,7 +228,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 		for (b = 0; b < pstAreaImgInfo->usHeight; b++) {
 
 			IT8951WriteDataBurst(bus, type, pusFrameBuf,
-					pstAreaImgInfo->usWidth / 2);
+					pstAreaImgInfo->usWidth / 2); //pstAreaImgInfo->usWidth / 2
 			pusFrameBuf += pstAreaImgInfo->usWidth / 2;
 			j = b;
 		}
@@ -397,11 +397,15 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 
 		iResult = write(spi->fd, preamble_, 2);
 
+		//iResult = bus->write_bytes(bus, preamble_, 2);
+
+		usleep(250); //--> need this here ? Costs 0.7 to 0.8 seconds while transmitting data over spi
+
 		//send SPI Image Buffer Adrress
 		//stat = bus->write_bytes(bus, imageBufferAdrr_, 2);
 
 		//send SPI data
-		//stat = bus->write_bytes(bus, (uint8_t *) usData, size * 2);
+		//iResult = bus->write_bytes(bus, (uint8_t *) usData, size * 2);
 		iResult = write(spi->fd, usData, size * 2);
 
 		IT8951WaitForReady(bus, type);

@@ -120,7 +120,7 @@ static int spi_init(pl_spi_t *psSPI)
 		return FALSE;
 	}
 	psSPI->mSpi->msh = tmp32;
-
+	//psSPI->mSpi->msh = 50000000;
 	return TRUE;
 }
 
