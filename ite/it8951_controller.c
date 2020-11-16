@@ -110,23 +110,34 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 
 	//Get the Device info such as Panel Type Width and height from DEVInfo struct
-	I80IT8951DevInfo devInfo;
-	GetIT8951SystemInfo(bus, type, &devInfo);
+	//I80IT8951DevInfo devInfo;
+	//GetIT8951SystemInfo(bus, type, &devInfo);
 
 	//Turn On HV creation
 //	IT8951WriteCmdCode(bus,type,USDEF_I80_CMD_POWER_CTR);
 //	IT8951WriteData(bus,type, 0x01); // set Power Bit to low
+	//IT8951WriteReg(bus, type, 0x1E00, 0x00);
+//	TWord data = IT8951ReadReg(bus, type, 0x1E00);
+//	LOG("GPIO-Register is %x", data);
 
 //Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
 	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
 	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
-	IT8951WriteData(bus, type, (TWord) devInfo.usPanelW); // Display W devInfo.usPanelW 1200
-	IT8951WriteData(bus, type, (TWord) devInfo.usPanelH); // Display H devInfo.usPanelH 960
+	IT8951WriteData(bus, type, (TWord) controller->xres); // Display W devInfo.usPanelW 1200
+	IT8951WriteData(bus, type, (TWord) controller->yres); // Display H devInfo.usPanelH 960
 	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
+
+//	IT8951WriteReg(bus, type, 0x1E00, 0xFB);
+//
+//	TWord data = IT8951ReadReg(bus, type, 0x1E00);
+//	LOG("GPIO-Register is %x", data);
 
 	//Wait until the Update has ended
 	IT8951WaitForDisplayReady(bus, type);
+
+	//TWord data =  IT8951ReadReg(bus, type, 0x1E00);
+
 	//	// Readout PMIC Fault registers
 //	// Send I2C Command via ITE8951
 //	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
@@ -213,7 +224,7 @@ static int init_controller(struct pl_generic_controller *controller,
 	// does the same again - just for confirmation
 
 	I80IT8951DevInfo devInfo;
-	GetIT8951SystemInfo(bus, type, &devInfo);
+	//GetIT8951SystemInfo(bus, type, &devInfo);
 
 	return 0;
 }
@@ -338,7 +349,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	int width = 0;
 	int height = 0;
-	int debug = 1;
 
 	if (clear) {
 		//Host Frame Buffer allocation
@@ -409,20 +419,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 		}
 	}
 
-//	//Scrambling Debug
-//	width = 1280;
-//	height = 960;
-//
-//	//Host Frame Buffer allocation
-//	gpFrameBuf = malloc(width * height);
-//	//Write pixel 0xF0(White) to Frame Buffer
-//	memset(gpFrameBuf, 0xff, width * height);
-
-	int t = 0;
-//	for (t = 0; t < height; t++) {
-//		gpFrameBuf[50 + (1280 * t)] = 0x00;
-//	}
-
 	// scramble image
 	TByte* scrambledPNG;
 	if (controller->cfa_overlay.r_position == -1 || clear) {
@@ -431,9 +427,16 @@ static int load_png_image(struct pl_generic_controller *controller,
 				controller->display_scrambling);
 	} else {
 		scrambledPNG =
-				malloc(4* max(height,controller->yres) * max(width, controller->xres));
+				malloc(
+						4
+								* max(height,
+										controller->yres) * max(width, controller->xres));
 
-		uint8_t *colorBuffer =	malloc(4* max(height, controller->yres) * max(width, controller->xres));
+		uint8_t *colorBuffer =
+				malloc(
+						4
+								* max(height,
+										controller->yres) * max(width, controller->xres));
 		rgbw_processing((uint32_t*) &width, (uint32_t*) &height, pngBuffer,
 				colorBuffer, (struct pl_area*) (area) ? NULL : area,
 				controller->cfa_overlay);
@@ -442,7 +445,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 		free(colorBuffer);
 		if (pngBuffer)
 			free(pngBuffer);
-
 	}
 
 	TByte* targetBuf = malloc(controller->yres * controller->xres);
@@ -495,8 +497,6 @@ static int wait_update_end(struct pl_generic_controller *controller) {
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
-
-	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 
 	//Poll the TCON Register, to know when the update has finished
 	IT8951WaitForDisplayReady(bus, type);
@@ -607,67 +607,6 @@ static int update_temp(struct pl_generic_controller *controller) {
 	//LOG("Set Temperature to %i ", decimalNumber + " to %i " + hexadecimalNumber);
 	newTemp = controller->manual_temp;
 
-//	int rem = 0, i = 0, x;
-//	char hex[4];
-//	memset(hex, 0, 4);
-//	//for (x = 0; i<4; i++){
-//	//	hex[i] = 0;
-//	//}
-//	while (newTemp > 0 && i >= 0) {
-//		rem = newTemp % 16;
-//		hex[i] = rem < 10 ? (char) rem + 48 : (char) rem + 55;
-//		newTemp /= 16;
-//		i++;
-//	}
-//	//hex[i] = '\0';
-//
-//	char RevStr[4];
-//	int t, j, len;
-//
-//	for (x = 0; i<4; i++){
-//			RevStr[i] = 0;
-//		}
-//	//printf("\n Please Enter any String :  ");
-//	//gets(hex);
-//
-//	j = 0;
-//	len = strlen(hex);
-//
-//	for (t = len - 1; t >= 0; t--) {
-//		RevStr[j++] = hex[t];
-//	}
-//	RevStr[t] = '\0';
-//
-//	int lenRev = strlen(RevStr);
-//	int c = 0;
-//	while (len > c) {
-//		char tmp = RevStr[--lenRev];
-//		RevStr[lenRev] = RevStr[c];
-//		RevStr[c++] = tmp;
-//	}
-
-	//0x%04X:\n", regSetting.addr)"
-
-//	char buffer[5];
-//	int j = snprintf(buffer, 4, "%04X\n", )
-
-//	char finalString[5];
-//
-//	finalString[0] = 0;
-//	finalString[1] = "x";
-//
-//	if (len < 3) {
-//		finalString[2] = 0;
-//		finalString[3] = RevStr[0];
-//		finalString[4] = RevStr[1];
-//	} else if (len < 2) {
-//		finalString[3] = 0;
-//	} else if (len < 1) {
-//		finalString[4] = 0;
-//	}
-
-//	TWord tempToSet = atoi(RevStr);
-
 	// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
 	IT8951WriteCmdCode(interface, type, USDEF_I80_CMD_FORCE_SET_TEMP);
 
@@ -675,16 +614,8 @@ static int update_temp(struct pl_generic_controller *controller) {
 	dataTemp[0] = 0x01;
 	dataTemp[1] = newTemp;  //37   //controller->manual_temp;
 
-//	i80 ==> dataTemp[1] = 0x0025;
-//
-//	spi ==> dataTemp[1] = 0x2500;
-
-	//usleep(8000);
-
 	IT8951WriteDataBurst(interface, type, dataTemp, 2);
 	IT8951WaitForReady(interface, type);
-
-	//LOG("Temperature: %d", it8951->);
 
 	stat = 1;
 
@@ -712,7 +643,6 @@ static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres) {
 static int fill(struct pl_generic_controller *controller,
 		const struct pl_area *a, uint8_t grey) {
 
-	LOG("Not implemented yet, pipes through for testing !");
 	clear = true;
 
 	return 1;
