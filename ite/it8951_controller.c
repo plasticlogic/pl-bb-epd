@@ -32,6 +32,7 @@
 #include <pl/scramble.h>
 #include <pl/hv.h>
 #include <pl/generic_interface.h>
+#include <pl/types.h>
 #include <pl/i80.h>
 #include <pl/gpio.h>
 #define LOG_TAG "it8951_controller"
@@ -46,6 +47,8 @@ static const struct pl_wfid wf_table[] = { { "default", 2 }, { "0", 0 }, { "1",
 
 int modeToUse = 0;
 int wfidToUse = 2;
+int partialX = 0;
+int partialY = 0;
 bool clear = false;
 
 static int trigger_update(struct pl_generic_controller *controller);
@@ -109,6 +112,13 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	enum interfaceType *type = it8951->sInterfaceType;
 	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 
+	if (modeToUse == 0) {
+		controller->imageWidth = controller->xres;
+		controller->imageHeight = controller->yres;
+		partialX = 0;
+		partialY = 0;
+	}
+
 	//Get the Device info such as Panel Type Width and height from DEVInfo struct
 	//I80IT8951DevInfo devInfo;
 	//GetIT8951SystemInfo(bus, type, &devInfo);
@@ -122,10 +132,11 @@ static int trigger_update(struct pl_generic_controller *controller) {
 
 //Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
-	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
-	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
-	IT8951WriteData(bus, type, (TWord) controller->xres); // Display W devInfo.usPanelW 1200
-	IT8951WriteData(bus, type, (TWord) controller->yres); // Display H devInfo.usPanelH 960
+	//ToDo: Pipe x/y position through from console
+	IT8951WriteData(bus, type, (TWord) partialX);     				// Display X
+	IT8951WriteData(bus, type, (TWord) partialY); 					// Display Y
+	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
+	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
 	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
 
 //	IT8951WriteReg(bus, type, 0x1E00, 0xFB);
@@ -311,6 +322,9 @@ static int load_png_image(struct pl_generic_controller *controller,
 		const char *path, struct pl_area *area, int left, int top) {
 	it8951_t *it8951 = controller->hw_ref;
 
+	partialX = left;
+	partialY = top;
+
 	assert(it8951 != NULL);
 
 	pl_generic_interface_t *bus = it8951->interface;
@@ -358,11 +372,20 @@ static int load_png_image(struct pl_generic_controller *controller,
 		memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
 		width = devInfo.usPanelW;
 		height = devInfo.usPanelH;
+		controller->imageWidth = devInfo.usPanelW;
+		controller->imageHeight = devInfo.usPanelH;
 
 	} else if (controller->cfa_overlay.r_position == -1) {
 		LOG("BW");
 		if (read_png(path, &gpFrameBuf, &width, &height))
 			return -ENOENT;
+		controller->imageWidth = width;
+		controller->imageHeight = height;
+		if (area != NULL) {
+			area->width = width;
+			area->height = height;
+		}
+
 	} else {
 
 		LOG("CFA");
@@ -447,10 +470,16 @@ static int load_png_image(struct pl_generic_controller *controller,
 			free(pngBuffer);
 	}
 
-	TByte* targetBuf = malloc(controller->yres * controller->xres);
+	TByte* targetBuf = malloc(width * height);
+
+//	if (width < controller->xres || height < controller->yres){
+//		if (controller->display_scrambling == 0){
+//			TByte* targetBufArea = malloc (width * height);
+//		}
+//	}
 
 	if (controller->display_scrambling == 0) {
-		memcpy(targetBuf, scrambledPNG, controller->yres * controller->xres);
+		memcpy(targetBuf, scrambledPNG, width * height);
 
 	} else {
 
@@ -472,10 +501,11 @@ static int load_png_image(struct pl_generic_controller *controller,
 	stLdImgInfo.usRotate = IT8951_ROTATE_0;
 	stLdImgInfo.ulImgBufBaseAddr = gulImgBufAddr;
 	//Set Load Area
-	stAreaImgInfo.usX = 0;
-	stAreaImgInfo.usY = 0;
-	stAreaImgInfo.usWidth = devInfo.usPanelW;
-	stAreaImgInfo.usHeight = devInfo.usPanelH;
+	//ToDo: Pipe x/y position through from console
+	stAreaImgInfo.usX = partialX;
+	stAreaImgInfo.usY = partialY;
+	stAreaImgInfo.usWidth = width;
+	stAreaImgInfo.usHeight = height;
 
 	//Load Image from Host to IT8951 Image Buffer
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2

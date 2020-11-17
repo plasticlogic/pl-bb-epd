@@ -46,6 +46,8 @@ typedef struct pl_generic_controller{
 	int display_scrambling;
 	int gate_offset;
 	int source_offset;
+	unsigned imageWidth;
+	unsigned imageHeight;
 	cfa_overlay_t cfa_overlay;
 
 	void (*delete)(struct pl_generic_controller *p);

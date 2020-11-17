@@ -477,8 +477,8 @@ int execute_update_image_regional(int argc, char **argv) {
 	int updateCount = 1;
 	int waitTime = 0;
 
-	int top;
-	int left;
+	int top = 0;
+	int left = 0;
 	struct pl_area* area = malloc(sizeof(struct pl_area));
 
 	if (argc >= 10)
@@ -1021,8 +1021,8 @@ int update_image_regional(char *path, const char* wfID,
 	if (wfId < 0)
 		return -EINVAL;
 
-	stat = epdc->controller->load_image(epdc->controller, path, area, top,
-			left);
+	stat = epdc->controller->load_image(epdc->controller, path, area, left,
+			top);
 	if (stat < 0)
 		return stat;
 
