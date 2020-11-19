@@ -787,17 +787,19 @@ int start_epdc(int load_nvm_content, int execute_clear) {
 	int stat = 0;
 	LOG("load_nvm_content?: %d", load_nvm_content);
 
-	// initialize GPIOs
+	//initialize GPIOs
 	stat = pl_gpio_config_list(&(hardware->gpios), hardware->board_gpios,
 			hardware->gpio_count);
 	if (stat < 0) {
 		LOG("GPIO init failed");
 		return stat;
 	}
-	// enable VDD
+
+	//enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
 	sleep(1);
+	stat = switch_hv(1);
 	stat = epdc->init(epdc, load_nvm_content);
 	if (stat < 0) {
 		LOG("EPDC-Init failed: %i\n", stat);
@@ -806,6 +808,9 @@ int start_epdc(int load_nvm_content, int execute_clear) {
 	if (execute_clear) {
 		stat = epdc->clear_init(epdc);
 	}
+
+	stat = switch_hv(0);
+
 	return stat;
 }
 ;
@@ -1315,15 +1320,15 @@ int slideshow(const char *path, const char* wf, int waittime) {
 				continue;
 
 			stat = show_image(path, d->d_name, wfid);
+			usleep(waittime);
 			if (stat < 0) {
 				LOG("Failed to show image");
 				return stat;
 			}
-			usleep(waittime);
-
 		}
 		closedir(dir);
 	}
+
 	//*/
 	return 0;
 }

@@ -27,6 +27,7 @@
 #include <pl/generic_epdc.h>
 #define LOG_TAG "generic_epdc"
 #include <pl/utils.h>
+#include <ite/it8951.h>
 
 static void generic_epdc_delete(struct pl_generic_epdc *p);
 static int set_vcom(struct pl_generic_epdc *p, int vcomInMillivolt);
@@ -281,6 +282,14 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 		return stat;
 
 	controller->update_temp(controller);
+
+	it8951_t *it8951 = controller->hw_ref;
+	pl_generic_interface_t *bus = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
+
+//	IT8951WaitForReady(bus, type);
+//	IT8951WriteCmdCode(bus, type,USDEF_I80_CMD_POWER_CTR);
+//	IT8951WriteData(bus, type, 0x01);
 
 	// initialize hv
 	if (!p->hv)

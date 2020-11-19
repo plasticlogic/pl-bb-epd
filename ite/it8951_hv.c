@@ -155,6 +155,15 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 //	IT8951WriteData(bus, type, 0x01); // Write Size
 //	IT8951WriteData(bus, type, 0x40); // Register Content (Maximal length for power Up Sequence) 27 6C -- 78
 
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x01); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x01); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	IT8951WriteData(bus, type, 0x00); //
+
+	IT8951WaitForReady(bus, type);
+
 	//Get current Register setting
 	TWord data;
 	data = IT8951ReadReg(bus, type, 0x1e16);

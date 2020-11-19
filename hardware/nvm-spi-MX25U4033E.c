@@ -81,7 +81,7 @@ static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr, uint8
 	stat = spi.read_bytes(&spi, rdid_data+2, 1);
 	stat = spi.set_cs(&spi, 1);
 
-	LOG("Manufacturing ID NVM: %x, %x, %x", rdid_data[0],rdid_data[1],rdid_data[2]);
+	//LOG("Manufacturing ID NVM: %x, %x, %x", rdid_data[0],rdid_data[1],rdid_data[2]);
 
 	while(bytes_to_transfer > 0){
 

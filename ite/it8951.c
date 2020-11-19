@@ -179,7 +179,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 	} else if (*type == I80) {
 
 		IT8951WriteDataBurst(bus, type, pusFrameBuf,
-				pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight);
+				pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight );
 	}
 
 	gettimeofday(&tStop, NULL);
@@ -488,10 +488,11 @@ void IT8951LoadImgAreaStart(pl_generic_interface_t *bus,
 //Host CMD IT8951_TCON_LD_IMG
 void IT8951LoadImgStart(pl_generic_interface_t *bus, enum interfaceType *type,
 		IT8951LdImgInfo* pstLdImgInfo) {
-	TWord usArg[5];
+	TWord usArg[1];
 	//Setting Argument for Load image start
 	usArg[0] = (pstLdImgInfo->usEndianType << 8)
 			| (pstLdImgInfo->usPixelFormat << 4) | (pstLdImgInfo->usRotate);
+
 	//Send Cmd and Args
 	IT8951SendCmdArg(bus, type, IT8951_TCON_LD_IMG, usArg, 1);
 }

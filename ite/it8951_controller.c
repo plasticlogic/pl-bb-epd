@@ -217,7 +217,7 @@ static int init_controller(struct pl_generic_controller *controller,
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
 
-	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
+		//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 	//struct pl_gpio *gpio = (struct pl_gpio *) i80->hw_ref;
 
 //	uint8_t data_out [2];
