@@ -291,7 +291,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 //	IT8951WriteCmdCode(bus, type,USDEF_I80_CMD_POWER_CTR);
 //	IT8951WriteData(bus, type, 0x01);
 
-	// initialize hv
+// initialize hv
 	if (!p->hv)
 		return -EINVAL;
 	pl_hv_t *hv = p->hv;
@@ -570,7 +570,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 #endif
 	//read_stopwatch(&t,"configure_update",1);
 	if (!nowait) {
-		stat |= switch_hvs_on(hv);
+	stat |= switch_hvs_on(hv);
 	}
 	//read_stopwatch(&t,"switch_hvs_on",1);
 	stat |= controller->trigger_update(controller);

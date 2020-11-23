@@ -89,7 +89,7 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 	assert(bus != NULL);
 	enum interfaceType *type = it8951->sInterfaceType;
 
-	printf("HV start managed by ITE \n");
+	//printf("HV start managed by ITE \n");
 
 //	if (IT8951WaitForReady(bus, type))
 //		return -ETIME;
@@ -99,14 +99,14 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 //	IT8951WaitForReady(bus, type);
 
 //Get current Register setting
-	//TWord data;
-	//data = IT8951ReadReg(bus, type, 0x1e16);
+	TWord data;
+	data = IT8951ReadReg(bus, type, 0x1e16);
 
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
-	//data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
+	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
 
 	//Write adjusted data to register
-	//IT8951WriteReg(bus, type, 0x1e16, data);
+	IT8951WriteReg(bus, type, 0x1e16, data);
 //	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
 //
 //	IT8951WriteData(bus, type, 0x01);
@@ -142,8 +142,7 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 	pl_generic_interface_t *bus = it8951->interface;
 	assert(bus != NULL);
 	enum interfaceType *type = it8951->sInterfaceType;
-
-	printf("HV off managed by ITE \n");
+	//printf("HV off managed by ITE \n");
 
 	if (IT8951WaitForReady(bus, type))
 		return -ETIME;

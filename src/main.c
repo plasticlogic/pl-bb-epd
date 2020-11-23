@@ -513,12 +513,15 @@ int execute_update_image_regional(int argc, char **argv) {
 
 int execute_update_gfx(int argc, char **argv) {
 
-	int x = 1280;
-	int y = 960;
+	int x, y;
+
+	int stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
+	if (stat < 0)
+		return stat;
 
 	char* wfID = "default";
 	char* path = "/tmp/gfx.png";
-	char *s = "Hello gd";
+	char *s = "Hello this Image Indicates your working Display ;)";
 
 	FILE * f = fopen(path, "w");
 
@@ -533,7 +536,7 @@ int execute_update_gfx(int argc, char **argv) {
 
 	fclose(f);
 
-	update_image(path, wfID, 0, 1, 1, 0);
+	update_image(path, wfID, 0, 0, 1, 0);
 
 	return 0;
 }
@@ -549,7 +552,7 @@ int execute_counter(int argc, char**argv) {
 int execute_slideshow(int argc, char**argv) {
 	int stat;
 	//slideshow path wfid waittime
-	int waitTime = 700;
+	int waitTime = 0;
 	char* wfID = NULL;
 	if (argc >= 5)
 		waitTime = atoi(argv[4]);
@@ -822,6 +825,7 @@ int start_epdc(int load_nvm_content, int execute_clear) {
  */
 int stop_epdc() {
 	int stat = 0;
+	stat = switch_hv(0);
 	hardware->gpios.set(hardware->vddGPIO, 0);
 
 	// de-configure Epson GPIOs
@@ -1082,9 +1086,11 @@ int read_register(regSetting_t regSetting) {
 int fill(uint8_t gl, uint8_t wfid, int update_mode) {
 
 	int x, y, stat;
-	struct pl_area a = { 0, 0, x, y };
 
 	stat = epdc->controller->get_resolution(epdc->controller, &x, &y);
+
+	struct pl_area a = { 0, 0, x, y };
+
 	if (stat < 0)
 		return stat;
 	LOG("FILL: %i, area: %i, %i, %i, %i", gl, a.width, a.height, a.top, a.left);
@@ -1092,6 +1098,7 @@ int fill(uint8_t gl, uint8_t wfid, int update_mode) {
 	stat = epdc->controller->fill(epdc->controller, &a, gl);
 	if (stat < 0)
 		return stat;
+	stat = epdc->controller->load_image(epdc->controller, NULL, NULL, 0, 0 );
 	stat = epdc->update(epdc, wfid, update_mode, &a);
 	return stat;
 }
@@ -1320,11 +1327,11 @@ int slideshow(const char *path, const char* wf, int waittime) {
 				continue;
 
 			stat = show_image(path, d->d_name, wfid);
-			usleep(waittime);
 			if (stat < 0) {
 				LOG("Failed to show image");
 				return stat;
 			}
+			usleep(waittime);
 		}
 		closedir(dir);
 	}

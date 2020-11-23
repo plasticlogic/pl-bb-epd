@@ -184,9 +184,9 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 	gettimeofday(&tStop, NULL);
 
-	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
+//	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+//			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+//	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
 
 	//Send Load Img End Command
 	IT8951LoadImgEnd(bus, type);
