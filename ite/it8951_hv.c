@@ -99,14 +99,21 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 //	IT8951WaitForReady(bus, type);
 
 //Get current Register setting
-	TWord data;
-	data = IT8951ReadReg(bus, type, 0x1e16);
+//	TWord data;
+//	data = IT8951ReadReg(bus, type, 0x1e16);
+//
+//	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
+//	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
+//
+//	//Write adjusted data to register
+//	IT8951WriteReg(bus, type, 0x1e16, data);
 
-	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
-	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
-
-	//Write adjusted data to register
-	IT8951WriteReg(bus, type, 0x1e16, data);
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x01); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, 0x2F); //
 //	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
 //
 //	IT8951WriteData(bus, type, 0x01);
@@ -447,10 +454,9 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	//data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
 
-//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-//	//usleep(8000);
-//	IT8951WriteData(bus, type, 0x00);
-//	IT8951WaitForReady(bus, type);
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+	IT8951WriteData(bus, type, 0x00);
+	IT8951WaitForReady(bus, type);
 //
 //	//usleep(8000);
 //	//Write adjusted data to register

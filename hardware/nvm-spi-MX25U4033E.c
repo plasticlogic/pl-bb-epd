@@ -139,6 +139,8 @@ static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_
 	stat = spi->read_bytes(spi, rdid_data, 1);
 	stat = spi->set_cs(spi, 1);
 
+	LOG("Manufacturing ID NVM: %x, %x, %x", rdid_data[0],rdid_data[1],rdid_data[2]);
+
 	// send write enable
 	stat = spi->set_cs(spi, 1);
 	stat = spi->set_cs(spi, 0);

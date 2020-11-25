@@ -179,14 +179,14 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 	} else if (*type == I80) {
 
 		IT8951WriteDataBurst(bus, type, pusFrameBuf,
-				pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight );
+				pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight);
 	}
 
 	gettimeofday(&tStop, NULL);
 
-//	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-//			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-//	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
+	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
 
 	//Send Load Img End Command
 	IT8951LoadImgEnd(bus, type);
@@ -304,12 +304,11 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 
 		iResult = write(spi->fd, preamble_, 2);
 
-		usleep(250); //--> need this here ? Costs 0.7 to 0.8 seconds while transmitting data over spi
+		//usleep(250); //--> need this here ? Costs 0.7 to 0.8 seconds while transmitting data over spi
+		IT8951WaitForReady(bus, type);
 
 		//send SPI data
 		iResult = write(spi->fd, usData, size * 2);
-
-		IT8951WaitForReady(bus, type);
 
 		// Set CS to high and end SPI communication
 		gpio->set(spi->cs_gpio, 1);
@@ -513,11 +512,13 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
 
 	if (*type == SPI_HRDY) {
 
-		uint8_t usCmd_[4];
-		usCmd_[0] = (uint8_t) 0x60;
-		usCmd_[1] = (uint8_t) 0x00;
-		usCmd_[2] = (uint8_t) (usCmd >> 8);
-		usCmd_[3] = (uint8_t) usCmd;
+		uint8_t usCmd_1[2];
+		usCmd_1[0] = (uint8_t) 0x60;
+		usCmd_1[1] = (uint8_t) 0x00;
+
+		uint8_t usCmd_2[2];
+		usCmd_2[0] = (uint8_t) (usCmd >> 8);
+		usCmd_2[1] = (uint8_t) usCmd;
 
 		int stat = -EINVAL;
 		pl_spi_hrdy_t *spi = (pl_spi_hrdy_t*) bus;
@@ -530,7 +531,11 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
 		IT8951WaitForReady(bus, type);
 
 		stat = bus->set_cs(bus, 0);
-		stat = bus->write_bytes(bus, usCmd_, 4);
+		stat = bus->write_bytes(bus, usCmd_1, 2);
+
+		IT8951WaitForReady(bus, type);
+
+		stat = bus->write_bytes(bus, usCmd_2, 2);
 		stat = bus->set_cs(bus, 1);
 
 	} else if (*type == I80) {
@@ -583,17 +588,19 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus,
 
 		swap_endianess(data_);
 
-		IT8951WaitForReady(bus, type);
-
 		// open SPI Bus
 		int stat = -EINVAL;
 		stat = bus->open(bus);
+
+		IT8951WaitForReady(bus, type);
 
 		// Set CS to low
 		gpio->set(spi->cs_gpio, 0);
 
 		//send SPI write data preamble
 		stat = bus->write_bytes(bus, preamble_, 2);
+
+		IT8951WaitForReady(bus, type);
 
 		//send SPI data
 		stat = bus->write_bytes(bus, data_, 2);

@@ -154,6 +154,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	stat = beaglebone_i2c_init(setup->i2c_port, &(setup->host_i2c));
 	if(stat < 0) return -ENODEV;
 
+
 	switch(setup->sInterfaceType){
 	case SPI: 			LOG("Interface: SPI"); break;
 	case SPI_HRDY: 		LOG("Interface: SPI with HRDY Pin"); break;

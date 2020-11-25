@@ -723,7 +723,11 @@ int execute_pgm_epdc(int argc, char **argv) {
 
 	int len = readBinaryFile(argv[2], &data);
 
+	stat = switch_hv(1);
+
 	stat = nvm->pgm(nvm, addr, data, len);
+
+	stat = switch_hv(0);
 
 	return stat;
 }
@@ -801,8 +805,8 @@ int start_epdc(int load_nvm_content, int execute_clear) {
 	//enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
-	sleep(1);
-	stat = switch_hv(1);
+	sleep(2);
+	//stat = switch_hv(1);
 	stat = epdc->init(epdc, load_nvm_content);
 	if (stat < 0) {
 		LOG("EPDC-Init failed: %i\n", stat);

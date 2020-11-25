@@ -123,7 +123,7 @@ static int spi_hrdy_init(pl_spi_hrdy_t *psSPI) {
 //	}
 //	psSPI->mSpi->msh = tmp32;
 	//psSPI->mSpi->msh = 16000000; //SPI_HRDY_TRANSFER_RATE_IN_HZ;
-	psSPI->mSpi->msh = 24000000; //SPI_HRDY_TRANSFER_RATE_IN_HZ;
+	psSPI->mSpi->msh = 12000000; //SPI_HRDY_TRANSFER_RATE_IN_HZ;
 
 	return TRUE;
 }
