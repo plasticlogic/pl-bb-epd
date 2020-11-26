@@ -816,7 +816,8 @@ int start_epdc(int load_nvm_content, int execute_clear) {
 		stat = epdc->clear_init(epdc);
 	}
 
-	stat = switch_hv(0);
+	if (execute_clear != 1)
+			stat = switch_hv(0);
 
 	return stat;
 }
