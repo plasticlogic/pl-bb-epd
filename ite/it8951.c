@@ -159,13 +159,13 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 	//Set Image buffer(IT8951) Base address
 	IT8951SetImgBufBaseAddr(bus, type, pstLdImgInfo->ulImgBufBaseAddr);
 
-	//Send Load Image start Cmd
+//	//Send Load Image start Cmd
 	IT8951LoadImgAreaStart(bus, type, pstLdImgInfo, pstAreaImgInfo);
-	//IT8951LoadImgStart(bus, type, pstLdImgInfo);
-
-	//Host Write Data
+//	//IT8951LoadImgStart(bus, type, pstLdImgInfo);
+//
+//	//Host Write Data
 	gettimeofday(&tStart, NULL);
-
+//
 	if (*type == SPI_HRDY) {
 		struct pl_gpio * gpio = (struct pl_gpio *) bus->hw_ref;
 		int b = 0;
@@ -190,6 +190,34 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 	//Send Load Img End Command
 	IT8951LoadImgEnd(bus, type);
+
+	//if width or height over than 2048 use memburst write instead, only allow 8bpp data
+	// IT8951MemBurstWriteProc(pstLdImgInfo->ulImgBufBaseAddr,  pstAreaImgInfo->usWidth/2* pstAreaImgInfo->usHeight,   pusFrameBuf); //MemAddr, Size, Framebuffer address
+
+	IT8951WaitForReady(bus, type);
+
+	// Image Update for more than 2048 data pieces TODO: Why is this not working ????
+//	TWord usArg[4];
+//	//Setting Arguments for Memory Burst Write
+//	usArg[0] = (TWord) (pstLdImgInfo->ulImgBufBaseAddr & 0x0000FFFF); //addr[15:0]
+//	usArg[1] = (TWord) ((pstLdImgInfo->ulImgBufBaseAddr >> 16) & 0x0000FFFF); //addr[25:16]
+//	usArg[2] = (TWord) (pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight
+//			& 0x0000FFFF); //Cnt[15:0]
+//	usArg[3] = (TWord) ((pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight
+//			>> 16) & 0x0000FFFF); //Cnt[25:16]
+//
+//	IT8951SendCmdArg(bus, type, IT8951_TCON_MEM_BST_WR, usArg, 4);
+//
+//	for (i = 0; i < pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight;
+//			i++) {
+//		IT8951WriteData(bus, type, pusFrameBuf[i]);
+//	}
+//
+//	gettimeofday(&tStop, NULL);
+//
+//	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+//			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+//	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
 
 }
 

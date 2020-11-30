@@ -192,7 +192,6 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 //	IT8951WriteData(bus, type, 0x01); // Write Size
 //	IT8951WriteData(bus, type, pmicEnableReg);
 
-
 //	IT8951WaitForReady(bus, type);
 //
 //	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
@@ -389,7 +388,17 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
 	IT8951WriteData(bus, type, 0x0B); // Power Up Sequence Register
 	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x00); //
+	IT8951WriteData(bus, type, 0x1E); //
+
+//	IT8951WaitForReady(bus, type);
+//
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x00); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x0B); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	TWord* breg = IT8951ReadData(bus, type, 1); //
+//	printf("Reg 0B: %x \n", *breg);
 
 	IT8951WaitForReady(bus, type);
 
@@ -398,7 +407,19 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
 	IT8951WriteData(bus, type, 0x0C); // Power Up Sequence Register
 	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x00); //
+	IT8951WriteData(bus, type, 0xC1); //
+
+	//IT8951WaitForReady(bus, type);
+
+
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x00); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x0C); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	TWord* creg = IT8951ReadData(bus, type, 1); //
+//
+//	printf("Reg 0C: %x \n", *creg);
 
 	IT8951WaitForReady(bus, type);
 
