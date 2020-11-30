@@ -155,44 +155,48 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 		return -ETIME;
 
 	//Get current Register setting
-			TWord data;
-			data = IT8951ReadReg(bus, type, 0x1e16);
+	TWord data;
+	data = IT8951ReadReg(bus, type, 0x1e16);
 
-			//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
-			data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
-			//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE to enable VCom_Switch
-			data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
+	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
+	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
+	//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE to enable VCom_Switch
+	data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
 
-			IT8951WriteReg(bus, type, 0x1e16, data);
+	//data &= ~(1 << 10); // wakeup Pin ---> faster when siwtched for multiple updates ?
 
-			IT8951WaitForReady(bus, type);
+	//data &= ~(1 << 13);
 
-//			IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//				IT8951WriteData(bus, type, 0x00); // I2C write command
-//				IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//				IT8951WriteData(bus, type, 0x01); // Power Up Sequence Register
-//				IT8951WriteData(bus, type, 0x01); // Write Size
+	IT8951WriteReg(bus, type, 0x1e16, data);
 
-				//TWord pmicEnableReg = IT8951ReadData(bus, type, 1); // Register Content (Maximal length for power Up Sequence) 27 6C -- 78
+//	IT8951WaitForReady(bus, type);
+//
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_STANDBY);
+//
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x00); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x01); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//
+//	TWord pmicEnableReg = IT8951ReadData(bus, type, 1); // Register Content (Maximal length for power Up Sequence) 27 6C -- 78
+//
+//	pmicEnableReg &= ~(1 << 6);
+//
+//	IT8951WaitForReady(bus, type);
+//
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x01); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, pmicEnableReg);
 
-				//pmicEnableReg &= ~(1 << 6);
-
-				IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-				IT8951WriteData(bus, type, 0x01); // I2C write command
-				IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-				IT8951WriteData(bus, type, 0x01); // Power Up Sequence Register
-				IT8951WriteData(bus, type, 0x01); // Write Size
-				IT8951WriteData(bus, type, 0x00);
-
-				IT8951WaitForReady(bus, type);
 
 //	IT8951WaitForReady(bus, type);
 //
 //	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
 //	IT8951WriteData(bus, type, 0x00);
-
-
-
 
 //
 //	LOG("Try to turn the EPDC power off");
@@ -414,35 +418,7 @@ static int set_vcom(struct pl_vcom_config *p, double vcomInMillivolt) {
 	IT8951WriteData(bus, type, 0x01); // Write Size
 	IT8951WriteData(bus, type, 0x78); //
 
-//	TWord* usData2[] = { 0x01, 0x68, 0x0A, 0x01, 0xFF };
-//	IT8951WriteDataBurst(bus, type, usData2, 5);
 	IT8951WaitForReady(bus, type);
-
-//	// Set VCom Value
-//	// Send I2C Command via ITE8951
-//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//	IT8951WriteData(bus, type, 0x01); // I2C write command
-//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//	IT8951WriteData(bus, type, 0x03); // Power Up Sequence Register
-//	IT8951WriteData(bus, type, 0x01); // Write Size
-//	IT8951WriteData(bus, type, vcomval_[0]); // Register Content
-//
-//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//	IT8951WriteData(bus, type, 0x01); // I2C write command
-//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//	IT8951WriteData(bus, type, 0x04); // Power Up Sequence Register
-//	IT8951WriteData(bus, type, 0x01); // Write Size
-//	IT8951WriteData(bus, type, vcomval_[1]); // Register Content
-
-	// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
-//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_FORCE_SET_TEMP);
-//
-//	TWord dataTemp[2];
-//	dataTemp[0] = 0x0001;
-//	dataTemp[1] = 0x0025;
-//
-//	IT8951WriteDataBurst(bus, type, dataTemp, 2);
-//	IT8951WaitForReady(bus, type);
 
 	//Configure the VCom Value
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_VCOM_CTR);
