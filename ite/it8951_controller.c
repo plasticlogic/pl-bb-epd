@@ -121,30 +121,28 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		partialY = 0;
 	}
 
-
 	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
 	IT8951WriteData(bus, type, 0x01); // I2C write command
 	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0B); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x0B); // Power Down Sequence Register
 	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0xDE); //
-
-//	IT8951WaitForReady(bus, type);
-//
-//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//	IT8951WriteData(bus, type, 0x00); // I2C write command
-//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//	IT8951WriteData(bus, type, 0x0B); // Power Up Sequence Register
-//	IT8951WriteData(bus, type, 0x01); // Write Size
-//	TWord* breg = IT8951ReadData(bus, type, 1); //
-//	printf("Reg 0B: %x \n", *breg);
+	IT8951WriteData(bus, type, 0x00); //DE ????
 
 	IT8951WaitForReady(bus, type);
 
 	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
 	IT8951WriteData(bus, type, 0x01); // I2C write command
 	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0C); // Power Up Sequence Register
+	IT8951WriteData(bus, type, 0x0C); // Power Down Sequence Register
+	IT8951WriteData(bus, type, 0x01); // Write Size
+	IT8951WriteData(bus, type, 0x00); //
+
+	IT8951WaitForReady(bus, type);
+
+	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+	IT8951WriteData(bus, type, 0x01); // I2C write command
+	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+	IT8951WriteData(bus, type, 0x0A); // Power Up Sequence Register
 	IT8951WriteData(bus, type, 0x01); // Write Size
 	IT8951WriteData(bus, type, 0x00); //
 
@@ -191,39 +189,37 @@ static int trigger_update(struct pl_generic_controller *controller) {
 
 	send_cmd(controller, reg2);
 
-	printf("PMIC Register B after update: ");
-
-	regSetting_t reg3;
-	reg3.addr = IT8951_TCON_BYPASS_I2C;
-	reg3.valCount = 4;
-	uint16_t *regb;
-	regb = malloc(reg3.valCount * sizeof(uint16_t));
-	regb[0] = 0x00;
-	regb[1] = 0x68;
-	regb[2] = 0x0B;
-	regb[3] = 0x01;
-	reg3.val = regb;
-
-	send_cmd(controller, reg3);
-
-	printf("PMIC Register C after update: ");
-
-	regSetting_t reg4;
-		reg4.addr = IT8951_TCON_BYPASS_I2C;
-		reg4.valCount = 4;
-		uint16_t *regc;
-		regc = malloc(reg4.valCount * sizeof(uint16_t));
-		regc[0] = 0x00;
-		regc[1] = 0x68;
-		regc[2] = 0x0C;
-		regc[3] = 0x01;
-		reg4.val = regc;
-
-		send_cmd(controller, reg4);
-
-
-
-	IT8951WaitForReady(bus, type);
+//	printf("PMIC Register B after update: ");
+//
+//	regSetting_t reg3;
+//	reg3.addr = IT8951_TCON_BYPASS_I2C;
+//	reg3.valCount = 4;
+//	uint16_t *regb;
+//	regb = malloc(reg3.valCount * sizeof(uint16_t));
+//	regb[0] = 0x00;
+//	regb[1] = 0x68;
+//	regb[2] = 0x0B;
+//	regb[3] = 0x01;
+//	reg3.val = regb;
+//
+//	send_cmd(controller, reg3);
+//
+//	printf("PMIC Register C after update: ");
+//
+//	regSetting_t reg4;
+//	reg4.addr = IT8951_TCON_BYPASS_I2C;
+//	reg4.valCount = 4;
+//	uint16_t *regc;
+//	regc = malloc(reg4.valCount * sizeof(uint16_t));
+//	regc[0] = 0x00;
+//	regc[1] = 0x68;
+//	regc[2] = 0x0C;
+//	regc[3] = 0x01;
+//	reg4.val = regc;
+//
+//	send_cmd(controller, reg4);
+//
+//	IT8951WaitForReady(bus, type);
 
 	return 0;
 }

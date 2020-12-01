@@ -105,6 +105,10 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data |= (1 << 12); // switches GPIO5 of ITE (Power Up Pin) high
 
+	//data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
+
+	//data &= ~(1 << 11);
+
 	//Write adjusted data to register
 	IT8951WriteReg(bus, type, 0x1e16, data);
 

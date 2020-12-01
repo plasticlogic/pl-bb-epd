@@ -161,7 +161,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 //	//Send Load Image start Cmd
 	IT8951LoadImgAreaStart(bus, type, pstLdImgInfo, pstAreaImgInfo);
-//	//IT8951LoadImgStart(bus, type, pstLdImgInfo);
+//	IT8951LoadImgStart(bus, type, pstLdImgInfo);
 //
 //	//Host Write Data
 	gettimeofday(&tStart, NULL);
