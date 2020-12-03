@@ -375,6 +375,7 @@ static int initialize_nvm(hw_setup_t *p, const char *selection, const char *form
 	}
 
 	// intialize nvm
+
 	if (!strcmp(selection, "MICROCHIP_24AA256" )){
 			p->nvm = pl_nvm_new();
 			nvm_24AA256_i2c_init(p->nvm, &(p->host_i2c));
@@ -388,7 +389,7 @@ static int initialize_nvm(hw_setup_t *p, const char *selection, const char *form
 		if(!strcmp("FALCON_PARALLEL", p->boardname)){
 			p->nvmSPI->cs_gpio = FALCON_DISPLAY_NVM_CS;
 		}else if(!strcmp("FALCON_I80", p->boardname)){
-			p->nvmSPI->cs_gpio = FALCON_DISPLAY_NVM_CS;
+			p->nvmSPI->cs_gpio = FALCON_FIRMWARE_NVM_CS;
 		}else if(!strcmp("FALCON_SPI", p->boardname)){
 			p->nvmSPI->cs_gpio = FALCON_DISPLAY_NVM_CS;
 		}else if(!strcmp("CHIFFCHAFF", p->boardname)){

@@ -446,7 +446,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 	int v_yres = 0;
 	int v_xres = 0;
 
-	if (!controller->display_scrambling) {
+	if (controller->display_scrambling == 0) {
 		v_xres = controller->xres - (2 * controller->xoffset);
 		v_yres = controller->yres - controller->yoffset;
 	}
@@ -473,9 +473,12 @@ static int load_png_image(struct pl_generic_controller *controller,
 			return -ENOENT;
 		controller->imageWidth = width;
 		controller->imageHeight = height;
-		if (area != NULL) {
+		if (area != NULL && controller->display_scrambling == 0) {
 			area->width = width;
 			area->height = height;
+		} else if (area != NULL && controller->display_scrambling != 0) {
+			area->width = controller->xres;
+			area->height = controller->yres;
 		}
 		if (height == controller->xres && width == controller->yres) {
 			rotate_8bit_image(&height, &width, gpFrameBuf);
@@ -540,9 +543,17 @@ static int load_png_image(struct pl_generic_controller *controller,
 	// scramble image
 	TByte* scrambledPNG;
 	if (controller->cfa_overlay.r_position == -1 || clear) {
-		scrambledPNG = malloc(width * height);
-		scramble_array(gpFrameBuf, scrambledPNG, &height, &width,
-				controller->display_scrambling);
+		if (controller->display_scrambling) {
+			scrambledPNG = malloc(controller->xres * controller->yres);
+			scramble_array(gpFrameBuf, scrambledPNG, &height, &width,
+					controller->display_scrambling);
+		} else {
+			scrambledPNG = malloc(width * height);
+
+			scramble_array(gpFrameBuf, scrambledPNG, &height, &width,
+					controller->display_scrambling);
+		}
+
 	} else {
 		scrambledPNG =
 				malloc(
@@ -565,21 +576,14 @@ static int load_png_image(struct pl_generic_controller *controller,
 			free(pngBuffer);
 	}
 
-	TByte* targetBuf = malloc(width * height);
-
-//	if (width < controller->xres || height < controller->yres){
-//		if (controller->display_scrambling == 0){
-//			TByte* targetBufArea = malloc (width * height);
-//		}
-//	}
-
-	if (controller->display_scrambling == 0) {
-		memcpy(targetBuf, scrambledPNG, width * height);
-
-	} else {
-
+	TByte* targetBuf;
+	if (controller->display_scrambling){
+		targetBuf = malloc(controller->xres * controller->yres);
 		memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
-				controller->xres, controller->yoffset, controller->xoffset);
+						controller->xres, controller->yoffset, controller->xoffset);
+	}else {
+		targetBuf = malloc(width * height);
+		memcpy(targetBuf, scrambledPNG, width * height);
 	}
 
 	//Check TCon is free ? Wait TCon Ready (optional)
@@ -599,8 +603,15 @@ static int load_png_image(struct pl_generic_controller *controller,
 	//ToDo: Pipe x/y position through from console
 	stAreaImgInfo.usX = partialX;
 	stAreaImgInfo.usY = partialY;
-	stAreaImgInfo.usWidth = width;
-	stAreaImgInfo.usHeight = height;
+
+	if (controller->display_scrambling){
+		stAreaImgInfo.usWidth = controller->xres;
+			stAreaImgInfo.usHeight = controller->yres;
+	}else {
+		stAreaImgInfo.usWidth = width;
+			stAreaImgInfo.usHeight = height;
+	}
+
 
 	//Load Image from Host to IT8951 Image Buffer
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
