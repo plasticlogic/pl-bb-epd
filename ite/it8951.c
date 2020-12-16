@@ -46,6 +46,7 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type,
 	I80IT8951DevInfo* pBuf_ = (I80IT8951DevInfo*) pBuf;
 	//Send I80 CMD
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_GET_DEV_INFO);
+	IT8951WaitForReady(bus, type);
 	pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(bus, type,
 			sizeof(I80IT8951DevInfo) / 2);
 
@@ -744,7 +745,6 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 			IT8951WaitForReady(bus, type);
 			read(i80->fd, &usData, 1);
 			iResult[i] = usData;
-			//usleep(5);
 		}
 
 		//WR Enable - H

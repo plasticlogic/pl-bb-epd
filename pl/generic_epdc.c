@@ -28,6 +28,7 @@
 #define LOG_TAG "generic_epdc"
 #include <pl/utils.h>
 #include <ite/it8951.h>
+#include <src/pindef.h>
 
 static void generic_epdc_delete(struct pl_generic_epdc *p);
 static int set_vcom(struct pl_generic_epdc *p, int vcomInMillivolt);
@@ -120,6 +121,11 @@ int do_load_nvm_content(struct pl_generic_epdc *p) {
 
 	uint8_t *buffer = NULL;
 	int bufferSize;
+
+	struct pl_spi *spi = (struct pl_spi *) p->nvm->hw_ref;
+	spi->cs_gpio = FALCON_DISPLAY_NVM_CS;
+
+	p->nvm->hw_ref = spi;
 
 // read NVM content to file
 	p->nvm->read_wfdata(p->nvm, &buffer, &bufferSize);

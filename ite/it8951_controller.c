@@ -310,15 +310,15 @@ static int init_controller(struct pl_generic_controller *controller,
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
 
-	uint8_t data_out[2];
-	uint8_t data_in[40];
+	//uint8_t data_out[2];
+	//uint8_t data_in[40];
 
-	data_out[0] = 0x03;
-	data_out[1] = 0x02;
+	//data_out[0] = 0x03;
+	//data_out[1] = 0x02;
 
-	IT8951WriteData(bus, type, (int) data_out);
-
-	IT8951ReadData(bus, type, (int) data_in);
+//	IT8951WriteData(bus, type, (int) data_out);
+//
+//	IT8951ReadData(bus, type, (int) data_in);
 
 	//does the same again - just for confirmation
 
@@ -577,11 +577,16 @@ static int load_png_image(struct pl_generic_controller *controller,
 	}
 
 	TByte* targetBuf;
-	if (controller->display_scrambling){
+	if (controller->display_scrambling && clear){
+		targetBuf = malloc(controller->xres * controller->yres);
+				memory_padding(scrambledPNG, targetBuf, controller->yres, controller->xres, controller->yres,
+						controller->xres, controller->yoffset, controller->xoffset);
+	}
+	else if (controller->display_scrambling) {
 		targetBuf = malloc(controller->xres * controller->yres);
 		memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
-						controller->xres, controller->yoffset, controller->xoffset);
-	}else {
+				controller->xres, controller->yoffset, controller->xoffset);
+	} else {
 		targetBuf = malloc(width * height);
 		memcpy(targetBuf, scrambledPNG, width * height);
 	}
@@ -604,14 +609,13 @@ static int load_png_image(struct pl_generic_controller *controller,
 	stAreaImgInfo.usX = partialX;
 	stAreaImgInfo.usY = partialY;
 
-	if (controller->display_scrambling){
+	if (controller->display_scrambling) {
 		stAreaImgInfo.usWidth = controller->xres;
-			stAreaImgInfo.usHeight = controller->yres;
-	}else {
+		stAreaImgInfo.usHeight = controller->yres;
+	} else {
 		stAreaImgInfo.usWidth = width;
-			stAreaImgInfo.usHeight = height;
+		stAreaImgInfo.usHeight = height;
 	}
-
 
 	//Load Image from Host to IT8951 Image Buffer
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2

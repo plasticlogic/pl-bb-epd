@@ -725,6 +725,11 @@ int execute_pgm_epdc(int argc, char **argv) {
 
 	stat = switch_hv(1);
 
+	struct pl_spi *spi = (struct pl_spi *) nvm->hw_ref;
+	spi->cs_gpio = FALCON_FIRMWARE_NVM_CS;
+
+	nvm->hw_ref = spi;
+
 	stat = nvm->pgm(nvm, addr, data, len);
 
 	stat = switch_hv(0);

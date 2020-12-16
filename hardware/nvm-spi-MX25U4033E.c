@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <hardware/nvm-spi-MX25U4033E.h>
 #include <pl/assert.h>
+#include <src/pindef.h>
 
 #define LOG_TAG "nvm_MX25U4033E"
 #include <pl/utils.h>
@@ -106,6 +107,9 @@ static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr, uint8
 		bytes_to_transfer -= transferChunkSize;
 	}
 
+//	if(spi->cs_gpio == FALCON_FIRMWARE_NVM_CS)
+//		spi->cs_gpio = FALCON_DISPLAY_NVM_CS;
+
 	return stat;
 }
 
@@ -124,6 +128,8 @@ static int nvm_MX25U4033E_spi_pgm(struct pl_nvm * nvm, unsigned int addr, uint8_
 	uint8_t buf = 0;
 
 	struct pl_spi *spi = (struct pl_spi *) nvm->hw_ref;
+
+//	spi->cs_gpio = FALCON_FIRMWARE_NVM_CS;
 
 	// open spi
 	stat = spi->open(spi);
