@@ -13,7 +13,6 @@
 #include <pl/scramble.h>
 #include <ite/it8951.h>
 #define LOG_TAG "it8951"
-#include "pl/utils.h"
 #include <pl/spi.h>
 #include <pl/spi_hrdy.h>
 #include <sys/time.h>
@@ -49,6 +48,10 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type,
 	IT8951WaitForReady(bus, type);
 	pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(bus, type,
 			sizeof(I80IT8951DevInfo) / 2);
+
+	IT8951WaitForReady(bus, type);
+
+	//LOG("I'm here !");
 
 	//transfer info between pointers
 	pBuf_->usPanelW = pstDevInfo->usPanelW;
@@ -140,7 +143,7 @@ int IT8951_update_reg(pl_generic_interface_t *bus, enum interfaceType *type,
 void IT8951WaitForDisplayReady(pl_generic_interface_t *bus,
 		enum interfaceType *type) {
 	//Check IT8951 Register LUTAFSR => NonZero ¡V Busy, 0 - Free
-	while (IT8951ReadReg(bus, type, LUTAFSR))
+	while (IT8951ReadReg(bus, type, DISPLAY_REG_BASE + 0x224))
 		;
 }
 
@@ -181,45 +184,17 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 		IT8951WriteDataBurst(bus, type, pusFrameBuf,
 				pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight);
+		j = pstAreaImgInfo->usHeight;
 	}
 
 	gettimeofday(&tStop, NULL);
 
 	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
 			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
+	//printf("Height: %d --> Time: %f\n", (int) j, tTotal);
 
 	//Send Load Img End Command
 	IT8951LoadImgEnd(bus, type);
-
-	//if width or height over than 2048 use memburst write instead, only allow 8bpp data
-	// IT8951MemBurstWriteProc(pstLdImgInfo->ulImgBufBaseAddr,  pstAreaImgInfo->usWidth/2* pstAreaImgInfo->usHeight,   pusFrameBuf); //MemAddr, Size, Framebuffer address
-
-	IT8951WaitForReady(bus, type);
-
-	// Image Update for more than 2048 data pieces TODO: Why is this not working ????
-//	TWord usArg[4];
-//	//Setting Arguments for Memory Burst Write
-//	usArg[0] = (TWord) (pstLdImgInfo->ulImgBufBaseAddr & 0x0000FFFF); //addr[15:0]
-//	usArg[1] = (TWord) ((pstLdImgInfo->ulImgBufBaseAddr >> 16) & 0x0000FFFF); //addr[25:16]
-//	usArg[2] = (TWord) (pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight
-//			& 0x0000FFFF); //Cnt[15:0]
-//	usArg[3] = (TWord) ((pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight
-//			>> 16) & 0x0000FFFF); //Cnt[25:16]
-//
-//	IT8951SendCmdArg(bus, type, IT8951_TCON_MEM_BST_WR, usArg, 4);
-//
-//	for (i = 0; i < pstAreaImgInfo->usWidth / 2 * pstAreaImgInfo->usHeight;
-//			i++) {
-//		IT8951WriteData(bus, type, pusFrameBuf[i]);
-//	}
-//
-//	gettimeofday(&tStop, NULL);
-//
-//	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-//			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-//	printf("Height: %d --> Time: %f\n", (int) j, tTotal);
-
 }
 
 //-----------------------------------------------------------
@@ -292,7 +267,7 @@ void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type,
 		TWord usData) {
 	//wait for ready
 
-	IT8951WaitForReady(bus, type);
+	//IT8951WaitForReady(bus, type);
 
 	//write data
 	gpio_i80_16b_data_out(bus, type, usData);
@@ -362,6 +337,8 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		//CS
 		gpio->set(i80->hcs_n_gpio, 0);
 
+		//gpio->set(i80->hwe_n_gpio, 0);
+
 		struct timeval tStop, tStart; // time variables
 		float tTotal;
 
@@ -374,13 +351,15 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		gettimeofday(&tStop, NULL);
 		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
 				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-		printf("Data Transmission --> Time: %f\n", tTotal);
+		//printf("Data Transmission --> Time: %f\n", tTotal);
 
 		//wait for ready
 		IT8951WaitForReady(bus, type);
 
 		//CS
 		gpio->set(i80->hcs_n_gpio, 1);
+
+		gpio->set(i80->hwe_n_gpio, 0);
 	} else {
 		//error
 	}
@@ -393,7 +372,7 @@ TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type,
 		int size) {
 	TWord* usData;
 	//wait for ready
-	IT8951WaitForReady(bus, type);
+	//IT8951WaitForReady(bus, type);
 
 	usData = gpio_i80_16b_data_in(bus, type, size);
 
@@ -525,6 +504,39 @@ void IT8951LoadImgStart(pl_generic_interface_t *bus, enum interfaceType *type,
 	IT8951SendCmdArg(bus, type, IT8951_TCON_LD_IMG, usArg, 1);
 }
 
+void IT8951MemBurstWriteProc(pl_generic_interface_t *bus,
+		enum interfaceType *type, TDWord ulMemAddr, TDWord ulWriteSize,
+		TWord *pSrcBuf) {
+
+	TDWord i;
+
+	//Send Burst Write Start Cmd and Args
+	IT8951MemBurstWrite(bus, type, ulMemAddr, ulWriteSize);
+//
+//	//Burst Write Data
+	for (i = 0; i < ulWriteSize; i++) {
+		gpio_i80_16b_data_out(bus, type, *pSrcBuf);
+	}
+//
+//	//Send Burst End Cmd
+	gpio_i80_16b_cmd_out(bus, type, IT8951_TCON_MEM_BST_END);
+}
+
+//-----------------------------------------------------------
+//Host Cmd 8 - MEM_BST_WR
+//-----------------------------------------------------------
+void IT8951MemBurstWrite(pl_generic_interface_t *bus, enum interfaceType *type,
+		TDWord ulMemAddr, TDWord ulWriteSize) {
+	TWord usArg[4];
+	//Setting Arguments for Memory Burst Write
+	usArg[0] = (TWord) (ulMemAddr & 0x0000FFFF); //addr[15:0]
+	usArg[1] = (TWord) ((ulMemAddr >> 16) & 0x0000FFFF); //addr[25:16]
+	usArg[2] = (TWord) (ulWriteSize & 0x0000FFFF); //Cnt[15:0]
+	usArg[3] = (TWord) ((ulWriteSize >> 16) & 0x0000FFFF); //Cnt[25:16]
+	//Send Cmd and Arg
+	IT8951SendCmdArg(bus, type, IT8951_TCON_MEM_BST_WR, usArg, 4);
+}
+
 //-----------------------------------------------------------
 //Host Cmd 12 - LD_IMG_END
 //-----------------------------------------------------------
@@ -582,10 +594,12 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
 		gpio->set(i80->hcs_n_gpio, 0);
 		//WR Enable
 		//GPIO_SET_L(WEN);
+		gpio->set(i80->hwe_n_gpio, 0);
 		//Set Data output (Parallel output request)
 		//See your host setting of GPIO
 		iResult = write(i80->fd, &usCmd, 1);
 
+		gpio->set(i80->hwe_n_gpio, 1);
 		//CS-H
 		//GPIO_SET_H(CS);
 		gpio->set(i80->hcs_n_gpio, 1);
@@ -653,14 +667,14 @@ static void gpio_i80_16b_data_out(pl_generic_interface_t *bus,
 
 		//WR Enable
 		//GPIO_SET_L(WEN);
-		//gpio->set(i80_ref->hwe_n_gpio, 0);
+		gpio->set(i80->hwe_n_gpio, 0);
 		//Set 16 bits Bus Data
 		//See your host setting of GPIO
 		iResult = write(i80->fd, &usData, 1);
 
 		//WR Enable - H
 		//GPIO_SET_H(WEN);
-		//gpio->set(i80_ref->hwe_n_gpio, 1);
+		gpio->set(i80->hwe_n_gpio, 1);
 		//CS-H
 		//GPIO_SET_H(CS);
 		gpio->set(i80->hcs_n_gpio, 1);
@@ -734,7 +748,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 
 		//RD Enable
 		//GPIO_SET_L(REN);
-		//gpio->set(i80_ref->hrd_n_gpio, 0);
+		gpio->set(i80->hrd_n_gpio, 0);
 		//Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
 		//See your host setting of GPIO
 		//usData = GPIO_I80_Bus[16];
@@ -742,14 +756,14 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 		//
 		int i = 0;
 		for (i = 0; i < size; i++) {
-			IT8951WaitForReady(bus, type);
+
+			usleep(1000);
 			read(i80->fd, &usData, 1);
 			iResult[i] = usData;
 		}
-
 		//WR Enable - H
 		//GPIO_SET_H(WEN);
-		//gpio->set(i80_ref->hrd_n_gpio, 1);
+		gpio->set(i80->hwe_n_gpio, 1);
 		//CS-H
 		//GPIO_SET_H(CS);
 		gpio->set(i80->hcs_n_gpio, 1);

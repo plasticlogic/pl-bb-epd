@@ -189,8 +189,8 @@ struct CmdLineOptions supportedOperations[] = { { "-start_epdc",
 		"shows a slidshow of .png images", execute_slideshow,
 		printHelp_slideshow },
 		{ "-fill", "fill the screen with a defined greylevel", execute_fill,
-				printHelp_fill },
-//		{"-count",					"shows a counting number",					execute_counter,				printHelp_counter},
+				printHelp_fill }, { "-count", "shows a counting number",
+				execute_counter, printHelp_counter },
 #ifdef INTERNAL_USAGE
 		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd,
 				printHelp_send_cmd }, { "-write_reg",
@@ -465,6 +465,7 @@ int execute_update_image(int argc, char **argv) {
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
 	}
+
 	return stat;
 }
 
@@ -721,16 +722,28 @@ int execute_pgm_epdc(int argc, char **argv) {
 
 	unsigned int addr = 0x00;
 
+	int isFirmware = atoi(argv[3]);
+
 	int len = readBinaryFile(argv[2], &data);
 
-	stat = switch_hv(1);
-
 	struct pl_spi *spi = (struct pl_spi *) nvm->hw_ref;
-	spi->cs_gpio = FALCON_FIRMWARE_NVM_CS;
+
+	if (isFirmware == 1) {
+		spi->cs_gpio = FALCON_FIRMWARE_NVM_CS;
+		LOG("Using Firmware CS: %i \n", spi->cs_gpio);
+	} else {
+		spi->cs_gpio = FALCON_DISPLAY_NVM_CS;
+		LOG("Using Display CS: %i \n", spi->cs_gpio);
+		stat = switch_hv(1);
+	}
 
 	nvm->hw_ref = spi;
 
 	stat = nvm->pgm(nvm, addr, data, len);
+
+	spi->cs_gpio = FALCON_DISPLAY_NVM_CS;
+
+	nvm->hw_ref = spi;
 
 	stat = switch_hv(0);
 
@@ -822,7 +835,7 @@ int start_epdc(int load_nvm_content, int execute_clear) {
 	}
 
 	if (execute_clear != 1)
-			stat = switch_hv(0);
+		stat = switch_hv(0);
 
 	return stat;
 }
@@ -908,7 +921,7 @@ int set_temperature(float temperature) {
 }
 
 int get_vcom(void) {
-	LOG("VCOM: %i", epdc->get_vcom(epdc));
+	printf("VCOM: %i\n", epdc->get_vcom(epdc));
 	return 0;
 }
 
@@ -969,6 +982,11 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		int vcomSwitchEnable, int updateCount, int waitTime) {
 	int cnt = 0;
 	int stat;
+
+	struct timeval tStop, tStart; // time variables
+	float tTotal;
+	gettimeofday(&tStart, NULL);
+
 	LOG("path: %s", path);
 
 	int wfId = pl_generic_controller_get_wfid(epdc->controller, wfID);
@@ -985,13 +1003,13 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	if (stat < 0)
 		return stat;
 
-	if (epdc->hv->vcomSwitch != NULL) {
-		if (vcomSwitchEnable == 0) {
-			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 1);
-		} else {
-			epdc->hv->vcomSwitch->disable_bypass_mode(epdc->hv->vcomSwitch);
-		}
-	}
+//	if (epdc->hv->vcomSwitch != NULL) {
+//		if (vcomSwitchEnable == 0) {
+//			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 1);
+//		} else {
+//			epdc->hv->vcomSwitch->disable_bypass_mode(epdc->hv->vcomSwitch);
+//		}
+//	}
 
 	for (cnt = 0; cnt < updateCount; cnt++) {
 		stat = epdc->update(epdc, wfId, mode, NULL);
@@ -1001,11 +1019,16 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		usleep(waitTime * 1000);
 	}
 
-	if (epdc->hv->vcomSwitch != NULL) {
-		if (vcomSwitchEnable == 0) {
-			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 0);
-		}
-	}
+	gettimeofday(&tStop, NULL);
+	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+	printf("Time: %f\n", tTotal);
+
+//	if (epdc->hv->vcomSwitch != NULL) {
+//		if (vcomSwitchEnable == 0) {
+//			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 0);
+//		}
+//	}
 
 	return 0;
 }
@@ -1108,7 +1131,7 @@ int fill(uint8_t gl, uint8_t wfid, int update_mode) {
 	stat = epdc->controller->fill(epdc->controller, &a, gl);
 	if (stat < 0)
 		return stat;
-	stat = epdc->controller->load_image(epdc->controller, NULL, NULL, 0, 0 );
+	stat = epdc->controller->load_image(epdc->controller, NULL, NULL, 0, 0);
 	stat = epdc->update(epdc, wfid, update_mode, &a);
 	return stat;
 }
@@ -1353,6 +1376,11 @@ int slideshow(const char *path, const char* wf, int waittime) {
 int show_image(const char *dir, const char *file, int wfid) {
 	char path[256];
 	int stat = 0;
+
+	struct timeval tStop, tStart; // time variables
+	float tTotal;
+	gettimeofday(&tStart, NULL);
+
 	LOG("Image: %s %s", dir, file);
 	if (wfid <= -1 || wfid > 14) {
 		wfid = 2;	// = pl_generic_controller_get_wfid(epdc->controller, wfID);
@@ -1376,6 +1404,10 @@ int show_image(const char *dir, const char *file, int wfid) {
 	}
 	stat = epdc->update(epdc, wfid, 0, NULL);
 
+	gettimeofday(&tStop, NULL);
+	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+	printf("Time: %f\n", tTotal);
 	return stat;
 }
 

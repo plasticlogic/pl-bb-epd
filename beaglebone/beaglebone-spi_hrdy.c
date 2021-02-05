@@ -82,18 +82,16 @@ static int spi_hrdy_init(pl_spi_hrdy_t *psSPI) {
 			psSPI->mSpi->channel);
 
 	int cnt = 0;
-	if(psSPI->fd <= 0)
-	{
+	if (psSPI->fd <= 0) {
 		while ((psSPI->fd = open(userlandSpiDevice, O_RDWR, 0)) == -1) {
 			cnt++;
 			printf("Try to open spi %d\n", cnt);
-			usleep(100000);
+			//usleep(10000);
 
 			if (cnt >= 100)
 				break;
 		}
 	}
-	//printf("got fd %d\n", psSPI->fd);
 
 	if (psSPI->fd == -1) {
 		char errorStr[bufferSize];
@@ -102,13 +100,6 @@ static int spi_hrdy_init(pl_spi_hrdy_t *psSPI) {
 		fprintf( stderr, errorStr);
 		return FALSE;
 	}
-	//	if ( ioctl( psSPI->fd, SPI_IOC_RD_MODE, &tmp8 ) == -1 )
-//  {
-//		fprintf( stderr, "Failed to get SPI_IOC_RD_MODE\n" );
-//		return FALSE;
-//	}
-//	psSPI->mSpi->mode = tmp8;
-//	psSPI->mSpi->mode = SPI_HRDY_TRANSFER_MODE;
 
 	if (ioctl(psSPI->fd, SPI_IOC_RD_BITS_PER_WORD, &tmp8) == -1) {
 		fprintf( stderr, "Failed to get SPI_IOC_RD_BITS_PER_WORD\n");
@@ -116,13 +107,6 @@ static int spi_hrdy_init(pl_spi_hrdy_t *psSPI) {
 	}
 	psSPI->mSpi->bpw = tmp8;
 
-//	if ( ioctl( psSPI->fd, SPI_hrdy_TRANSFER_RATE_IN_HZ, &tmp32 ) == -1)
-//  {
-//		fprintf( stderr, "Failed to get SPI_IOC_RD_MAX_SPEED_HZ\n" );
-//		return FALSE;
-//	}
-//	psSPI->mSpi->msh = tmp32;
-	//psSPI->mSpi->msh = 16000000; //SPI_HRDY_TRANSFER_RATE_IN_HZ;
 	psSPI->mSpi->msh = 12000000; //SPI_HRDY_TRANSFER_RATE_IN_HZ;
 
 	return TRUE;
@@ -154,14 +138,18 @@ static int spi_hrdy_close(struct pl_spi_hrdy *psSPI) {
  */
 int wait_for_ready(struct pl_spi_hrdy *p) {
 	struct pl_gpio * gpio = (struct pl_gpio *) p->hw_ref;
-	int i = 0;
+	int timeout = 0;
+	timeout = WAIT_FOR_READY_TIMEOUT_SPI_HRDY;
 
-	while (i++ < WAIT_FOR_READY_TIMEOUT_SPI_HRDY) {
-		if (gpio->get(p->hrdy_gpio) == 1) {
-			return 0;
-		}
+	while (timeout-- && !gpio->get(p->hrdy_gpio))
+		;
+
+	if (timeout == 0) {
+		return -1;
+	} else {
+		return 0;
 	}
-	return -1;
+
 }
 
 /**
@@ -266,7 +254,7 @@ static int spi_hrdy_write_bytes(struct pl_spi_hrdy *psSPI, uint8_t *buff,
 	// MAX_SPI_PER_TRANSFER bytes.
 	i = 0;
 	while ((i < MAX_SPI_TRANSFER_BUFFERS_hrdy) && (size > 0)) {
-		wait_for_ready(spi);
+		//wait_for_ready(spi);
 		boLast = (size < MAX_SPI_BYTES_PER_TRANSFER_hrdy);
 		psTrans = &asTrans[i];
 		psTrans->tx_buf = (unsigned long) pbBuffer;

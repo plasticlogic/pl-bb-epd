@@ -31,7 +31,7 @@ typedef struct
 
 }I80IT8951DevInfo;
 
-#define WAIT_FOR_READY_TIMEOUT_I80 10000
+#define WAIT_FOR_READY_TIMEOUT_I80 100000
 
 struct pl_gpio;
 

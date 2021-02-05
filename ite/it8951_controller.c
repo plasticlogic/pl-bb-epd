@@ -121,32 +121,32 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		partialY = 0;
 	}
 
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0B); // Power Down Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x00); //DE ????
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x0B); // Power Down Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, 0x00); //DE ????
+//
+//	//IT8951WaitForReady(bus, type);
+//
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x0C); // Power Down Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, 0x00); //
+//
+//	//IT8951WaitForReady(bus, type);
+//
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x0A); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, 0x00); //
 
-	IT8951WaitForReady(bus, type);
-
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0C); // Power Down Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x00); //
-
-	IT8951WaitForReady(bus, type);
-
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0A); // Power Up Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x00); //
-
-	IT8951WaitForReady(bus, type);
+//IT8951WaitForReady(bus, type);
 
 //Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
@@ -157,9 +157,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
 
 	//Wait until the Update has ended
-	IT8951WaitForDisplayReady(bus, type);
+	//IT8951WaitForDisplayReady(bus, type);
 
-	printf("PMIC Register 7 after update: ");
+	//printf("PMIC Register 7 after update: ");
 
 	regSetting_t reg;
 	reg.addr = (int) IT8951_TCON_BYPASS_I2C;
@@ -172,9 +172,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	reg7[3] = 0x01;
 	reg.val = reg7;
 
-	send_cmd(controller, reg);
+	//send_cmd(controller, reg);
 
-	printf("PMIC Register 8 after update: ");
+	//printf("PMIC Register 8 after update: ");
 
 	regSetting_t reg2;
 	reg2.addr = IT8951_TCON_BYPASS_I2C;
@@ -187,39 +187,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	reg8[3] = 0x01;
 	reg2.val = reg8;
 
-	send_cmd(controller, reg2);
+	//send_cmd(controller, reg2);
 
-//	printf("PMIC Register B after update: ");
-//
-//	regSetting_t reg3;
-//	reg3.addr = IT8951_TCON_BYPASS_I2C;
-//	reg3.valCount = 4;
-//	uint16_t *regb;
-//	regb = malloc(reg3.valCount * sizeof(uint16_t));
-//	regb[0] = 0x00;
-//	regb[1] = 0x68;
-//	regb[2] = 0x0B;
-//	regb[3] = 0x01;
-//	reg3.val = regb;
-//
-//	send_cmd(controller, reg3);
-//
-//	printf("PMIC Register C after update: ");
-//
-//	regSetting_t reg4;
-//	reg4.addr = IT8951_TCON_BYPASS_I2C;
-//	reg4.valCount = 4;
-//	uint16_t *regc;
-//	regc = malloc(reg4.valCount * sizeof(uint16_t));
-//	regc[0] = 0x00;
-//	regc[1] = 0x68;
-//	regc[2] = 0x0C;
-//	regc[3] = 0x01;
-//	reg4.val = regc;
-//
-//	send_cmd(controller, reg4);
-//
-//	IT8951WaitForReady(bus, type);
+	//IT8951WaitForReady(bus, type);
 
 	return 0;
 }
@@ -310,19 +280,7 @@ static int init_controller(struct pl_generic_controller *controller,
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
 
-	//uint8_t data_out[2];
-	//uint8_t data_in[40];
-
-	//data_out[0] = 0x03;
-	//data_out[1] = 0x02;
-
-//	IT8951WriteData(bus, type, (int) data_out);
-//
-//	IT8951ReadData(bus, type, (int) data_in);
-
-	//does the same again - just for confirmation
-
-	I80IT8951DevInfo devInfo;
+	//I80IT8951DevInfo devInfo;
 	GetIT8951SystemInfo(bus, type, &devInfo);
 
 	return 0;
@@ -339,7 +297,8 @@ static int configure_update(struct pl_generic_controller *controller, int wfid,
 	modeToUse = mode;
 
 	//Set to Enable I80 Packed mode
-	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
+	//IT8951WriteReg(bus, type, I80CPCR, 0x0001);
+	//IT8951WaitForReady(bus, type);
 
 	return 0;
 }
@@ -433,13 +392,17 @@ static int load_png_image(struct pl_generic_controller *controller,
 	if (devInfo.usImgBufAddrH == NULL)
 		GetIT8951SystemInfo(bus, type, &devInfo);
 
+//	devInfo.usPanelH = 960;
+//	devInfo.usPanelW = 1280;
+//	devInfo.usImgBufAddrL = 0x2a70;
+//	devInfo.usImgBufAddrH = 0x12;
+
 	//Get Image Buffer Address of IT8951
 	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 
 	//Set to Enable I80 Packed mode
 	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
 	//-------------------------------------------------------------------
-
 	controller->yres = devInfo.usPanelH;
 	controller->xres = devInfo.usPanelW;
 
@@ -544,9 +507,12 @@ static int load_png_image(struct pl_generic_controller *controller,
 	TByte* scrambledPNG;
 	if (controller->cfa_overlay.r_position == -1 || clear) {
 		if (controller->display_scrambling) {
-			scrambledPNG = malloc(controller->xres * controller->yres);
+			scrambledPNG = malloc(
+			max(height,
+					controller->yres) * max(width, controller->xres));
 			scramble_array(gpFrameBuf, scrambledPNG, &height, &width,
 					controller->display_scrambling);
+
 		} else {
 			scrambledPNG = malloc(width * height);
 
@@ -577,15 +543,33 @@ static int load_png_image(struct pl_generic_controller *controller,
 	}
 
 	TByte* targetBuf;
-	if (controller->display_scrambling && clear){
+	if (controller->display_scrambling && clear) {
 		targetBuf = malloc(controller->xres * controller->yres);
-				memory_padding(scrambledPNG, targetBuf, controller->yres, controller->xres, controller->yres,
-						controller->xres, controller->yoffset, controller->xoffset);
-	}
-	else if (controller->display_scrambling) {
-		targetBuf = malloc(controller->xres * controller->yres);
-		memory_padding(scrambledPNG, targetBuf, height, width, controller->yres,
-				controller->xres, controller->yoffset, controller->xoffset);
+		memory_padding(scrambledPNG, targetBuf, controller->yres,
+				controller->xres, controller->yres, controller->xres,
+				controller->yoffset, controller->xoffset);
+	} else if (controller->display_scrambling) {
+		targetBuf = malloc(
+		max(height,
+				controller->yres) * max(width, controller->xres));
+
+		if (area == NULL) {
+			memory_padding(scrambledPNG, targetBuf, height, width,
+					controller->yres, controller->xres, controller->yoffset,
+					controller->xoffset);
+		} else {
+			area->width = width;
+			area->height = height;
+			memory_padding_area(scrambledPNG, targetBuf, height, width,
+					controller->yoffset, controller->xoffset, area, partialY,
+					partialX);
+
+//			targetBuf = malloc(width * height);
+//					memcpy(targetBuf, scrambledPNG, width * height);
+		}
+
+		//}
+
 	} else {
 		targetBuf = malloc(width * height);
 		memcpy(targetBuf, scrambledPNG, width * height);
@@ -617,20 +601,31 @@ static int load_png_image(struct pl_generic_controller *controller,
 		stAreaImgInfo.usHeight = height;
 	}
 
+//	struct timeval tStop, tStart; // time variables
+//	float tTotal;
+//	gettimeofday(&tStart, NULL);
+
 	//Load Image from Host to IT8951 Image Buffer
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
+	//IT8951SetImgBufBaseAddr(bus, type, gulImgBufAddr);
+	//IT8951MemBurstWriteProc(bus, type, gulImgBufAddr, 640,
+	//		(TDWord)targetBuf);
 	//Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
 	//IT8951DisplayArea(i80, 0,0, devInfo.usPanelW, devInfo.usPanelH, 2);
+
+//	gettimeofday(&tStop, NULL);
+//
+//	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+//			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+//	printf("Time: %f\n", tTotal);
 
 	if (scrambledPNG)
 		free(scrambledPNG);
 
-	if (gpFrameBuf)
-		free(gpFrameBuf);
-
-//	if (fillBuffer)
-//		free(fillBuffer);
-
+	if (controller->cfa_overlay.r_position == -1) {
+		if (gpFrameBuf)
+			free(gpFrameBuf);
+	}
 	return 0;
 }
 
@@ -682,7 +677,7 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting) {
 		IT8951WriteData(interface, type, setting.val[i]);
 
 	//sleep(1);
-	usleep(8000);
+	//usleep(8000);
 
 	if (setting.val[0] == 0x00) {
 		TWord* value = IT8951ReadData(interface, type, 1);  //read data
@@ -719,7 +714,7 @@ static int set_temp_mode(struct pl_generic_controller *p,
 		//usleep(250);
 
 		IT8951WriteDataBurst(interface, type, dataTemp, 2);
-		IT8951WaitForReady(interface, type);
+		//IT8951WaitForReady(interface, type);
 		stat = 1;
 		break;
 	case PL_EPDC_TEMP_EXTERNAL:
@@ -747,9 +742,9 @@ static int update_temp(struct pl_generic_controller *controller) {
 	int stat = -1;
 	int newTemp = 37;
 
-	//LOG("Set Temperature to %i ", decimalNumber + " to %i " + hexadecimalNumber);
 	if (controller->temp_mode == PL_EPDC_TEMP_MANUAL) {
 		newTemp = controller->manual_temp;
+		LOG("Set Temperature to %i ", newTemp);
 	} else if (controller->temp_mode == PL_EPDC_TEMP_EXTERNAL) {
 
 		IT8951WaitForReady(interface, type);
@@ -785,7 +780,9 @@ static int update_temp(struct pl_generic_controller *controller) {
 	dataTemp[0] = 0x01;
 	dataTemp[1] = newTemp;  //37   //controller->manual_temp;
 
-	IT8951WriteDataBurst(interface, type, dataTemp, 2);
+	//IT8951WriteDataBurst(interface, type, dataTemp, 2);
+	IT8951WriteData(interface, type, dataTemp[0]);
+	IT8951WriteData(interface, type, dataTemp[1]);
 	IT8951WaitForReady(interface, type);
 
 	stat = 1;
@@ -841,6 +838,6 @@ static int fill(struct pl_generic_controller *controller,
 	//Write pixel 0xF0(White) to Frame Buffer
 	memset(fillBuffer, grey, devInfo.usPanelW * devInfo.usPanelH);
 
-	return 1;
+	return 0;
 }
 

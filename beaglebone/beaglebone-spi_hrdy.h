@@ -34,7 +34,7 @@ typedef unsigned long TDWord; //4 bytes
 #define SPI_WORD_TYPE                 uint16_t
 #define SPI_BITS_PER_WORD             ( 9 )
 #endif
-#define WAIT_FOR_READY_TIMEOUT_SPI_HRDY 10000
+#define WAIT_FOR_READY_TIMEOUT_SPI_HRDY 100000
 
 
 struct pl_gpio;

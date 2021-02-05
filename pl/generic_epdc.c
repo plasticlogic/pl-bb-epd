@@ -442,7 +442,19 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 //		send_cmd(p, reg_t);
 
 	if (load_nvm_content) {
-		do_load_nvm_content(p);
+//		stat = do_load_nvm_content(p);
+		if (do_load_nvm_content(p) < 0) {
+			LOG("Loading wflib: %s", controller->waveform_file_path);
+			stat = controller->load_wflib(controller,
+					controller->waveform_file_path);
+			if (stat < 0)
+				return stat;
+
+			LOG("Setting vcom: %d", p->default_vcom);
+			stat = p->set_vcom(p, p->default_vcom);
+			if (stat < 0)
+				return stat;
+		}
 	} else {
 		LOG("Loading wflib: %s", controller->waveform_file_path);
 		stat = controller->load_wflib(controller,
@@ -474,7 +486,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 //		send_cmd(p, reg_t);
 #endif
 
-return stat;
+	return stat;
 
 }
 
@@ -487,10 +499,10 @@ return stat;
  */
 static int set_vcom(struct pl_generic_epdc *p, int vcomInMillivolt) {
 
-struct pl_vcom_config *vcom_config = p->hv->vcomConfig;
+	struct pl_vcom_config *vcom_config = p->hv->vcomConfig;
 
-assert(vcom_config != NULL);
-return vcom_config->set_vcom(vcom_config, vcomInMillivolt);
+	assert(vcom_config != NULL);
+	return vcom_config->set_vcom(vcom_config, vcomInMillivolt);
 }
 
 /**
@@ -503,12 +515,12 @@ return vcom_config->set_vcom(vcom_config, vcomInMillivolt);
  */
 static int read_register(struct pl_generic_epdc *p, const regSetting_t* setting) {
 
-assert(p != NULL);
+	assert(p != NULL);
 
-pl_generic_controller_t *controller = p->controller;
-assert(controller != NULL);
+	pl_generic_controller_t *controller = p->controller;
+	assert(controller != NULL);
 
-return controller->read_register(controller, setting);
+	return controller->read_register(controller, setting);
 }
 
 /**
@@ -520,13 +532,13 @@ return controller->read_register(controller, setting);
  * @return success indicator: 0 if passed, otherwise <> 0
  */
 static int write_register(struct pl_generic_epdc *p, const regSetting_t setting,
-	const uint32_t bitmask) {
-assert(p != NULL);
+		const uint32_t bitmask) {
+	assert(p != NULL);
 
-pl_generic_controller_t *controller = p->controller;
-assert(controller != NULL);
+	pl_generic_controller_t *controller = p->controller;
+	assert(controller != NULL);
 
-return controller->write_register(controller, setting, bitmask);
+	return controller->write_register(controller, setting, bitmask);
 }
 
 /**
@@ -537,12 +549,12 @@ return controller->write_register(controller, setting, bitmask);
  * @return success indicator: 0 if passed, otherwise <> 0
  */
 static int send_cmd(struct pl_generic_epdc *p, const regSetting_t setting) {
-assert(p != NULL);
+	assert(p != NULL);
 
-pl_generic_controller_t *controller = p->controller;
-assert(controller != NULL);
+	pl_generic_controller_t *controller = p->controller;
+	assert(controller != NULL);
 
-return controller->send_cmd(controller, setting);
+	return controller->send_cmd(controller, setting);
 }
 
 /**
@@ -555,60 +567,63 @@ return controller->send_cmd(controller, setting);
  * @return success indicator: 0 if passed, otherwise <> 0
  */
 static int generic_update(struct pl_generic_epdc *p, int wfID,
-	enum pl_update_mode mode, const struct pl_area *area) {
+		enum pl_update_mode mode, const struct pl_area *area) {
 
-assert(p != NULL);
-pl_generic_controller_t *controller = p->controller;
-pl_hv_t *hv = p->hv;
+	assert(p != NULL);
+	pl_generic_controller_t *controller = p->controller;
+	pl_hv_t *hv = p->hv;
 //struct timespec t;
 //start_stopwatch(&t);
-assert(controller != NULL);
-assert(hv != NULL);
+	assert(controller != NULL);
+	assert(hv != NULL);
 
-int nowait = 0;
-if (mode > 3) {
-	mode -= 4;
-	nowait = 1;
-}
+	int nowait = 0;
+	if (mode > 3) {
+		mode -= 4;
+		nowait = 1;
+	}
 
-int stat = 0;
-//stat |= controller->wait_update_end(controller);
-if (controller->temp_mode != PL_EPDC_TEMP_MANUAL) {
-	if (controller->update_temp != NULL)
-		stat |= controller->update_temp(controller);
-}
+	int stat = 0;
+	//stat |= controller->wait_update_end(controller);
+
+	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL) {
+		if (controller->update_temp != NULL)
+			stat |= controller->update_temp(controller);
+	}
+
+	stat |= switch_hvs_on(hv);
 #if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
+	LOG("%s: stat: %i", __func__, stat);
 #endif
 //read_stopwatch(&t,"update_temp",1);
-stat |= controller->configure_update(controller, wfID, mode, area);
+	stat |= controller->configure_update(controller, wfID, mode, area);
 #if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
+	LOG("%s: stat: %i", __func__, stat);
 #endif
 //read_stopwatch(&t,"configure_update",1);
-if (!nowait) {
-	stat |= switch_hvs_on(hv);
-}
+//	if (!nowait) {
+		//stat |= switch_hvs_on(hv);
+	//}
 //read_stopwatch(&t,"switch_hvs_on",1);
-stat |= controller->trigger_update(controller);
+	stat |= controller->trigger_update(controller);
 #if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
+	LOG("%s: stat: %i", __func__, stat);
 #endif
 //read_stopwatch(&t,"trigger_update",1);
-if (!nowait) {
-	stat |= controller->wait_update_end(controller);
+//	if (!nowait) {
+		stat |= controller->wait_update_end(controller);
 #if VERBOSE
-	LOG("%s: stat: %i", __func__, stat);
+		LOG("%s: stat: %i", __func__, stat);
 #endif
-	//read_stopwatch(&t,"cwait_update_end",1);
-	//sleep(10);
-	stat |= switch_hvs_off(hv);
+//read_stopwatch(&t,"cwait_update_end",1);
+//sleep(10);
+		stat |= switch_hvs_off(hv);
 #if VERBOSE
-	LOG("%s: stat: %i", __func__, stat);
+		LOG("%s: stat: %i", __func__, stat);
 #endif
-	//read_stopwatch(&t,"switch_hvs_off",1);
-}
-return stat;
+//read_stopwatch(&t,"switch_hvs_off",1);
+	//}
+	return stat;
 }
 
 /**
@@ -618,54 +633,54 @@ return stat;
  * @return success indicator: 0 if passed, otherwise <> 0.
  */
 static int do_clear_update(struct pl_generic_epdc *p) {
-assert(p != NULL);
-assert(p->controller != NULL);
+	assert(p != NULL);
+	assert(p->controller != NULL);
 
-pl_generic_controller_t *controller = p->controller;
-pl_hv_t *hv = p->hv;
+	pl_generic_controller_t *controller = p->controller;
+	pl_hv_t *hv = p->hv;
 
-int stat = 0;
+	int stat = 0;
 
-if (p->controller->clear_update == NULL) {
-	LOG("Warning - clear update not supported...");
-	return 0;
-}
+	if (p->controller->clear_update == NULL) {
+		LOG("Warning - clear update not supported...");
+		return 0;
+	}
 
-if (controller->temp_mode != PL_EPDC_TEMP_MANUAL) {
-	if (controller->update_temp != NULL)
-		stat |= controller->update_temp(controller);
+	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL) {
+		if (controller->update_temp != NULL)
+			stat |= controller->update_temp(controller);
+#if VERBOSE
+		LOG("%s: stat: %i", __func__, stat);
+#endif
+	}
+
+	stat = p->controller->fill(p->controller, NULL, 0xFF);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-}
+	if (stat < 0)
+		return stat;
 
-stat = p->controller->fill(p->controller, NULL, 0xFF);
+	stat |= switch_hvs_on(hv);
 #if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
+	LOG("%s: stat: %i", __func__, stat);
 #endif
-if (stat < 0)
+
+	stat |= controller->clear_update(controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	stat |= controller->wait_update_end(controller);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+
+	stat |= switch_hvs_off(hv);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+
 	return stat;
-
-stat |= switch_hvs_on(hv);
-#if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
-#endif
-
-stat |= controller->clear_update(controller);
-#if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
-#endif
-stat |= controller->wait_update_end(controller);
-#if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
-#endif
-
-stat |= switch_hvs_off(hv);
-#if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
-#endif
-
-return stat;
 }
 
 // -----------------------------------------------------------------------------
@@ -680,33 +695,33 @@ return stat;
  */
 static int unpack_nvm_content(uint8_t *buffer, int bufferSize) {
 
-char command[200];
-const char *filename = "/tmp/dummy.nvm";
-errno = 0;
-FILE *fd = fopen(filename, "w");
-int n = fwrite(buffer, sizeof(uint8_t), bufferSize, fd);
-if (n != bufferSize) {
-	if (ferror(fd) != 0)
-		LOG("Error (%d) during file write.", ferror(fd));
-	else
-		LOG("Not all bytes have been written to file.");
+	char command[200];
+	const char *filename = "/tmp/dummy.nvm";
+	errno = 0;
+	FILE *fd = fopen(filename, "w");
+	int n = fwrite(buffer, sizeof(uint8_t), bufferSize, fd);
+	if (n != bufferSize) {
+		if (ferror(fd) != 0)
+			LOG("Error (%d) during file write.", ferror(fd));
+		else
+			LOG("Not all bytes have been written to file.");
 
-	return -errno;
-}
-fclose(fd);
+		return -errno;
+	}
+	fclose(fd);
 
-errno = 0;
+	errno = 0;
 // generate binary blob
-sprintf(command, "/home/root/scripts/extract_display_nvm_content.py %s",
-		filename);
-if (system(command)) {
-	return -errno;
-}
+	sprintf(command, "/home/root/scripts/extract_display_nvm_content.py %s",
+			filename);
+	if (system(command)) {
+		return -errno;
+	}
 #if VERBOSE
-LOG("%s: stat: %i", __func__, errno);
+	LOG("%s: stat: %i", __func__, errno);
 #endif
 
-return 0;
+	return 0;
 }
 
 /**
@@ -718,23 +733,23 @@ return 0;
  */
 static int read_vcom_from_file(const char *filename, int *vcomInMillivolts) {
 
-FILE *fd = fopen(filename, "r");
+	FILE *fd = fopen(filename, "r");
 
 // check if the file exists
-if (fd == NULL) {
-	LOG("Given vcom-file (%s) not found.", filename);
-	return -ENOENT;
-}
+	if (fd == NULL) {
+		LOG("Given vcom-file (%s) not found.", filename);
+		return -ENOENT;
+	}
 
-int bytecount = fscanf(fd, "%d", vcomInMillivolts);
-fclose(fd);
+	int bytecount = fscanf(fd, "%d", vcomInMillivolts);
+	fclose(fd);
 
-if (bytecount <= 0) {
-	LOG("Vcom file (%s) seems to be empty.", filename);
-	return -ENODATA;
-}
+	if (bytecount <= 0) {
+		LOG("Vcom file (%s) seems to be empty.", filename);
+		return -ENODATA;
+	}
 
-return 0;
+	return 0;
 }
 
 /**
@@ -744,25 +759,25 @@ return 0;
  * @return status.
  */
 static int switch_hvs_on(pl_hv_t *hv) {
-int stat = 0;
+	int stat = 0;
 
-if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_on != NULL)) {
-	stat |= hv->hvDriver->switch_on(hv->hvDriver);
-	//LOG("HV on");
-}
-if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_on != NULL)) {
-	stat |= hv->vcomDriver->switch_on(hv->vcomDriver);
-	//LOG("Vcom on");
-}
-if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->close != NULL)
-		&& (!hv->vcomSwitch->is_bypass)) {
-	hv->vcomSwitch->close(hv->vcomSwitch);
-	//LOG("ComSwitch on");
-}
+	if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_on != NULL)) {
+		stat |= hv->hvDriver->switch_on(hv->hvDriver);
+//LOG("HV on");
+	}
+	if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_on != NULL)) {
+		stat |= hv->vcomDriver->switch_on(hv->vcomDriver);
+//LOG("Vcom on");
+	}
+	if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->close != NULL)
+			&& (!hv->vcomSwitch->is_bypass)) {
+		hv->vcomSwitch->close(hv->vcomSwitch);
+//LOG("ComSwitch on");
+	}
 #if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
+	LOG("%s: stat: %i", __func__, stat);
 #endif
-return stat;
+	return stat;
 }
 
 /**
@@ -772,31 +787,31 @@ return stat;
  * @return status.
  */
 static int switch_hvs_off(pl_hv_t *hv) {
-int stat = 0;
-if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->open != NULL)
-		&& (!hv->vcomSwitch->is_bypass)) {
-	hv->vcomSwitch->open(hv->vcomSwitch);
-	//LOG("ComSwitch off\n");
-}
-if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_off != NULL)) {
-	stat |= hv->vcomDriver->switch_off(hv->vcomDriver);
-	//LOG("Vcom off\n");
-}
-if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_off != NULL)) {
-	stat |= hv->hvDriver->switch_off(hv->hvDriver);
-	//LOG("HV off\n");
-}
+	int stat = 0;
+	if ((hv->vcomSwitch != NULL) && (hv->vcomSwitch->open != NULL)
+			&& (!hv->vcomSwitch->is_bypass)) {
+		hv->vcomSwitch->open(hv->vcomSwitch);
+//LOG("ComSwitch off\n");
+	}
+	if ((hv->vcomDriver != NULL) && (hv->vcomDriver->switch_off != NULL)) {
+		stat |= hv->vcomDriver->switch_off(hv->vcomDriver);
+//LOG("Vcom off\n");
+	}
+	if ((hv->hvDriver != NULL) && (hv->hvDriver->switch_off != NULL)) {
+		stat |= hv->hvDriver->switch_off(hv->hvDriver);
+//LOG("HV off\n");
+	}
 
 #if VERBOSE
-LOG("%s: stat: %i", __func__, stat);
+	LOG("%s: stat: %i", __func__, stat);
 #endif
-return stat;
+	return stat;
 }
 
 static int get_vcom(struct pl_generic_epdc *p) {
 
-struct pl_vcom_config *vcom_config = p->hv->vcomConfig;
-assert(vcom_config != NULL);
-return vcom_config->get_vcom(vcom_config);
+	struct pl_vcom_config *vcom_config = p->hv->vcomConfig;
+	assert(vcom_config != NULL);
+	return vcom_config->get_vcom(vcom_config);
 }
 

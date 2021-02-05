@@ -15,6 +15,7 @@
 #include <pl/i80.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <utils.h>
 #include <errno.h>
 
 //#define WAIT_FOR_READY_TIMEOUT_I80 10000
@@ -25,41 +26,37 @@ typedef unsigned short TWord; //2 bytes
 typedef unsigned long TDWord; //4 bytes
 //prototype of structure
 //structure prototype 1
-typedef struct IT8951LdImgInfo
-{
-    TWord usEndianType; //little or Big Endian
-    TWord usPixelFormat; //bpp
-    TWord usRotate; //Rotate mode
-    TDWord ulStartFBAddr; //Start address of source Frame buffer
-    TDWord ulImgBufBaseAddr;//Base address of target image buffer
+typedef struct IT8951LdImgInfo {
+	TWord usEndianType; //little or Big Endian
+	TWord usPixelFormat; //bpp
+	TWord usRotate; //Rotate mode
+	TDWord ulStartFBAddr; //Start address of source Frame buffer
+	TDWord ulImgBufBaseAddr; //Base address of target image buffer
 
-}IT8951LdImgInfo;
+} IT8951LdImgInfo;
 //structure prototype 2
-typedef struct IT8951AreaImgInfo
-{
-    TWord usX;
-    TWord usY;
-    TWord usWidth;
-    TWord usHeight;
+typedef struct IT8951AreaImgInfo {
+	TWord usX;
+	TWord usY;
+	TWord usWidth;
+	TWord usHeight;
 
-}IT8951AreaImgInfo;
+} IT8951AreaImgInfo;
 
 //structure prototype 3
 //See user defined command ¡V Get Device information (0x0302)
-typedef struct
-{
-    TWord usPanelW;
-    TWord usPanelH;
-    TWord usImgBufAddrL;
-    TWord usImgBufAddrH;
-    TWord usFWVersion[8]; //16 Bytes String
-    TWord usLUTVersion[8]; //16 Bytes String
+typedef struct {
+	TWord usPanelW;
+	TWord usPanelH;
+	TWord usImgBufAddrL;
+	TWord usImgBufAddrH;
+	TWord usFWVersion[8]; //16 Bytes String
+	TWord usLUTVersion[8]; //16 Bytes String
 
-}I80IT8951DevInfo;
+} I80IT8951DevInfo;
 
-#define WAIT_FOR_READY_TIMEOUT_SPI_HRDY 10000
-#define WAIT_FOR_READY_TIMEOUT_I80 10000
-
+#define WAIT_FOR_READY_TIMEOUT_SPI_HRDY 100000
+#define WAIT_FOR_READY_TIMEOUT_I80 100000
 
 //Built in I80 Command Code
 #define IT8951_TCON_SYS_RUN      0x0001
@@ -84,9 +81,7 @@ typedef struct
 #define USDEF_I80_CMD_FORCE_SET_TEMP	0x0040
 
 //Panel
-#define IT8951_PANEL_WIDTH   1024 //it Get Device information
-#define IT8951_PANEL_HEIGHT   758
-
+#define IT8951_PANEL_WIDTH   1024 //it Get Device information#define IT8951_PANEL_HEIGHT   758
 //Rotate mode
 #define IT8951_ROTATE_0     0
 #define IT8951_ROTATE_90    1
@@ -118,25 +113,7 @@ typedef struct
 // IT8951 TCon Registers defines
 //-----------------------------------------------------------------------
 //Register Base Address
-#define DISPLAY_REG_BASE 0x1000               //Register RW access for I80 only
-//Base Address of Basic LUT Registers
-#define LUT0EWHR  (DISPLAY_REG_BASE + 0x00)   //LUT0 Engine Width Height Reg
-#define LUT0XYR   (DISPLAY_REG_BASE + 0x40)   //LUT0 XY Reg
-#define LUT0BADDR (DISPLAY_REG_BASE + 0x80)   //LUT0 Base Address Reg
-#define LUT0MFN   (DISPLAY_REG_BASE + 0xC0)   //LUT0 Mode and Frame number Reg
-#define LUT01AF   (DISPLAY_REG_BASE + 0x114)  //LUT0 and LUT1 Active Flag Reg
-//Update Parameter Setting Register
-#define UP0SR (DISPLAY_REG_BASE + 0x134)      //Update Parameter0 Setting Reg
-
-#define UP1SR     (DISPLAY_REG_BASE + 0x138)  //Update Parameter1 Setting Reg
-#define LUT0ABFRV (DISPLAY_REG_BASE + 0x13C)  //LUT0 Alpha blend and Fill rectangle Value
-#define UPBBADDR  (DISPLAY_REG_BASE + 0x17C)  //Update Buffer Base Address
-#define LUT0IMXY  (DISPLAY_REG_BASE + 0x180)  //LUT0 Image buffer X/Y offset Reg
-#define LUTAFSR   (DISPLAY_REG_BASE + 0x224)  //LUT Status Reg (status of All LUT Engines)
-
-#define BGVR      (DISPLAY_REG_BASE + 0x250)  //Bitmap (1bpp) image color table
-//-------System Registers----------------
-#define SYS_REG_BASE 0x0000
+#define DISPLAY_REG_BASE 0x1000               //Register RW access for I80 only//Base Address of Basic LUT Registers#define LUT0EWHR  (DISPLAY_REG_BASE + 0x00)   //LUT0 Engine Width Height Reg#define LUT0XYR   (DISPLAY_REG_BASE + 0x40)   //LUT0 XY Reg#define LUT0BADDR (DISPLAY_REG_BASE + 0x80)   //LUT0 Base Address Reg#define LUT0MFN   (DISPLAY_REG_BASE + 0xC0)   //LUT0 Mode and Frame number Reg#define LUT01AF   (DISPLAY_REG_BASE + 0x114)  //LUT0 and LUT1 Active Flag Reg//Update Parameter Setting Register#define UP0SR (DISPLAY_REG_BASE + 0x134)      //Update Parameter0 Setting Reg#define UP1SR     (DISPLAY_REG_BASE + 0x138)  //Update Parameter1 Setting Reg#define LUT0ABFRV (DISPLAY_REG_BASE + 0x13C)  //LUT0 Alpha blend and Fill rectangle Value#define UPBBADDR  (DISPLAY_REG_BASE + 0x17C)  //Update Buffer Base Address#define LUT0IMXY  (DISPLAY_REG_BASE + 0x180)  //LUT0 Image buffer X/Y offset Reg#define LUTAFSR   (DISPLAY_REG_BASE + 0x224)  //LUT Status Reg (status of All LUT Engines)#define BGVR      (DISPLAY_REG_BASE + 0x250)  //Bitmap (1bpp) image color table//-------System Registers----------------#define SYS_REG_BASE 0x0000
 
 //Address of System Registers
 #define I80CPCR (SYS_REG_BASE + 0x04)
@@ -165,40 +142,69 @@ typedef struct it8951 {
 
 } it8951_t;
 
-it8951_t *it8951_new(struct pl_gpio *gpios, struct pl_generic_interface *interface, enum interfaceType *sInterfaceType, struct pl_i2c *i2c, const struct it8951_pins *pins);
-
+it8951_t *it8951_new(struct pl_gpio *gpios,
+		struct pl_generic_interface *interface,
+		enum interfaceType *sInterfaceType, struct pl_i2c *i2c,
+		const struct it8951_pins *pins);
 
 //void IT8951WaitForReady(struct pl_i80 *p);
 int IT8951WaitForReady(pl_generic_interface_t *bus, enum interfaceType *type);
 //void IT8951WriteCmdCode(struct pl_i80 *p, TWord usCmdCode);
-void IT8951WriteCmdCode(pl_generic_interface_t *bus, enum interfaceType *type,  TWord usCmdCode);
-void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
-void IT8951WriteData_NoSwap(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
-void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
-TWord *IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type, int size);
-void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type, TWord *usData, int size);
-void IT8951SendCmdArg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usCmdCode,TWord* pArg, TWord usNumArg);
+void IT8951WriteCmdCode(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord usCmdCode);
+void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord usData);
+void IT8951WriteData_NoSwap(pl_generic_interface_t *bus,
+		enum interfaceType *type, TWord usData);
+void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord *usData, int size);
+TWord *IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type,
+		int size);
+void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord *usData, int size);
+void IT8951SendCmdArg(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord usCmdCode, TWord* pArg, TWord usNumArg);
 TWord swap_endianess(TWord in);
 
-
-static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus, enum interfaceType *type, TWord usCmd);
-static void gpio_i80_16b_data_out(pl_generic_interface_t *bus, enum interfaceType *type, TWord usData);
-static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus, enum interfaceType *type, int size);
+static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
+		enum interfaceType *type, TWord usCmd);
+static void gpio_i80_16b_data_out(pl_generic_interface_t *bus,
+		enum interfaceType *type, TWord usData);
+static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
+		enum interfaceType *type, int size);
 
 //void GetIT8951SystemInfo(struct pl_i80 *p, void* pBuf);
-void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type  , void* pBuf);
+void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type,
+		void* pBuf);
 
-void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus, enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo, IT8951AreaImgInfo* pstAreaImgInfo);
-void IT8951DisplayArea(pl_generic_interface_t *bus, enum interfaceType *type, TWord usX, TWord usY, TWord usW, TWord usH, TWord usDpyMode);
+void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
+		enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo,
+		IT8951AreaImgInfo* pstAreaImgInfo);
+void IT8951DisplayArea(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord usX, TWord usY, TWord usW, TWord usH, TWord usDpyMode);
 
 void IT8951LoadImgEnd(pl_generic_interface_t *bus, enum interfaceType *type);
-void IT8951LoadImgAreaStart(pl_generic_interface_t *bus, enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo ,IT8951AreaImgInfo* pstAreaImgInfo);
-void IT8951LoadImgStart(pl_generic_interface_t *bus, enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo);
+void IT8951LoadImgAreaStart(pl_generic_interface_t *bus,
+		enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo,
+		IT8951AreaImgInfo* pstAreaImgInfo);
+void IT8951LoadImgStart(pl_generic_interface_t *bus, enum interfaceType *type,
+		IT8951LdImgInfo* pstLdImgInfo);
 
-void IT8951WaitForDisplayReady(pl_generic_interface_t *bus, enum interfaceType *type);
+void IT8951WaitForDisplayReady(pl_generic_interface_t *bus,
+		enum interfaceType *type);
 
-TWord IT8951ReadReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr);
-void IT8951WriteReg(pl_generic_interface_t *bus, enum interfaceType *type, TWord usRegAddr,TWord usValue);
-int IT8951_update_reg(pl_generic_interface_t *bus, enum interfaceType *type, uint16_t reg, uint16_t val, const uint32_t bitmask);
+TWord IT8951ReadReg(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord usRegAddr);
+void IT8951WriteReg(pl_generic_interface_t *bus, enum interfaceType *type,
+		TWord usRegAddr, TWord usValue);
+int IT8951_update_reg(pl_generic_interface_t *bus, enum interfaceType *type,
+		uint16_t reg, uint16_t val, const uint32_t bitmask);
+void IT8951MemBurstWrite(pl_generic_interface_t *bus, enum interfaceType *type,
+		TDWord ulMemAddr, TDWord ulWriteSize);
+void IT8951MemBurstWriteProc(pl_generic_interface_t *bus,
+		enum interfaceType *type, TDWord ulMemAddr, TDWord ulWriteSize,
+		TWord *pSrcBuf);
+void IT8951SetImgBufBaseAddr(pl_generic_interface_t *bus,
+		enum interfaceType *type, TDWord ulImgBufAddr);
 
 #endif /* IT8951_H_ */
