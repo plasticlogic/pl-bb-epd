@@ -110,10 +110,6 @@ static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr,
 		register_address += transferChunkSize;
 		bytes_to_transfer -= transferChunkSize;
 	}
-
-//	if(spi->cs_gpio == FALCON_FIRMWARE_NVM_CS)
-//		spi->cs_gpio = FALCON_DISPLAY_NVM_CS;
-
 	return stat;
 }
 

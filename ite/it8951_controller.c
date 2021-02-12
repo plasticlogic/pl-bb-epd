@@ -65,6 +65,8 @@ static int load_wflib(struct pl_generic_controller *controller,
 		const char *filename);
 static int load_png_image(struct pl_generic_controller *controller,
 		const char *path, struct pl_area *area, int left, int top);
+static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
+		struct pl_area *area, int left, int top);
 static int wait_update_end(struct pl_generic_controller *controller);
 static int read_register(struct pl_generic_controller *controller,
 		const regSetting_t* setting);
@@ -77,6 +79,7 @@ static int set_temp_mode(struct pl_generic_controller *controller,
 		enum pl_epdc_temp_mode mode);
 static int update_temp(struct pl_generic_controller *controller);
 static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres);
+static int get_temperature(pl_generic_controller_t *p, int* temperature);
 
 int it8951_controller_setup(struct pl_generic_controller *controller,
 		it8951_t *it8951) {
@@ -101,6 +104,7 @@ int it8951_controller_setup(struct pl_generic_controller *controller,
 
 	controller->set_temp_mode = set_temp_mode;
 	controller->update_temp = update_temp;
+	controller->get_temp = get_temperature;
 	controller->get_resolution = get_resolution;
 
 	return 0;
@@ -159,7 +163,7 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	//Wait until the Update has ended
 	//IT8951WaitForDisplayReady(bus, type);
 
-	//printf("PMIC Register 7 after update: ");
+	printf("PMIC Register 7 after update: ");
 
 	regSetting_t reg;
 	reg.addr = (int) IT8951_TCON_BYPASS_I2C;
@@ -172,9 +176,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	reg7[3] = 0x01;
 	reg.val = reg7;
 
-	//send_cmd(controller, reg);
+	send_cmd(controller, reg);
 
-	//printf("PMIC Register 8 after update: ");
+	printf("PMIC Register 8 after update: ");
 
 	regSetting_t reg2;
 	reg2.addr = IT8951_TCON_BYPASS_I2C;
@@ -187,9 +191,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	reg8[3] = 0x01;
 	reg2.val = reg8;
 
-	//send_cmd(controller, reg2);
+	send_cmd(controller, reg2);
 
-	//IT8951WaitForReady(bus, type);
+	IT8951WaitForReady(bus, type);
 
 	return 0;
 }
@@ -240,9 +244,7 @@ static int clear_update(pl_generic_controller_t *p) {
 
 	//Host Frame Buffer allocation
 	configure_update(p, 0, 0, NULL);
-//	gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
-//	//Write pixel 0xF0(White) to Frame Buffer
-//	memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
+
 	width = devInfo.usPanelW;
 	height = devInfo.usPanelH;
 	p->imageWidth = devInfo.usPanelW;
@@ -253,8 +255,8 @@ static int clear_update(pl_generic_controller_t *p) {
 	stLdImgInfo.usPixelFormat = IT8951_8BPP;
 	stLdImgInfo.usRotate = IT8951_ROTATE_0;
 	stLdImgInfo.ulImgBufBaseAddr = gulImgBufAddr;
-	//Set Load Area
 
+	//Set Load Area
 	stAreaImgInfo.usX = partialX;
 	stAreaImgInfo.usY = partialY;
 	stAreaImgInfo.usWidth = width;
@@ -290,15 +292,9 @@ static int configure_update(struct pl_generic_controller *controller, int wfid,
 		enum pl_update_mode mode, const struct pl_area *area) {
 	it8951_t *it8951 = controller->hw_ref;
 	assert(it8951 != NULL);
-	pl_generic_interface_t *bus = it8951->interface;
-	enum interfaceType *type = it8951->sInterfaceType;
 
 	wfidToUse = wfid;
 	modeToUse = mode;
-
-	//Set to Enable I80 Packed mode
-	//IT8951WriteReg(bus, type, I80CPCR, 0x0001);
-	//IT8951WaitForReady(bus, type);
 
 	return 0;
 }
@@ -366,8 +362,74 @@ static void memory_padding_area(uint8_t *source, uint8_t *target,
 	}
 }
 
+static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
+		struct pl_area *area, int left, int top) {
+
+	it8951_t *it8951 = controller->hw_ref;
+
+	partialX = left;
+	partialY = top;
+
+	assert(it8951 != NULL);
+
+	pl_generic_interface_t *bus = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
+
+	TDWord gulImgBufAddr;
+	TByte* gpFrameBuf;
+	rgbw_pixel_t *pngBuffer;
+
+	IT8951LdImgInfo stLdImgInfo;
+	IT8951AreaImgInfo stAreaImgInfo;
+
+	struct timeval tStop, tStart; // time variables
+	float tTotal;
+	gettimeofday(&tStart, NULL);
+	if (devInfo.usImgBufAddrH == NULL)
+		GetIT8951SystemInfo(bus, type, &devInfo);
+
+	//Get Image Buffer Address of IT8951
+	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
+
+	//Set to Enable I80 Packed mode
+	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
+	//-------------------------------------------------------------------
+	controller->yres = devInfo.usPanelH;
+	controller->xres = devInfo.usPanelW;
+
+	//--------------------------------------------------------------------------------------------
+	//      initial display - Display white only
+	//--------------------------------------------------------------------------------------------
+	//Load Image and Display
+	//Setting Load image information
+	stLdImgInfo.ulStartFBAddr = (TDWord) buf;
+	stLdImgInfo.usEndianType = IT8951_LDIMG_L_ENDIAN;
+	stLdImgInfo.usPixelFormat = IT8951_8BPP;
+	stLdImgInfo.usRotate = IT8951_ROTATE_0;
+	stLdImgInfo.ulImgBufBaseAddr = gulImgBufAddr;
+	//Set Load Area
+	//ToDo: Pipe x/y position through from console
+	stAreaImgInfo.usX = partialX;
+	stAreaImgInfo.usY = partialY;
+
+	stAreaImgInfo.usWidth = devInfo.usPanelW;
+	stAreaImgInfo.usHeight = devInfo.usPanelH;
+
+	gettimeofday(&tStop, NULL);
+	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+	printf("Time Load and Scramble: %f\n", tTotal);
+
+	//Load Image from Host to IT8951 Image Buffer
+	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
+
+	return 0;
+
+}
+
 static int load_png_image(struct pl_generic_controller *controller,
 		const char *path, struct pl_area *area, int left, int top) {
+
 	it8951_t *it8951 = controller->hw_ref;
 
 	partialX = left;
@@ -389,6 +451,9 @@ static int load_png_image(struct pl_generic_controller *controller,
 	//------------------------------------------------------------------
 	//Get Device Info
 
+	struct timeval tStop, tStart; // time variables
+	float tTotal;
+	gettimeofday(&tStart, NULL);
 	if (devInfo.usImgBufAddrH == NULL)
 		GetIT8951SystemInfo(bus, type, &devInfo);
 
@@ -434,6 +499,14 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 		if (read_png(path, &gpFrameBuf, &width, &height))
 			return -ENOENT;
+
+		FILE *fp;
+		fp = fopen("/tmp/img.txt", "w");
+
+		fwrite(gpFrameBuf, sizeof(gpFrameBuf[0]), 1280 * 960, fp);
+
+		fclose(fp);
+
 		controller->imageWidth = width;
 		controller->imageHeight = height;
 		if (area != NULL && controller->display_scrambling == 0) {
@@ -601,23 +674,15 @@ static int load_png_image(struct pl_generic_controller *controller,
 		stAreaImgInfo.usHeight = height;
 	}
 
-//	struct timeval tStop, tStart; // time variables
-//	float tTotal;
-//	gettimeofday(&tStart, NULL);
+	gettimeofday(&tStop, NULL);
+	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+	printf("Time Load and Scramble: %f\n", tTotal);
 
 	//Load Image from Host to IT8951 Image Buffer
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
 	//IT8951SetImgBufBaseAddr(bus, type, gulImgBufAddr);
 	//IT8951MemBurstWriteProc(bus, type, gulImgBufAddr, 640,
-	//		(TDWord)targetBuf);
-	//Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
-	//IT8951DisplayArea(i80, 0,0, devInfo.usPanelW, devInfo.usPanelH, 2);
-
-//	gettimeofday(&tStop, NULL);
-//
-//	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-//			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-//	printf("Time: %f\n", tTotal);
 
 	if (scrambledPNG)
 		free(scrambledPNG);
@@ -705,6 +770,7 @@ static int set_temp_mode(struct pl_generic_controller *p,
 	switch (mode) {
 	case PL_EPDC_TEMP_MANUAL:
 		// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
+		p->temp_mode = PL_EPDC_TEMP_MANUAL;
 		IT8951WriteCmdCode(interface, type, USDEF_I80_CMD_FORCE_SET_TEMP);
 
 		TWord dataTemp[2];
@@ -714,16 +780,18 @@ static int set_temp_mode(struct pl_generic_controller *p,
 		//usleep(250);
 
 		IT8951WriteDataBurst(interface, type, dataTemp, 2);
-		//IT8951WaitForReady(interface, type);
-		stat = 1;
+		IT8951WaitForReady(interface, type);
+		stat = 0;
 		break;
 	case PL_EPDC_TEMP_EXTERNAL:
+		p->temp_mode = PL_EPDC_TEMP_EXTERNAL;
 		LOG(
 				"Selected External Temp Mode, if no external Sensor read is available internal Temp will be used.");
 		break;
 	case PL_EPDC_TEMP_INTERNAL:
+		p->temp_mode = PL_EPDC_TEMP_INTERNAL;
 		LOG("Selected Internal Temp Mode");
-		stat = 1;
+		stat = 0;
 		break;
 	default:
 		assert_fail("Invalid temperature mode");
@@ -741,51 +809,59 @@ static int update_temp(struct pl_generic_controller *controller) {
 	enum interfaceType *type = it8951->sInterfaceType;
 	int stat = -1;
 	int newTemp = 37;
+	int shouldUpdate = 0;
 
 	if (controller->temp_mode == PL_EPDC_TEMP_MANUAL) {
+		shouldUpdate = 1;
 		newTemp = controller->manual_temp;
-		LOG("Set Temperature to %i ", newTemp);
+		printf("Manual set Temperature to %i \n", newTemp);
 	} else if (controller->temp_mode == PL_EPDC_TEMP_EXTERNAL) {
 
-		IT8951WaitForReady(interface, type);
-
-		IT8951WriteCmdCode(interface, type, IT8951_TCON_BYPASS_I2C);
-		IT8951WriteData(interface, type, 0x01); // I2C write command
-		IT8951WriteData(interface, type, 0x68); // TPS65815 Chip Address0
-		IT8951WriteData(interface, type, 0x0D); // Power Up Sequence Register
-		IT8951WriteData(interface, type, 0x01); // Write Size
-		IT8951WriteData(interface, type, 0x80);
-
-		IT8951WaitForReady(interface, type);
-
-		TWord pmicTemp;
-		IT8951WriteCmdCode(interface, type, IT8951_TCON_BYPASS_I2C);
-		IT8951WriteData(interface, type, 0x00); // I2C write command
-		IT8951WriteData(interface, type, 0x68); // TPS65815 Chip Address0
-		IT8951WriteData(interface, type, 0x00); // Power Up Sequence Register
-		IT8951WriteData(interface, type, 0x01); // Write Size
-		pmicTemp = (int) IT8951ReadData(interface, type, 1);  //read data
-		newTemp = pmicTemp >> 8;
-		printf("PMIC Temp is %x \n", pmicTemp >> 8);
-		//printf("Not yet implemented ! \n");
+//		IT8951WaitForReady(interface, type);
+//
+//		IT8951WriteCmdCode(interface, type, IT8951_TCON_BYPASS_I2C);
+//		IT8951WriteData(interface, type, 0x01); // I2C write command
+//		IT8951WriteData(interface, type, 0x68); // TPS65815 Chip Address0
+//		IT8951WriteData(interface, type, 0x0D); // Power Up Sequence Register
+//		IT8951WriteData(interface, type, 0x01); // Write Size
+//		IT8951WriteData(interface, type, 0x80);
+//
+//		IT8951WaitForReady(interface, type);
+//
+//		TWord pmicTemp;
+//		IT8951WriteCmdCode(interface, type, IT8951_TCON_BYPASS_I2C);
+//		IT8951WriteData(interface, type, 0x00); // I2C write command
+//		IT8951WriteData(interface, type, 0x68); // TPS65815 Chip Address0
+//		IT8951WriteData(interface, type, 0x00); // Power Up Sequence Register
+//		IT8951WriteData(interface, type, 0x01); // Write Size
+//		pmicTemp = (int) IT8951ReadData(interface, type, 1);  //read data
+//		newTemp = pmicTemp >> 8;
+//		printf("PMIC Temp is %x \n", pmicTemp >> 8);
+		printf("Not yet implemented, using internal mode ! \n");
+	} else if (controller->temp_mode == PL_EPDC_TEMP_INTERNAL) {
+		printf("Using internal measured Temp ! \n");
+		shouldUpdate = 0;
+		stat = 0;
 	}
 
-	IT8951WaitForReady(interface, type);
-	// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
-	IT8951WriteCmdCode(interface, type, USDEF_I80_CMD_FORCE_SET_TEMP);
+	if (shouldUpdate == 1) {
+		IT8951WaitForReady(interface, type);
+		// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
+		IT8951WriteCmdCode(interface, type, USDEF_I80_CMD_FORCE_SET_TEMP);
 
-	IT8951WaitForReady(interface, type);
+		IT8951WaitForReady(interface, type);
 
-	TWord dataTemp[2];
-	dataTemp[0] = 0x01;
-	dataTemp[1] = newTemp;  //37   //controller->manual_temp;
+		TWord dataTemp[2];
+		dataTemp[0] = 0x01;
+		dataTemp[1] = newTemp;  //37   //controller->manual_temp;
 
-	//IT8951WriteDataBurst(interface, type, dataTemp, 2);
-	IT8951WriteData(interface, type, dataTemp[0]);
-	IT8951WriteData(interface, type, dataTemp[1]);
-	IT8951WaitForReady(interface, type);
+		//IT8951WriteDataBurst(interface, type, dataTemp, 2);
+		IT8951WriteData(interface, type, dataTemp[0]);
+		IT8951WriteData(interface, type, dataTemp[1]);
+		IT8951WaitForReady(interface, type);
 
-	stat = 1;
+		stat = 0;
+	}
 
 	return stat;
 }
@@ -806,6 +882,31 @@ static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres) {
 		return 0;
 	}
 	return -EINVAL;
+}
+
+static int get_temperature(pl_generic_controller_t *p, int* temperature) {
+	it8951_t *it8951 = p->hw_ref;
+	pl_generic_interface_t *bus = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
+
+	IT8951WaitForReady(bus, type);
+	// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_FORCE_SET_TEMP);
+
+	IT8951WaitForReady(bus, type);
+
+	TWord dataTemp[2];
+
+	IT8951WriteData(bus, type, 0x00);
+	IT8951WaitForReady(bus, type);
+	IT8951ReadDataBurst(bus, type, dataTemp, 2);
+
+	IT8951WaitForReady(bus, type);
+
+	temperature[0] = dataTemp[0];
+	temperature[1] = dataTemp[1];
+
+	return 0;
 }
 
 static int fill(struct pl_generic_controller *controller,

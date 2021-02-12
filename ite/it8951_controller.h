@@ -32,4 +32,6 @@
 
 int it8951_controller_setup(struct pl_generic_controller *p, it8951_t *it8951);
 
+
+
 #endif /* IT8951_CONTROLLER_H_ */

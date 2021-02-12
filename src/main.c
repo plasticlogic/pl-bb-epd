@@ -89,7 +89,7 @@ int initialize_environment();
 int release_environment();
 int readBinaryFile(const char *binaryPath, uint8_t **buffer);
 
-int start_epdc(int load_nvm_content, int execute_clear);
+int start_epdc(int load_nvm_content, int execute_clear, int gpio_only);
 int stop_epdc();
 int set_vcom(int vcom);
 int set_waveform(char *waveform, float *temperature);
@@ -345,6 +345,11 @@ int execute_start_epdc(int argc, char **argv) {
 	int stat = 0;
 	int executeClear = false;
 	int initFromEEprom = false;
+	int gpio_only = false;
+
+	if (argc >= 5){
+		gpio_only = atoi(argv[4]);
+	}
 
 	if (argc >= 4) {
 		executeClear = atoi(argv[3]);
@@ -354,7 +359,7 @@ int execute_start_epdc(int argc, char **argv) {
 		initFromEEprom = atoi(argv[2]);
 	}
 
-	stat = start_epdc(initFromEEprom, executeClear);
+	stat = start_epdc(initFromEEprom, executeClear, gpio_only);
 
 	return stat;
 }
@@ -730,10 +735,10 @@ int execute_pgm_epdc(int argc, char **argv) {
 
 	if (isFirmware == 1) {
 		spi->cs_gpio = FALCON_FIRMWARE_NVM_CS;
-		LOG("Using Firmware CS: %i \n", spi->cs_gpio);
+		printf("Using Firmware CS: %i \n", spi->cs_gpio);
 	} else {
 		spi->cs_gpio = FALCON_DISPLAY_NVM_CS;
-		LOG("Using Display CS: %i \n", spi->cs_gpio);
+		printf("Using Display CS: %i \n", spi->cs_gpio);
 		stat = switch_hv(1);
 	}
 
@@ -808,7 +813,7 @@ int print_versionInfo(int argc, char **argv) {
  *
  * @return status
  */
-int start_epdc(int load_nvm_content, int execute_clear) {
+int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 	int stat = 0;
 	LOG("load_nvm_content?: %d", load_nvm_content);
 
@@ -824,18 +829,22 @@ int start_epdc(int load_nvm_content, int execute_clear) {
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
 	sleep(2);
-	//stat = switch_hv(1);
-	stat = epdc->init(epdc, load_nvm_content);
-	if (stat < 0) {
-		LOG("EPDC-Init failed: %i\n", stat);
-		return stat;
-	}
-	if (execute_clear) {
-		stat = epdc->clear_init(epdc);
-	}
 
-	if (execute_clear != 1)
-		stat = switch_hv(0);
+	if (gpio_only == 0){
+		stat = epdc->init(epdc, load_nvm_content);
+			if (stat < 0) {
+				LOG("EPDC-Init failed: %i\n", stat);
+				return stat;
+			}
+			if (execute_clear) {
+				stat = epdc->clear_init(epdc);
+			}
+
+			if (execute_clear != 1)
+				stat = switch_hv(0);
+	}else {
+		printf("GPIO only set !");
+	}
 
 	return stat;
 }
@@ -907,16 +916,12 @@ int set_waveform(char *waveform, float *temperature) {
  */
 int set_temperature(float temperature) {
 
-	if (epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL) {
-		printf("temperature %f\n", temperature);
-		epdc->controller->manual_temp = (int) temperature;
-		epdc->controller->update_temp(epdc->controller);
-	} else {
-		LOG(
-				"Manual set temperature not possible.\n" "Temperature mode is not set to \"MANUAL\".");
-		return -EINVAL;
-	}
-
+	printf("temperature %f\n", temperature);
+	epdc->controller->set_temp_mode(epdc->controller, PL_EPDC_TEMP_MANUAL);
+	epdc->controller->manual_temp = (int) temperature;
+	epdc->controller->update_temp(epdc->controller);
+	printf(
+			"Temperature Mode will be set automatically to Manual, till reset of the ITE \n");
 	return 0;
 }
 
@@ -949,13 +954,17 @@ int get_waveform(void) {
  * @return status
  */
 int get_temperature(void) {
-	if (epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL) {
-		printf("temperature %i\n", epdc->controller->manual_temp);
-	} else {
-		LOG(
-				"Manual get temperature not possible.\n" "Temperature mode is not set to \"MANUAL\".");
-		return -EINVAL;
-	}
+//	if (epdc->controller->temp_mode == PL_EPDC_TEMP_MANUAL) {
+//		printf("temperature %i\n", epdc->controller->manual_temp);
+//	} else {
+//		printf(
+//				"Manual get temperature not possible. Temperature mode is not set to \"MANUAL\". \n\r");
+//		return -EINVAL;
+//	}
+	int stat = 0;
+	int temperature[2];
+	stat = epdc->controller->get_temp(epdc->controller, temperature);
+	printf("Real Temp: %i , Set Temp: %i \n", temperature[0], temperature[1]);
 	return 0;
 }
 
@@ -985,7 +994,6 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 
 	struct timeval tStop, tStart; // time variables
 	float tTotal;
-	gettimeofday(&tStart, NULL);
 
 	LOG("path: %s", path);
 
@@ -999,17 +1007,11 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	if (wfId < 0)
 		return -EINVAL;
 
+	gettimeofday(&tStart, NULL);
 	stat = epdc->controller->load_image(epdc->controller, path, NULL, 0, 0);
+
 	if (stat < 0)
 		return stat;
-
-//	if (epdc->hv->vcomSwitch != NULL) {
-//		if (vcomSwitchEnable == 0) {
-//			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 1);
-//		} else {
-//			epdc->hv->vcomSwitch->disable_bypass_mode(epdc->hv->vcomSwitch);
-//		}
-//	}
 
 	for (cnt = 0; cnt < updateCount; cnt++) {
 		stat = epdc->update(epdc, wfId, mode, NULL);
@@ -1022,13 +1024,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	gettimeofday(&tStop, NULL);
 	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
 			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-	printf("Time: %f\n", tTotal);
-
-//	if (epdc->hv->vcomSwitch != NULL) {
-//		if (vcomSwitchEnable == 0) {
-//			epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 0);
-//		}
-//	}
+	printf("Time Complete: %f\n", tTotal);
 
 	return 0;
 }
@@ -1253,7 +1249,7 @@ int switch_com(int state) {
  * @return status
  */
 int readBinaryFile(const char *binaryPath, uint8_t **blob) {
-	// read binary blob
+// read binary blob
 
 	FILE *fs = fopen(binaryPath, "rb");
 	int len = 0;
@@ -1267,7 +1263,7 @@ int readBinaryFile(const char *binaryPath, uint8_t **blob) {
 	len = ftell(fs);
 	fseek(fs, 0, SEEK_SET);
 
-	// read file content to blob
+// read file content to blob
 	*blob = (uint8_t *) malloc(sizeof(uint8_t) * len);
 	int bytecount = fread(*blob, sizeof(uint8_t), len, fs);
 	fclose(fs);
@@ -1309,9 +1305,9 @@ int counter(const char* wf) {
 	if (epdc->hv->vcomSwitch != NULL) {
 		epdc->hv->vcomSwitch->enable_bypass_mode(epdc->hv->vcomSwitch, 1);
 	}
-	//struct timespec t;
+//struct timespec t;
 
-	//*
+//*
 	while (1) {
 		//start_stopwatch(&t);
 		sprintf(counter, "%u", count++);
@@ -1325,7 +1321,7 @@ int counter(const char* wf) {
 			return -1;
 		//read_stopwatch(&t, "update", 1);
 	}
-	//*/
+//*/
 	return 0;
 }
 
@@ -1346,7 +1342,7 @@ int slideshow(const char *path, const char* wf, int waittime) {
 //#if VERBOSE
 	LOG("Running slideshow");
 //#endif
-	//*
+//*
 	while (count--) {
 
 		if ((dir = opendir(path)) == NULL) {
@@ -1369,7 +1365,7 @@ int slideshow(const char *path, const char* wf, int waittime) {
 		closedir(dir);
 	}
 
-	//*/
+//*/
 	return 0;
 }
 
@@ -1658,7 +1654,7 @@ void printHelp_write_reg(int identLevel) {
 }
 
 void printHelp_fill(int identLevel) {
-	// TODO...
+// TODO...
 	printf("%*s Fill the screen with a Greylevel.\n", identLevel, " ");
 	printf("\n");
 	printf("%*s Usage: epdc-app -fill <GLx | y>\n", identLevel, " ");

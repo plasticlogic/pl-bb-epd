@@ -351,7 +351,7 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		gettimeofday(&tStop, NULL);
 		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
 				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-		//printf("Data Transmission --> Time: %f\n", tTotal);
+		printf("Data Transmission --> Time: %f\n", tTotal);
 
 		//wait for ready
 		IT8951WaitForReady(bus, type);
@@ -359,7 +359,7 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		//CS
 		gpio->set(i80->hcs_n_gpio, 1);
 
-		gpio->set(i80->hwe_n_gpio, 0);
+		//gpio->set(i80->hwe_n_gpio, 1);
 	} else {
 		//error
 	}
@@ -757,7 +757,10 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 		int i = 0;
 		for (i = 0; i < size; i++) {
 
-			usleep(1000);
+			//usleep(10);
+			//if (i%2 == 0){
+				IT8951WaitForReady(bus, type);
+			//}
 			read(i80->fd, &usData, 1);
 			iResult[i] = usData;
 		}
