@@ -293,10 +293,6 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
 
-//	IT8951WaitForReady(bus, type);
-//	IT8951WriteCmdCode(bus, type,USDEF_I80_CMD_POWER_CTR);
-//	IT8951WriteData(bus, type, 0x01);
-
 // initialize hv
 	if (!p->hv)
 		return -EINVAL;
@@ -432,15 +428,6 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 	}
 #else
 
-//	regSetting_t reg_t;
-//		reg_t.addr = 0x0003;
-//		reg_t.valCount = 0;
-//		uint16_t *reg_t_val;
-//		reg_t_val = malloc(1 * sizeof(uint16_t));
-//		reg_t_val[0] = 0x01;
-//		reg_t.val = reg_t_val;
-//		send_cmd(p, reg_t);
-
 	if (load_nvm_content) {
 //		stat = do_load_nvm_content(p);
 		if (do_load_nvm_content(p) < 0) {
@@ -477,13 +464,6 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 			return stat;
 	}
 
-//	if (do_load_nvm_content(p) || !load_nvm_content) {
-//		LOG("Loading wflib: %s", controller->waveform_file_path);
-//		stat = controller->load_wflib(controller,
-//				controller->waveform_file_path);
-//}
-//	reg_t.addr = 0x0001;
-//		send_cmd(p, reg_t);
 #endif
 
 	return stat;
@@ -572,8 +552,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 	assert(p != NULL);
 	pl_generic_controller_t *controller = p->controller;
 	pl_hv_t *hv = p->hv;
-	struct timeval tStop, tStart; // time variables
-	float tTotal;
+	struct timespec t;
 
 	assert(controller != NULL);
 	assert(hv != NULL);
@@ -585,67 +564,50 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 	}
 
 	int stat = 0;
-	//stat |= controller->wait_update_end(controller);
 
-	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL && controller->temp_mode != PL_EPDC_TEMP_INTERNAL) {
+	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL
+			&& controller->temp_mode != PL_EPDC_TEMP_INTERNAL) {
 		if (controller->update_temp != NULL)
 			stat |= controller->update_temp(controller);
 	}
-
-
-	stat |= switch_hvs_on(hv);
+	//gettimeofday(&tStart, NULL);
 
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-//read_stopwatch(&t,"update_temp",1);
+	read_stopwatch(&t, "update_temp", 1);
 	stat |= controller->configure_update(controller, wfID, mode, area);
+	read_stopwatch(&t, "configure_update", 1);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-//read_stopwatch(&t,"configure_update",1);
-//	if (!nowait) {
-	//stat |= switch_hvs_on(hv);
-	//}
-//read_stopwatch(&t,"switch_hvs_on",1);
-	//int i = 0;
-//	for (i = 0; i < 20; i++) {
 
-	gettimeofday(&tStart, NULL);
-	stat |= controller->trigger_update(controller);
-
-//	gettimeofday(&tStop, NULL);
-//	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-//			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-//	printf("Update Time: %f\n", tTotal);
-	//}
+	if (!nowait) {
+		stat |= switch_hvs_on(hv);
+	}
+	read_stopwatch(&t, "switch_hvs_on", 1);
 
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-//read_stopwatch(&t,"trigger_update",1);
-//	if (!nowait) {
-
+	if (!nowait) {
+		stat |= controller->trigger_update(controller);
+	}
+	read_stopwatch(&t, "trigger update", 1);
 
 	stat |= controller->wait_update_end(controller);
-	gettimeofday(&tStop, NULL);
-		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-		printf("Update Time: %f\n", tTotal);
 
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-//read_stopwatch(&t,"cwait_update_end",1);
-//sleep(10);
+	read_stopwatch(&t, "cwait_update_end", 1);
 
 	stat |= switch_hvs_off(hv);
-
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-//read_stopwatch(&t,"switch_hvs_off",1);
-	//}
+	read_stopwatch(&t, "switch_hvs_off", 1);
+
 	return stat;
 }
 

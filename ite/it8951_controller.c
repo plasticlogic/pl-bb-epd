@@ -52,6 +52,9 @@ int partialX = 0;
 int partialY = 0;
 bool clear = false;
 I80IT8951DevInfo devInfo;
+uint16_t reg7[4];
+uint16_t reg8[4];
+int verbose = 0;
 
 static int trigger_update(struct pl_generic_controller *controller);
 static int clear_update(pl_generic_controller_t *p);
@@ -111,12 +114,12 @@ int it8951_controller_setup(struct pl_generic_controller *controller,
 }
 
 static int trigger_update(struct pl_generic_controller *controller) {
+
 	//initialize communication structure
 	it8951_t *it8951 = controller->hw_ref;
 	assert(it8951 != NULL);
 	pl_generic_interface_t *bus = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
-	//pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 
 	if (modeToUse == 0) {
 		controller->imageWidth = controller->xres;
@@ -125,33 +128,6 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		partialY = 0;
 	}
 
-//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//	IT8951WriteData(bus, type, 0x01); // I2C write command
-//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//	IT8951WriteData(bus, type, 0x0B); // Power Down Sequence Register
-//	IT8951WriteData(bus, type, 0x01); // Write Size
-//	IT8951WriteData(bus, type, 0x00); //DE ????
-//
-//	//IT8951WaitForReady(bus, type);
-//
-//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//	IT8951WriteData(bus, type, 0x01); // I2C write command
-//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//	IT8951WriteData(bus, type, 0x0C); // Power Down Sequence Register
-//	IT8951WriteData(bus, type, 0x01); // Write Size
-//	IT8951WriteData(bus, type, 0x00); //
-//
-//	//IT8951WaitForReady(bus, type);
-//
-//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//	IT8951WriteData(bus, type, 0x01); // I2C write command
-//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//	IT8951WriteData(bus, type, 0x0A); // Power Up Sequence Register
-//	IT8951WriteData(bus, type, 0x01); // Write Size
-//	IT8951WriteData(bus, type, 0x00); //
-
-//IT8951WaitForReady(bus, type);
-
 //Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
 	IT8951WriteData(bus, type, (TWord) partialX);     				// Display X
@@ -159,41 +135,49 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
 	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
 	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
+//	regSetting_t regUpdate;
+//	regUpdate.addr = (int) USDEF_I80_CMD_DPY_AREA;
+//	regUpdate.valCount = (int) 5;
+//	TWord data[5];
+//	data[0] = (TWord) partialX;
+//	data[1] = (TWord) partialY;
+//	data[2] = (TWord) controller->imageWidth;
+//	data[3] = (TWord) controller->imageHeight;
+//	data[4] = (TWord) wfidToUse;
+//	regUpdate.val = data;
+//	send_cmd(controller, regUpdate);
+//	IT8951WriteDataBurst(bus, type, data, 5);
 
-	//Wait until the Update has ended
-	//IT8951WaitForDisplayReady(bus, type);
+	if (verbose) {
 
-	printf("PMIC Register 7 after update: ");
+		printf("PMIC Register 7 after update: ");
 
-	regSetting_t reg;
-	reg.addr = (int) IT8951_TCON_BYPASS_I2C;
-	reg.valCount = (int) 4;
-	uint16_t *reg7;
-	reg7 = malloc(reg.valCount * sizeof(uint16_t));
-	reg7[0] = 0x00;
-	reg7[1] = 0x68;
-	reg7[2] = 0x07;
-	reg7[3] = 0x01;
-	reg.val = reg7;
+		regSetting_t reg;
+		reg.addr = (int) IT8951_TCON_BYPASS_I2C;
+		reg.valCount = (int) 4;
+		reg7[0] = 0x00;
+		reg7[1] = 0x68;
+		reg7[2] = 0x07;
+		reg7[3] = 0x01;
+		reg.val = reg7;
 
-	send_cmd(controller, reg);
+		send_cmd(controller, reg);
 
-	printf("PMIC Register 8 after update: ");
+		printf("PMIC Register 8 after update: ");
 
-	regSetting_t reg2;
-	reg2.addr = IT8951_TCON_BYPASS_I2C;
-	reg2.valCount = 4;
-	uint16_t *reg8;
-	reg8 = malloc(reg.valCount * sizeof(uint16_t));
-	reg8[0] = 0x00;
-	reg8[1] = 0x68;
-	reg8[2] = 0x08;
-	reg8[3] = 0x01;
-	reg2.val = reg8;
+		regSetting_t reg2;
+		reg2.addr = IT8951_TCON_BYPASS_I2C;
+		reg2.valCount = 4;
+		reg8[0] = 0x00;
+		reg8[1] = 0x68;
+		reg8[2] = 0x08;
+		reg8[3] = 0x01;
+		reg2.val = reg8;
 
-	send_cmd(controller, reg2);
+		send_cmd(controller, reg2);
+	}
 
-	IT8951WaitForReady(bus, type);
+	//IT8951WaitForReady(bus, type);
 
 	return 0;
 }
@@ -263,7 +247,18 @@ static int clear_update(pl_generic_controller_t *p) {
 	stAreaImgInfo.usHeight = height;
 
 	//Load Image from Host to IT8951 Image Buffer
-	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
+//	if (stAreaImgInfo.usWidth >= 2048) {
+//		stAreaImgInfo.usWidth = (stAreaImgInfo.usWidth / 2);
+//		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+//		stLdImgInfo.ulStartFBAddr += (stAreaImgInfo.usHeight
+//				* stAreaImgInfo.usWidth);
+//		stLdImgInfo.ulImgBufBaseAddr += (stAreaImgInfo.usHeight
+//				* stAreaImgInfo.usWidth /*+ 180 * devInfo.usPanelW*/);
+//		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+//	} else {
+		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+	//}
+	//Display function 2
 	//Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
 
 	if (fillBuffer)
@@ -421,7 +416,17 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 	printf("Time Load and Scramble: %f\n", tTotal);
 
 	//Load Image from Host to IT8951 Image Buffer
-	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
+	if (stAreaImgInfo.usWidth >= 2048) {
+		stAreaImgInfo.usHeight = stAreaImgInfo.usHeight / 2;
+		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+		stLdImgInfo.ulStartFBAddr += (stAreaImgInfo.usHeight
+				* stAreaImgInfo.usWidth / 2);
+		stLdImgInfo.ulImgBufBaseAddr += (stAreaImgInfo.usHeight
+				* stAreaImgInfo.usWidth / 2);
+		//IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+	} else {
+		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+	}
 
 	return 0;
 
@@ -500,12 +505,12 @@ static int load_png_image(struct pl_generic_controller *controller,
 		if (read_png(path, &gpFrameBuf, &width, &height))
 			return -ENOENT;
 
-		FILE *fp;
-		fp = fopen("/tmp/img.txt", "w");
-
-		fwrite(gpFrameBuf, sizeof(gpFrameBuf[0]), 1280 * 960, fp);
-
-		fclose(fp);
+//		FILE *fp;
+//		fp = fopen("/tmp/img.txt", "w");
+//
+//		fwrite(gpFrameBuf, sizeof(gpFrameBuf[0]), 1280 * 960, fp);
+//
+//		fclose(fp);
 
 		controller->imageWidth = width;
 		controller->imageHeight = height;
@@ -679,10 +684,18 @@ static int load_png_image(struct pl_generic_controller *controller,
 			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
 	printf("Time Load and Scramble: %f\n", tTotal);
 
-	//Load Image from Host to IT8951 Image Buffer
-	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo); //Display function 2
-	//IT8951SetImgBufBaseAddr(bus, type, gulImgBufAddr);
-	//IT8951MemBurstWriteProc(bus, type, gulImgBufAddr, 640,
+//	if (stAreaImgInfo.usWidth >= 2048) {
+//		stAreaImgInfo.usWidth = (stAreaImgInfo.usWidth / 2);
+//		//stAreaImgInfo.usHeight = (stAreaImgInfo.usHeight / 2);
+//		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+//		stLdImgInfo.ulStartFBAddr += (stAreaImgInfo.usHeight
+//				* stAreaImgInfo.usWidth);
+//		stLdImgInfo.ulImgBufBaseAddr += (stAreaImgInfo.usHeight
+//				* stAreaImgInfo.usWidth  /*+ 180 * stAreaImgInfo.usWidth*/);
+//		//IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+//	} else {
+		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+	//}
 
 	if (scrambledPNG)
 		free(scrambledPNG);
@@ -690,6 +703,10 @@ static int load_png_image(struct pl_generic_controller *controller,
 	if (controller->cfa_overlay.r_position == -1) {
 		if (gpFrameBuf)
 			free(gpFrameBuf);
+
+		if (targetBuf)
+			free(targetBuf);
+
 	}
 	return 0;
 }
@@ -934,6 +951,8 @@ static int fill(struct pl_generic_controller *controller,
 
 	if (devInfo.usImgBufAddrH == NULL)
 		GetIT8951SystemInfo(bus, type, &devInfo);
+
+	//devInfo.usPanelW = 2048;
 
 	fillBuffer = malloc(devInfo.usPanelW * devInfo.usPanelH);
 	//Write pixel 0xF0(White) to Frame Buffer
