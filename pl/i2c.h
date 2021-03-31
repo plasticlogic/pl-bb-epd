@@ -70,6 +70,13 @@ typedef struct pl_i2c {
 		     const uint8_t *data, uint8_t count, uint8_t flags);
 
 	/**
+	   detect devices on the I2C bus
+	   @param[in] i2c this pl_i2c instance
+	   @return -1 if error, 0 otherwise
+	 */
+	int (*detect)(struct pl_i2c *i2c);
+
+	/**
 	   free the resources associated with this instance
 	   @param i2c this pl_i2c instance
 	 */
