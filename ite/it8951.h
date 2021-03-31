@@ -75,6 +75,7 @@ typedef struct {
 
 //I80 User defined command code
 #define USDEF_I80_CMD_DPY_AREA     		0x0034
+#define USDEF_I80_CMD_DPY_AREA_BUFFER 	0x0037
 #define USDEF_I80_CMD_GET_DEV_INFO 		0x0302
 #define USDEF_I80_CMD_POWER_CTR	  		0x0038
 #define USDEF_I80_CMD_VCOM_CTR     		0x0039

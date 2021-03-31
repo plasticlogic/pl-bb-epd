@@ -116,7 +116,7 @@ int show_image(const char *dir, const char *file, int wfid);
 int counter(const char* wf);
 int fill(uint8_t gl, uint8_t wfid, int update_mode);
 //remove int interface_data(	char* interface,int number_of_values,char values);
-int slideshow(const char *path, const char* wf, int count);
+int slideshow(const char *path, const char* wf, int count, int anim);
 
 int execute_help(int argc, char **argv);
 int execute_start_epdc(int argc, char **argv);
@@ -223,6 +223,8 @@ int main(int argc, char* argv[]) {
 		abort_msg("Initialization failed", ABORT_APPLICATION);
 		return -1;
 	}
+
+	epdc->controller->animationMode = 0;
 
 	// parse input parameter
 	if (argc > 1) {
@@ -347,7 +349,7 @@ int execute_start_epdc(int argc, char **argv) {
 	int initFromEEprom = false;
 	int gpio_only = false;
 
-	if (argc >= 5){
+	if (argc >= 5) {
 		gpio_only = atoi(argv[4]);
 	}
 
@@ -559,14 +561,17 @@ int execute_slideshow(int argc, char**argv) {
 	int stat;
 	//slideshow path wfid waittime
 	int waitTime = 0;
+	int anim = 0;
 	char* wfID = NULL;
+	if (argc >= 6)
+		anim = atoi(argv[5]);
 	if (argc >= 5)
 		waitTime = atoi(argv[4]);
 	if (argc >= 4)
 		wfID = argv[3];
 
 	if (argc >= 3) {
-		stat = slideshow(argv[2], wfID, waitTime);
+		stat = slideshow(argv[2], wfID, waitTime, anim);
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
 	}
@@ -830,20 +835,20 @@ int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 
 	sleep(2);
 
-	if (gpio_only == 0){
+	if (gpio_only == 0) {
 		stat = epdc->init(epdc, load_nvm_content);
-			if (stat < 0) {
-				LOG("EPDC-Init failed: %i\n", stat);
-				return stat;
-			}
-			if (execute_clear) {
-				stat = epdc->clear_init(epdc);
-			}
+		if (stat < 0) {
+			LOG("EPDC-Init failed: %i\n", stat);
+			return stat;
+		}
+		if (execute_clear) {
+			stat = epdc->clear_init(epdc);
+		}
 
-			if (execute_clear != 1)
-				stat = switch_hv(0);
-	}else {
-		printf("GPIO only set !");
+		if (execute_clear != 1)
+			stat = switch_hv(0);
+	} else {
+		printf("GPIO only set ! \n");
 	}
 
 	return stat;
@@ -1328,7 +1333,7 @@ int counter(const char* wf) {
 // ----------------------------------------------------------------------
 // Slideshow
 // ----------------------------------------------------------------------
-int slideshow(const char *path, const char* wf, int waittime) {
+int slideshow(const char *path, const char* wf, int waittime, int anim) {
 	DIR *dir;
 	struct dirent *d;
 	int wfid = -1;
@@ -1343,29 +1348,67 @@ int slideshow(const char *path, const char* wf, int waittime) {
 	LOG("Running slideshow");
 //#endif
 //*
-	while (count--) {
+	epdc->controller->animationMode = anim;
 
-		if ((dir = opendir(path)) == NULL) {
-			LOG("Failed to open directory [%s]", path);
-			return -ENOENT;
-		}
+	if (anim == 1) {
 
-		while ((d = readdir(dir)) != NULL) {
-			LOG("%s", d->d_name);
-			if (d->d_name[0] == '.')
-				continue;
+		struct dirent **namelist;
+		int n;
+		int i = 0;
 
-			stat = show_image(path, d->d_name, wfid);
-			if (stat < 0) {
-				LOG("Failed to show image");
-				return stat;
+		n = scandir(path, &namelist, NULL, alphasort);
+
+		if (n < 0)
+			perror("scandir");
+		else {
+			while (count--) {
+				while (i < n) {
+
+					if (namelist[i]->d_name[0] == '.') {
+						i++;
+						continue;
+					}
+
+					printf("%s\n", namelist[i]->d_name);
+
+					stat = show_image(path, namelist[i]->d_name, wfid);
+//				free(namelist[i]);
+					++i;
+					if (stat < 0) {
+						LOG("Failed to show image");
+						return stat;
+					}
+
+				}
+				i = 0;
 			}
-			usleep(waittime);
+			free(namelist);
+			switch_hv(0);
 		}
-		closedir(dir);
-	}
+	} else {
+		while (count--) {
+			if ((dir = opendir(path)) == NULL) {
+				LOG("Failed to open directory [%s]", path);
+				return -ENOENT;
+			}
+			while ((d = readdir(dir)) != NULL) {
+				LOG("%s", d->d_name);
+				if (d->d_name[0] == '.')
+					continue;
 
-//*/
+				stat = show_image(path, d->d_name, wfid);
+
+				if (stat < 0) {
+					LOG("Failed to show image");
+					return stat;
+
+				}
+				usleep(waittime);
+			}
+		}
+	}
+	closedir(dir);
+
 	return 0;
 }
 
@@ -1379,7 +1422,7 @@ int show_image(const char *dir, const char *file, int wfid) {
 
 	LOG("Image: %s %s", dir, file);
 	if (wfid <= -1 || wfid > 14) {
-		wfid = 2;	// = pl_generic_controller_get_wfid(epdc->controller, wfID);
+		wfid = 2; // = pl_generic_controller_get_wfid(epdc->controller, wfID);
 	}
 	if (wfid < 0)
 		return -EINVAL;

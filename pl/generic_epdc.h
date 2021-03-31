@@ -1,21 +1,21 @@
 /*
-  Plastic Logic EPD project on BeagleBone
+ Plastic Logic EPD project on BeagleBone
 
-  Copyright (C) 2018 Plastic Logic
+ Copyright (C) 2018 Plastic Logic
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 /*
  * generic_epdc.h
  *
@@ -31,7 +31,7 @@
 #include <pl/generic_controller.h>
 #include <errno.h>
 
-typedef struct pl_generic_epdc{
+typedef struct pl_generic_epdc {
 	int default_vcom;
 	pl_hv_t *hv;
 	pl_nvm_t *nvm;
@@ -40,11 +40,13 @@ typedef struct pl_generic_epdc{
 	void (*delete)(struct pl_generic_epdc *p);
 	int (*init)(struct pl_generic_epdc *p, int load_nvm_content);
 	int (*clear_init)(struct pl_generic_epdc *p);
-	int (*update)(struct pl_generic_epdc *p, int wfid, enum pl_update_mode mode, const struct pl_area *area);
+	int (*update)(struct pl_generic_epdc *p, int wfid, enum pl_update_mode mode,
+			const struct pl_area *area);
 	int (*set_vcom)(struct pl_generic_epdc *p, int vcomInMillivolt);
 	int (*get_vcom)(struct pl_generic_epdc *p);
 	int (*read_register)(struct pl_generic_epdc *p, const regSetting_t* setting);
-	int (*write_register)(struct pl_generic_epdc *p, const regSetting_t setting, const uint32_t bitmask);
+	int (*write_register)(struct pl_generic_epdc *p, const regSetting_t setting,
+			const uint32_t bitmask);
 	int (*send_cmd)(struct pl_generic_epdc *p, const regSetting_t setting);
 	int (*get_resolution)(struct pl_generic_controller *p, int* xres, int* yres);
 

@@ -54,7 +54,7 @@ bool clear = false;
 I80IT8951DevInfo devInfo;
 uint16_t reg7[4];
 uint16_t reg8[4];
-int verbose = 0;
+int verbose = 1;
 
 static int trigger_update(struct pl_generic_controller *controller);
 static int clear_update(pl_generic_controller_t *p);
@@ -129,12 +129,15 @@ static int trigger_update(struct pl_generic_controller *controller) {
 	}
 
 //Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA);
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
 	IT8951WriteData(bus, type, (TWord) partialX);     				// Display X
 	IT8951WriteData(bus, type, (TWord) partialY); 					// Display Y
 	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
 	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
 	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
+	IT8951WriteData(bus, type, (TWord) devInfo.usImgBufAddrL); // Display H devInfo.usPanelH 960
+	IT8951WriteData(bus, type, (TWord) devInfo.usImgBufAddrH);
+
 //	regSetting_t regUpdate;
 //	regUpdate.addr = (int) USDEF_I80_CMD_DPY_AREA;
 //	regUpdate.valCount = (int) 5;
@@ -147,8 +150,11 @@ static int trigger_update(struct pl_generic_controller *controller) {
 //	regUpdate.val = data;
 //	send_cmd(controller, regUpdate);
 //	IT8951WriteDataBurst(bus, type, data, 5);
+//
 
 	if (verbose) {
+
+		IT8951WaitForDisplayReady(bus, type);
 
 		printf("PMIC Register 7 after update: ");
 
@@ -246,20 +252,7 @@ static int clear_update(pl_generic_controller_t *p) {
 	stAreaImgInfo.usWidth = width;
 	stAreaImgInfo.usHeight = height;
 
-	//Load Image from Host to IT8951 Image Buffer
-//	if (stAreaImgInfo.usWidth >= 2048) {
-//		stAreaImgInfo.usWidth = (stAreaImgInfo.usWidth / 2);
-//		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-//		stLdImgInfo.ulStartFBAddr += (stAreaImgInfo.usHeight
-//				* stAreaImgInfo.usWidth);
-//		stLdImgInfo.ulImgBufBaseAddr += (stAreaImgInfo.usHeight
-//				* stAreaImgInfo.usWidth /*+ 180 * devInfo.usPanelW*/);
-//		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-//	} else {
-		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-	//}
-	//Display function 2
-	//Display Area ¡V (x,y,w,h) with mode 0 for initial White to clear Panel
+	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
 
 	if (fillBuffer)
 		free(fillBuffer);
@@ -684,18 +677,77 @@ static int load_png_image(struct pl_generic_controller *controller,
 			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
 	printf("Time Load and Scramble: %f\n", tTotal);
 
-//	if (stAreaImgInfo.usWidth >= 2048) {
-//		stAreaImgInfo.usWidth = (stAreaImgInfo.usWidth / 2);
-//		//stAreaImgInfo.usHeight = (stAreaImgInfo.usHeight / 2);
-//		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-//		stLdImgInfo.ulStartFBAddr += (stAreaImgInfo.usHeight
-//				* stAreaImgInfo.usWidth);
-//		stLdImgInfo.ulImgBufBaseAddr += (stAreaImgInfo.usHeight
-//				* stAreaImgInfo.usWidth  /*+ 180 * stAreaImgInfo.usWidth*/);
-//		//IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-//	} else {
-		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-	//}
+	//multiple Buffer Calculation
+//	For each address the formula is Image buffer address + number * panel height* panel width.
+//	ex:
+//	(#0)Image buffer address = 0x10000
+//	#1  = 0x10000 + panel height* panel width
+//	#2  = 0x10000 + 2*(panel height* panel width)
+
+	//TDWord buf1 = 0x4A3E38;
+	//TDWord buf2 = 0x377E30;
+	//TDWord buf3 = 0x5CFE40;
+
+	//int test = 0;
+	//TWord tempBuf[1280 * 960];
+	//while(test < (1280*960)){
+
+	//printf("Image Buffer Address = %X\r\n", buf2);
+
+	//stLdImgInfo.ulImgBufBaseAddr = buf2;
+
+	//memset(tempBuf, 0x00, 1280 * 960);
+	//stLdImgInfo.ulStartFBAddr = tempBuf;
+
+	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+
+	//IT8951WaitForReady(bus, type);
+
+//	//TestBufferUpdate
+//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
+//	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
+//	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
+//	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
+//	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
+//	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
+//	IT8951WriteData(bus, type, (TWord) gulImgBufAddr & 0xFFFF);
+//	IT8951WriteData(bus, type, (TWord) (gulImgBufAddr >> 16) & 0xFFFF);
+
+//	stLdImgInfo.ulImgBufBaseAddr = buf1;
+//
+//	memset(tempBuf, 0xFF, 1280 * 960);
+//	stLdImgInfo.ulStartFBAddr = tempBuf;
+//
+//	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+//
+//	IT8951WaitForReady(bus, type);
+//
+//	//TestBufferUpdate
+//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
+//	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
+//	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
+//	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
+//	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
+//	IT8951WriteData(bus, type, (TWord) 4); 				// Display Mode
+//	IT8951WriteData(bus, type, (TWord) buf1 & 0xFFFF);
+//	IT8951WriteData(bus, type, (TWord) (buf1 >> 16) & 0xFFFF);
+//
+//	stLdImgInfo.ulImgBufBaseAddr = buf3;
+//	stLdImgInfo.ulStartFBAddr = targetBuf;
+//
+//	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+//
+//	IT8951WaitForReady(bus, type);
+//
+//	//TestBufferUpdate
+//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
+//	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
+//	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
+//	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
+//	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
+//	IT8951WriteData(bus, type, (TWord) 4); 				// Display Mode
+//	IT8951WriteData(bus, type, (TWord) buf3 & 0xFFFF);
+//	IT8951WriteData(bus, type, (TWord) (buf3 >> 16) & 0xFFFF);
 
 	if (scrambledPNG)
 		free(scrambledPNG);
@@ -707,7 +759,11 @@ static int load_png_image(struct pl_generic_controller *controller,
 		if (targetBuf)
 			free(targetBuf);
 
+//		if (tempBuf)
+//			free(tempBuf);
+
 	}
+
 	return 0;
 }
 

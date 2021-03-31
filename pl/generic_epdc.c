@@ -457,6 +457,9 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 		LOG("Setting vcom: %d", p->default_vcom);
 		stat = p->set_vcom(p, p->default_vcom);
 
+		LOG("Update Temp: %d", controller->manual_temp);
+		stat = controller->update_temp(controller);
+
 #if VERBOSE
 		LOG("%s: stat: %i", __func__, stat);
 #endif
@@ -565,17 +568,17 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 
 	int stat = 0;
 
-	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL
-			&& controller->temp_mode != PL_EPDC_TEMP_INTERNAL) {
-		if (controller->update_temp != NULL)
-			stat |= controller->update_temp(controller);
-	}
+//	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL
+//			&& controller->temp_mode != PL_EPDC_TEMP_INTERNAL) {
+//		if (controller->update_temp != NULL)
+//			stat |= controller->update_temp(controller);
+	//}
 	//gettimeofday(&tStart, NULL);
-
+//read_stopwatch(&t, "update_temp", 1);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	read_stopwatch(&t, "update_temp", 1);
+
 	stat |= controller->configure_update(controller, wfID, mode, area);
 	read_stopwatch(&t, "configure_update", 1);
 #if VERBOSE
@@ -583,7 +586,8 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 #endif
 
 	if (!nowait) {
-		stat |= switch_hvs_on(hv);
+		if (!controller->animationMode)
+			stat |= switch_hvs_on(hv);
 	}
 	read_stopwatch(&t, "switch_hvs_on", 1);
 
@@ -595,14 +599,15 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 	}
 	read_stopwatch(&t, "trigger update", 1);
 
-	stat |= controller->wait_update_end(controller);
+	//stat |= controller->wait_update_end(controller);
 
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
 	read_stopwatch(&t, "cwait_update_end", 1);
 
-	stat |= switch_hvs_off(hv);
+	if (!controller->animationMode)
+		stat |= switch_hvs_off(hv);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif

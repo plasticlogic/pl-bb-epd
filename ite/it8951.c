@@ -158,10 +158,13 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 	struct timeval tStop, tStart; // time variables
 	float tTotal;
 
+	gettimeofday(&tStart, NULL);
+
 	//Source buffer address of Host
 	uint8_t* pusFrameBuf = (uint8_t*) pstLdImgInfo->ulStartFBAddr;
 
 	//Set Image buffer(IT8951) Base address
+
 	IT8951SetImgBufBaseAddr(bus, type, pstLdImgInfo->ulImgBufBaseAddr);
 
 	if (pstAreaImgInfo->usWidth > 2048) {
@@ -183,9 +186,6 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 				}
 			}
 
-//		saveBufToPNG(pstAreaImgInfo->usWidth, pstAreaImgInfo->usHeight,
-//				tempBuf);
-
 		if (*type == SPI_HRDY) {
 			struct pl_gpio * gpio = (struct pl_gpio *) bus->hw_ref;
 			int b = 0;
@@ -193,7 +193,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 				IT8951WriteDataBurst(bus, type, (TWord*) tempBuf,
 						pstAreaImgInfo->usWidth / 2);
-				pusFrameBuf += pstAreaImgInfo->usWidth / 2;
+				tempBuf += pstAreaImgInfo->usWidth;
 				j = b;
 			}
 		} else if (*type == I80) {
@@ -203,6 +203,9 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 			j = pstAreaImgInfo->usHeight;
 		}
 		IT8951LoadImgEnd(bus, type);
+
+		saveBufToPNG(pstAreaImgInfo->usWidth, pstAreaImgInfo->usHeight,
+				tempBuf);
 
 		//Second image Part
 		pstAreaImgInfo->usX = pstAreaImgInfo->usWidth;
@@ -226,7 +229,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 				IT8951WriteDataBurst(bus, type, (TWord*) tempBuf2,
 						pstAreaImgInfo->usWidth / 2);
-				tempBuf2 += pstAreaImgInfo->usWidth / 2;
+				tempBuf2 += pstAreaImgInfo->usWidth;
 				j = b;
 			}
 		} else if (*type == I80) {
@@ -236,8 +239,23 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 		}
 		IT8951LoadImgEnd(bus, type);
 
+		gettimeofday(&tStop, NULL);
+		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+		printf("Data Transmission --> Time: %f\n", tTotal);
+
+//		if (tempBuf)
+//			free(tempBuf);
+//
+//		if (tempBuf2)
+//			free(tempBuf2);
+
 	} else {
 
+		//pstAreaImgInfo->usX = 400;
+		//pstAreaImgInfo->usY = 300;
+		//saveBufToPNG(pstAreaImgInfo->usWidth, pstAreaImgInfo->usHeight,
+		//		pusFrameBuf);
 		IT8951LoadImgAreaStart(bus, type, pstLdImgInfo, pstAreaImgInfo);
 
 		//Host Write Data
@@ -250,7 +268,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 
 				IT8951WriteDataBurst(bus, type, (TWord*) pusFrameBuf,
 						pstAreaImgInfo->usWidth / 2);
-				pusFrameBuf += pstAreaImgInfo->usWidth / 2;
+				pusFrameBuf += pstAreaImgInfo->usWidth;
 				j = b;
 			}
 		} else if (*type == I80) {
@@ -260,14 +278,11 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 			j = pstAreaImgInfo->usHeight;
 		}
 
-		//gettimeofday(&tStop, NULL);
+		gettimeofday(&tStop, NULL);
+		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+		printf("Data Transmission --> Time: %f\n", tTotal);
 
-		//tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-		//		+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-		//printf("Height: %d --> Time: %f\n", (int) j, tTotal);
-
-		//Send Load Img End Command
-		//if (pstAreaImgInfo->usWidth <= 2048 && pstAreaImgInfo->usHeight <= 2048)
 		IT8951LoadImgEnd(bus, type);
 	}
 
@@ -404,49 +419,20 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		}
 #endif
 
-		struct timeval tStop, tStart; // time variables
-		float tTotal;
-
 		//wait for ready
 		IT8951WaitForReady(bus, type);
 
-		gettimeofday(&tStart, NULL);
 		//Switch C/D to Data => Data - H
 		gpio->set(i80->hdc_gpio, 1);
 
 		//CS
 		gpio->set(i80->hcs_n_gpio, 0);
 
-//		gettimeofday(&tStop, NULL);
-//		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-//				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-//		printf("Data Transmission --> Time: %f\n", tTotal);
-
 		gpio->set(i80->hwe_n_gpio, 0);
-
-		//gettimeofday(&tStart, NULL);
-
-//		while (1) {
-//
-//			if (size < 1024) {
-//				iResult = write(i80->fd, usData, size);
-//
-//				break;
-//			} else {
-//				iResult = write(i80->fd, usData, 1024);
-//				usData += 1024;
-//				size -= 1024;
-//			}
-//		}
 
 		iResult = write(i80->fd, usData, size / 2);
 		IT8951WaitForReady(bus, type);
 		iResult = write(i80->fd, usData + size / 2, size / 2);
-
-		gettimeofday(&tStop, NULL);
-		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
-				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-		printf("Data Transmission --> Time: %f\n", tTotal);
 
 		//wait for ready
 		IT8951WaitForReady(bus, type);
