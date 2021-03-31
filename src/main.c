@@ -64,6 +64,7 @@
 #include <libgd/src/gdfontl.h>
 
 #define INTERNAL_USAGE
+#define IC2_INTERFACE
 #define VERSION_INFO		"v1.2*"
 
 // ----------------------------------------------------------------------
@@ -141,6 +142,9 @@ int execute_switch_hv(int argc, char **argv);
 int execute_switch_com(int argc, char **argv);
 int execute_send_cmd(int argc, char **argv);
 int execute_fill(int argc, char **argv);
+int execute_detect_i2c(int argc, char **argv);
+int execute_write_i2c(int argc, char **argv);
+int execute_read_i2c(int argc, char **argv);
 int print_versionInfo(int argc, char **argv);
 
 void printHelp_start_epdc(int identLevel);
@@ -165,6 +169,9 @@ void printHelp_switch_hv(int identLevel);
 void printHelp_switch_com(int identLevel);
 void printHelp_send_cmd(int identLevel);
 void printHelp_fill(int identLevel);
+void printHelp_detect_i2c(int identLevel);
+void printHelp_write_i2c(int identLevel);
+void printHelp_read_i2c(int identLevel);
 
 struct CmdLineOptions supportedOperations[] = {
 		{ "-start_epdc", "initializes the EPD controller", execute_start_epdc, printHelp_start_epdc },
@@ -182,6 +189,11 @@ struct CmdLineOptions supportedOperations[] = {
 		{ "-slideshow", "shows a slidshow of .png images", execute_slideshow, printHelp_slideshow },
 		{ "-fill", "fill the screen with a defined greylevel", execute_fill, printHelp_fill },
 		{ "-count", "shows a counting number", execute_counter, printHelp_counter },
+#ifdef IC2_INTERFACE
+		{ "-detect_i2c", "searches for all devices connected to ic2", execute_detect_i2c, printHelp_detect_i2c },
+		{ "-write_i2c", "send data over i2c", execute_write_i2c, printHelp_write_i2c },
+		{ "-read_i2c", "receives data over i2c", execute_read_i2c, printHelp_read_i2c },
+#endif
 #ifdef INTERNAL_USAGE
 		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd, printHelp_send_cmd },
 		{ "-write_reg", "writes to a register of EPD controller", execute_write_reg, printHelp_write_reg },
@@ -638,6 +650,21 @@ int execute_fill(int argc, char **argv) {
 		}
 	}
 	return fill(gl, wfid, update_mode);
+}
+
+int execute_detect_i2c(int argc, char **argv) {
+
+	return 0;
+}
+
+int execute_write_i2c(int argc, char **argv) {
+
+	return 0;
+}
+
+int execute_read_i2c(int argc, char **argv) {
+
+	return 0;
 }
 
 int execute_write_reg(int argc, char **argv) {
@@ -1727,6 +1754,39 @@ void printHelp_read_reg(int identLevel) {
 	printf(
 			"%*s \t<datacount>: \tspecifies the amount of data portions to be read.\n",
 			identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_detect_i2c(int identLevel) {
+
+	printf(
+			"%*s Detects all devices on the epdc I2C bus.\n",
+			identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -detect_i2c\n", identLevel,
+			" ");
+	printf("\n");
+}
+
+void printHelp_write_i2c(int identLevel) {
+
+	printf(
+			"%*s Writes data to the epdc I2C bus.\n",
+			identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -write_i2c\n", identLevel,
+			" ");
+	printf("\n");
+}
+
+void printHelp_read_i2c(int identLevel) {
+
+	printf(
+			"%*s Reads data frome the epdc I2C bus.\n",
+			identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -read_i2c\n", identLevel,
+			" ");
 	printf("\n");
 }
 
