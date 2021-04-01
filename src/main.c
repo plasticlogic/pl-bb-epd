@@ -659,6 +659,17 @@ int execute_detect_i2c(int argc, char **argv) {
 
 int execute_write_i2c(int argc, char **argv) {
 
+//	int (*write)(struct pl_i2c *i2c, uint8_t addr,
+//		     const uint8_t *data, uint8_t count, uint8_t flags);
+
+	struct pl_i2c* i2c = &(hardware->host_i2c);
+
+	uint8_t data[2];
+	data[0] = 0xf0;
+	data[1] = 0x0f;
+
+	i2c->write(i2c, 0xff, data, sizeof(data), 0);
+
 	return 0;
 }
 
