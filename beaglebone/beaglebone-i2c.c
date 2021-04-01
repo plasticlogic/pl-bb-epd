@@ -42,7 +42,7 @@ static int beaglebone_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 		const uint8_t *data, uint8_t count, uint8_t flags);
 static int beaglebone_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 		uint8_t *data, uint8_t count, uint8_t flags);
-
+static int beaglebone_i2c_detect(struct pl_i2c *i2c);
 /**
  * Initialisation of the I2C Module.
  * Which i2c interface is determined at compile time.
@@ -65,6 +65,7 @@ int beaglebone_i2c_init(uint8_t channel, struct pl_i2c *i2c) {
 
 	i2c->read = beaglebone_i2c_read;
 	i2c->write = beaglebone_i2c_write;
+	i2c->detect = beaglebone_i2c_detect;
 
 	return 0;
 }
@@ -124,5 +125,11 @@ static int beaglebone_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 	}
 	return 0;
 
+}
+
+static int beaglebone_i2c_detect(struct pl_i2c *i2c){
+
+	LOG("Beaglebone_i2c_detect not supported yet.\n");
+	return 0;
 }
 

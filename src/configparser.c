@@ -32,6 +32,7 @@
 
 #include "beaglebone/beaglebone-gpio.h"
 #include "beaglebone/beaglebone-i2c.h"
+#include "ite/it8951_i2c.h"
 //#include "beaglebone/beaglebone-spi.h"
 #include <pl/generic_interface.h>
 #include "epson/epson-i2c.h"
@@ -148,12 +149,6 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	if (setup->nvmSPI->open(setup->nvmSPI) != 1)
 		return -EBUSY;
 
-	// ------------------------------------
-	// initialize i2c
-	// ----------------------
-	stat = beaglebone_i2c_init(setup->i2c_port, &(setup->host_i2c));
-	if(stat < 0) return -ENODEV;
-
 
 	switch(setup->sInterfaceType){
 	case SPI: 			LOG("Interface: SPI"); break;
@@ -249,6 +244,30 @@ int parse_config(hw_setup_t *setup, const char *filename){
 				get_rgbw_pixel_value(2, setup->controller->cfa_overlay, rgbw_pixel),
 				get_rgbw_pixel_value(3, setup->controller->cfa_overlay, rgbw_pixel));
 	}
+
+
+	// ------------------------------------
+	// initialize i2c
+	// ----------------------
+	str = iniparser_getstring(dictConfig, "general:i2c_master", NULL);
+	if (str == NULL)
+	{
+		LOG("missing general:i2c_master setting... set default: i2c_master=BEAGLEBONE");
+		str = "BEAGLEBONE";
+	}
+
+	if(!strcmp(str, "EPDC"))
+	{
+		stat = it8951_i2c_init(setup->controller, &(setup->host_i2c));
+		if(stat < 0) return -ENODEV;
+	}
+	else
+	{
+		// str == BEAGLEBONE and others
+		stat = beaglebone_i2c_init(setup->i2c_port, &(setup->host_i2c));
+		if(stat < 0) return -ENODEV;
+	}
+
 
 	// ------------------------------------
 	// initialize HV parts

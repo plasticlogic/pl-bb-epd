@@ -64,7 +64,8 @@
 #include <libgd/src/gdfontl.h>
 
 #define INTERNAL_USAGE
-#define VERSION_INFO		"v1.2"
+#define IC2_INTERFACE
+#define VERSION_INFO		"v1.2*"
 
 // ----------------------------------------------------------------------
 // -  global variables
@@ -141,6 +142,9 @@ int execute_switch_hv(int argc, char **argv);
 int execute_switch_com(int argc, char **argv);
 int execute_send_cmd(int argc, char **argv);
 int execute_fill(int argc, char **argv);
+int execute_detect_i2c(int argc, char **argv);
+int execute_write_i2c(int argc, char **argv);
+int execute_read_i2c(int argc, char **argv);
 int print_versionInfo(int argc, char **argv);
 
 void printHelp_start_epdc(int identLevel);
@@ -165,50 +169,42 @@ void printHelp_switch_hv(int identLevel);
 void printHelp_switch_com(int identLevel);
 void printHelp_send_cmd(int identLevel);
 void printHelp_fill(int identLevel);
+void printHelp_detect_i2c(int identLevel);
+void printHelp_write_i2c(int identLevel);
+void printHelp_read_i2c(int identLevel);
 
-struct CmdLineOptions supportedOperations[] = { { "-start_epdc",
-		"initializes the EPD controller", execute_start_epdc,
-		printHelp_start_epdc }, { "-stop_epdc",
-		"de-initializes the EPD controller", execute_stop_epdc,
-		printHelp_stop_epdc }, { "-set_vcom", "sets com voltage",
-		execute_set_vcom, printHelp_set_vcom }, { "-set_waveform",
-		"sets the waveform", execute_set_waveform, printHelp_set_waveform }, {
-		"-set_temperature", "sets the temperature", execute_set_temperature,
-		printHelp_set_temperature }, { "-get_vcom", "gets com voltage",
-		execute_get_vcom, printHelp_get_vcom }, { "-get_resolution",
-		"gets display resolution", execute_get_resolution,
-		printHelp_get_resolution }, { "-get_waveform", "gets the waveform",
-		execute_get_waveform, printHelp_get_waveform }, { "-get_temperature",
-		"gets the temperature", execute_get_temperature,
-		printHelp_get_temperature }, { "-update_image", "updates the display",
-		execute_update_image, printHelp_update_image }, {
-		"-update_image_regional", "updates the display on certain area",
-		execute_update_image_regional, printHelp_update_image_regional }, {
-		"-update_gfx", "updates the display with auto gen. gfx image",
-		execute_update_gfx, printHelp_update_gfx }, { "-slideshow",
-		"shows a slidshow of .png images", execute_slideshow,
-		printHelp_slideshow },
-		{ "-fill", "fill the screen with a defined greylevel", execute_fill,
-				printHelp_fill }, { "-count", "shows a counting number",
-				execute_counter, printHelp_counter },
-#ifdef INTERNAL_USAGE
-		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd,
-				printHelp_send_cmd }, { "-write_reg",
-				"writes to a register of EPD controller", execute_write_reg,
-				printHelp_write_reg }, { "-read_reg",
-				"reads from a register of EPD controller", execute_read_reg,
-				printHelp_read_reg }, { "-pgm_epdc",
-				"programs firmware to the EPD controller", execute_pgm_epdc,
-				printHelp_pgm_epdc }, { "-info",
-				"displays general display informations", execute_info,
-				printHelp_info },
+struct CmdLineOptions supportedOperations[] = {
+		{ "-start_epdc", "initializes the EPD controller", execute_start_epdc, printHelp_start_epdc },
+		{ "-stop_epdc", "de-initializes the EPD controller", execute_stop_epdc, printHelp_stop_epdc },
+		{ "-set_vcom", "sets com voltage", execute_set_vcom, printHelp_set_vcom },
+		{ "-set_waveform", "sets the waveform", execute_set_waveform, printHelp_set_waveform },
+		{ "-set_temperature", "sets the temperature", execute_set_temperature, printHelp_set_temperature },
+		{ "-get_vcom", "gets com voltage", execute_get_vcom, printHelp_get_vcom },
+		{ "-get_resolution", "gets display resolution", execute_get_resolution, printHelp_get_resolution },
+		{ "-get_waveform", "gets the waveform", execute_get_waveform, printHelp_get_waveform },
+		{ "-get_temperature", "gets the temperature", execute_get_temperature, printHelp_get_temperature },
+		{ "-update_image", "updates the display", execute_update_image, printHelp_update_image },
+		{ "-update_image_regional", "updates the display on certain area", execute_update_image_regional, printHelp_update_image_regional },
+		{ "-update_gfx", "updates the display with auto gen. gfx image", execute_update_gfx, printHelp_update_gfx },
+		{ "-slideshow", "shows a slidshow of .png images", execute_slideshow, printHelp_slideshow },
+		{ "-fill", "fill the screen with a defined greylevel", execute_fill, printHelp_fill },
+		{ "-count", "shows a counting number", execute_counter, printHelp_counter },
+#ifdef IC2_INTERFACE
+		{ "-detect_i2c", "searches for all devices connected to ic2", execute_detect_i2c, printHelp_detect_i2c },
+		{ "-write_i2c", "send data over i2c", execute_write_i2c, printHelp_write_i2c },
+		{ "-read_i2c", "receives data over i2c", execute_read_i2c, printHelp_read_i2c },
 #endif
-		{ "-switch_hv", "switches hv on/off based on parameter",
-				execute_switch_hv, printHelp_switch_hv }, { "-switch_com",
-				"switches com on/off based on parameter", execute_switch_com,
-				printHelp_switch_com }, { "--version", "displays version info",
-				print_versionInfo, NULL }, { "--help",
-				"prints this help message", execute_help, NULL }, };
+#ifdef INTERNAL_USAGE
+		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd, printHelp_send_cmd },
+		{ "-write_reg", "writes to a register of EPD controller", execute_write_reg, printHelp_write_reg },
+		{ "-read_reg", "reads from a register of EPD controller", execute_read_reg, printHelp_read_reg },
+		{ "-pgm_epdc", "programs firmware to the EPD controller", execute_pgm_epdc, printHelp_pgm_epdc },
+		{ "-info", "displays general display informations", execute_info, printHelp_info },
+#endif
+		{ "-switch_hv", "switches hv on/off based on parameter", execute_switch_hv, printHelp_switch_hv },
+		{ "-switch_com", "switches com on/off based on parameter", execute_switch_com, printHelp_switch_com },
+		{ "--version", "displays version info", print_versionInfo, NULL },
+		{ "--help", "prints this help message", execute_help, NULL }, };
 
 /**
  * Main sequence
@@ -654,6 +650,60 @@ int execute_fill(int argc, char **argv) {
 		}
 	}
 	return fill(gl, wfid, update_mode);
+}
+
+int execute_detect_i2c(int argc, char **argv) {
+
+	return 0;
+}
+
+int execute_write_i2c(int argc, char **argv) {
+
+	uint8_t addr;
+	uint8_t data[2];
+	int stat = 0;
+
+	if (argc == 5)
+	{
+		addr = (int) strtol(argv[2], NULL, 0);
+		data[0] = (int) strtol(argv[3], NULL, 0);
+		data[1] = (int) strtol(argv[4], NULL, 0);
+
+		struct pl_i2c* i2c = &(hardware->host_i2c);
+
+		stat = i2c->write(i2c, addr, data, sizeof(data), 0);
+	}
+	else
+	{
+		LOG("Wrong number of parameter.");
+		return -1;
+	}
+
+	return stat;
+}
+
+int execute_read_i2c(int argc, char **argv) {
+
+	uint8_t addr;
+	uint8_t data[1];
+	int stat = 0;
+
+	if (argc == 4)
+	{
+		addr = (int) strtol(argv[2], NULL, 0);
+		data[0] = (int) strtol(argv[3], NULL, 0);
+
+		struct pl_i2c* i2c = &(hardware->host_i2c);
+
+		stat = i2c->read(i2c, addr, data, sizeof(data), 0);
+	}
+	else
+	{
+		LOG("Wrong number of parameter.");
+		return -1;
+	}
+
+	return stat;
 }
 
 int execute_write_reg(int argc, char **argv) {
@@ -1743,6 +1793,39 @@ void printHelp_read_reg(int identLevel) {
 	printf(
 			"%*s \t<datacount>: \tspecifies the amount of data portions to be read.\n",
 			identLevel, " ");
+	printf("\n");
+}
+
+void printHelp_detect_i2c(int identLevel) {
+
+	printf(
+			"%*s Detects all devices on the epdc I2C bus.\n",
+			identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -detect_i2c\n", identLevel,
+			" ");
+	printf("\n");
+}
+
+void printHelp_write_i2c(int identLevel) {
+
+	printf(
+			"%*s Writes data to the epdc I2C bus.\n",
+			identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -write_i2c\n", identLevel,
+			" ");
+	printf("\n");
+}
+
+void printHelp_read_i2c(int identLevel) {
+
+	printf(
+			"%*s Reads data frome the epdc I2C bus.\n",
+			identLevel, " ");
+	printf("\n");
+	printf("%*s Usage: epdc-app -read_i2c\n", identLevel,
+			" ");
 	printf("\n");
 }
 
