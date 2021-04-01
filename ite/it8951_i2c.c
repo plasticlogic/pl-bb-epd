@@ -32,7 +32,7 @@ static int it8951_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 
 	struct pl_generic_controller * controller = i2c->controller;
 
-	printf("IT8951 write I2C: Start\n");
+	//printf("IT8951 write I2C: Start\n");
 
 	uint16_t buffer[3 + count];
 
@@ -48,19 +48,40 @@ static int it8951_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 	for(i = 1; i < count; i++)
 	{
 		buffer[3 + i] = (uint16_t) data[i];
+		printf("Data: 0x%x\n", data[i]);
 	}
 
 	reg.val = buffer;
 
 	controller->send_cmd(controller, reg);
 
-	printf("IT8951 write I2C: End\n");
+	//printf("IT8951 write I2C: End\n");
 
 	return 0;
 }
 
 static int it8951_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 		uint8_t *data, uint8_t count, uint8_t flags){
+
+	struct pl_generic_controller * controller = i2c->controller;
+
+	//printf("IT8951 read I2C: Start\n");
+
+	uint16_t buffer[4];
+
+	regSetting_t reg;
+	reg.addr = IT8951_TCON_BYPASS_I2C;
+	reg.valCount = sizeof(buffer) / 2;
+	buffer[0] = 0x00; // 0 = read, 1 = write
+	buffer[1] = i2c_addr;
+	buffer[2] = (uint16_t) data[0];
+	buffer[3] = 1;
+
+	reg.val = buffer;
+
+	controller->send_cmd(controller, reg);
+
+	//printf("IT8951 read I2C: End\n");
 
 	return 0;
 }

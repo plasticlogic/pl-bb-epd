@@ -671,11 +671,6 @@ int execute_write_i2c(int argc, char **argv) {
 
 		struct pl_i2c* i2c = &(hardware->host_i2c);
 
-		// for debugging only
-//		addr = 0x68;
-//		data[0] = 0x07;
-//		data[1] = 0x01;
-
 		stat = i2c->write(i2c, addr, data, sizeof(data), 0);
 	}
 	else
@@ -689,7 +684,26 @@ int execute_write_i2c(int argc, char **argv) {
 
 int execute_read_i2c(int argc, char **argv) {
 
-	return 0;
+	uint8_t addr;
+	uint8_t data[1];
+	int stat = 0;
+
+	if (argc == 4)
+	{
+		addr = (int) strtol(argv[2], NULL, 0);
+		data[0] = (int) strtol(argv[3], NULL, 0);
+
+		struct pl_i2c* i2c = &(hardware->host_i2c);
+
+		stat = i2c->read(i2c, addr, data, sizeof(data), 0);
+	}
+	else
+	{
+		LOG("Wrong number of parameter.");
+		return -1;
+	}
+
+	return stat;
 }
 
 int execute_write_reg(int argc, char **argv) {
