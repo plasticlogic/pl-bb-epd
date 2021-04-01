@@ -665,10 +665,10 @@ int execute_write_i2c(int argc, char **argv) {
 	struct pl_i2c* i2c = &(hardware->host_i2c);
 
 	uint8_t data[2];
-	data[0] = 0xf0;
-	data[1] = 0x0f;
+	data[0] = 0x07;
+	data[1] = 0x01;
 
-	i2c->write(i2c, 0xff, data, sizeof(data), 0);
+	i2c->write(i2c, 0x68, data, sizeof(data), 0);
 
 	return 0;
 }

@@ -34,21 +34,21 @@ static int it8951_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 
 	printf("IT8951 write I2C: Start\n");
 
-	uint8_t buffer[2 + count];
+	uint16_t buffer[4];
 
 	regSetting_t reg;
-	reg.addr = (int) IT8951_TCON_BYPASS_I2C;
-	reg.valCount = sizeof(buffer);
+	reg.addr = IT8951_TCON_BYPASS_I2C;
+	reg.valCount = sizeof(buffer) / 2;
 	buffer[0] = 0x00; // 0 = write
 	buffer[1] = i2c_addr;
 
 	int i = 0;
 	for(i = 0; i < count; i++)
 	{
-		buffer[2 + i] = data[i];
+		buffer[2 + i] = (uint16_t) data[i];
 	}
 
-	reg.val = (uint16_t *) buffer;
+	reg.val = buffer;
 
 	controller->send_cmd(controller, reg);
 
