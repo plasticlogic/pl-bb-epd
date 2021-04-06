@@ -818,7 +818,7 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting) {
 	//usleep(8000);
 
 	if (setting.val[0] == 0x00) {
-		TWord* value = IT8951ReadData(interface, type, 1);  //read data
+		TWord* value = IT8951ReadData(interface, type, 2);  //read data
 		printf("Data: 0x%x\n", *value);
 	}
 

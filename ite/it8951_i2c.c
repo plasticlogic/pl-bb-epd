@@ -88,6 +88,27 @@ static int it8951_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 
 static int it8951_i2c_detect(struct pl_i2c *i2c){
 
+	struct pl_generic_controller * controller = i2c->controller;
+
+	printf("IT8951 detect I2C: Start\n");
+
+	uint16_t buffer[5];
+
+	regSetting_t reg;
+	reg.addr = IT8951_TCON_BYPASS_I2C;
+	reg.valCount = sizeof(buffer) / 2;
+	buffer[0] = 0x01; // 0 = read, 1 = write
+	buffer[1] = 0x68;
+	buffer[2] = 0x00;
+	buffer[3] = 0x00;
+	buffer[4] = 0x11;
+
+	reg.val = buffer;
+
+	controller->send_cmd(controller, reg);
+
+	printf("IT8951 detect I2C: End\n");
+
 	return 0;
 }
 

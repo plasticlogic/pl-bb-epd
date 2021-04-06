@@ -654,7 +654,21 @@ int execute_fill(int argc, char **argv) {
 
 int execute_detect_i2c(int argc, char **argv) {
 
-	return 0;
+	int stat = 0;
+
+	if (argc == 2)
+	{
+		struct pl_i2c* i2c = &(hardware->host_i2c);
+
+		stat = i2c->detect(i2c);
+	}
+	else
+	{
+		LOG("Wrong number of parameter.");
+		return -1;
+	}
+
+	return stat;
 }
 
 int execute_write_i2c(int argc, char **argv) {
