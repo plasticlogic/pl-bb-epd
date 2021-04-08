@@ -53,8 +53,6 @@
 
 #define FALCON_BUFFER_OUT_EN_N 	BEAGLEBONE_GPIO(3, 20) //P9-41 //by default should be low=enable
 
-#define FALCON_I80_HWE_N	BEAGLEBONE_GPIO(1,12)  //P8-12
-#define FALCON_I80_HRD_N	BEAGLEBONE_GPIO(1,13)  //P8-11
 #define FALCON_I80_HCS_N	BEAGLEBONE_GPIO(0,5)   //P9-17
 //#define FALCON_I80_HCS_N	BEAGLEBONE_GPIO(1,14)  //P8-16 --> waveshare eval wiring
 #define FALCON_I80_HDC		BEAGLEBONE_GPIO(1,17)  //P9-23
@@ -206,8 +204,6 @@ static const  struct pl_gpio_config g_falcon_i80_gpios[] = {
 	{ FALCON_DISPLAY_NVM_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_FIRMWARE_NVM_CS, 	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_SPI_CS_ITE, 		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ FALCON_I80_HWE_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ FALCON_I80_HRD_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HCS_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HDC,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HRDY,			PL_GPIO_INPUT  | PL_GPIO_INIT_H },
@@ -239,8 +235,6 @@ static const  struct pl_gpio_config g_falcon_i80_gpios[] = {
 
 static const  struct pl_gpio_config g_falcon_spi_gpios[] = {
 	{ FALCON_DISPLAY_NVM_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ FALCON_I80_HWE_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ FALCON_I80_HRD_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HCS_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HDC,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HRDY,			PL_GPIO_INPUT  | PL_GPIO_INIT_H },
