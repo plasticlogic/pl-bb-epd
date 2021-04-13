@@ -106,6 +106,16 @@ const struct s1d135xx_pins g_s1d135xx_pins = {
 	RUDDOCK_5V_EN,
 };
 
+const struct s1d135xx_pins g_s1d13541_falcon_pins = {
+	FALCON_GPIO2,
+	FALCON_DISPLAY_NVM_CS,
+	PL_GPIO_NONE,
+	PL_GPIO_NONE,
+	PL_GPIO_NONE,
+	PL_GPIO_NONE, //EPSON_CLK_EN,
+	RUDDOCK_5V_EN,
+};
+
 const struct s1d135xx_pins g_s1d13524_falcon_p_pins = {
 	RUDDOCK_RESET,
 	RUDDOCK_CS,
@@ -151,8 +161,8 @@ const struct it8951_pins g_it8951_falcon_pins = {
 	FALCON_I80_HRDY,
 	FALCON_I80_HCS_N,
 	FALCON_I80_HDC,
-	FALCON_I80_HWE_N,
-	FALCON_I80_HRD_N,
+	PL_GPIO_NONE,
+	PL_GPIO_NONE,
 	FALCON_SPI_CS_ITE,  //for SPI communication
 	// more for the parallel bus???
 };
@@ -220,7 +230,7 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 	}
 	else if (!strcmp(selection, "FALCON_PARALLEL" )){
 		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
-		p->s1d13541_pins = &g_s1d135xx_pins;
+		p->s1d13541_pins = &g_s1d13541_falcon_pins;
 		p->board_gpios = g_falcon_parallel_gpios;
 		p->gpio_count = ARRAY_SIZE(g_falcon_parallel_gpios);
 		p->vddGPIO = RUDDOCK_5V_EN;
@@ -229,7 +239,7 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 	else if (!strcmp(selection, "FALCON_I80" )){
 		p->it8951_pins = &g_it8951_falcon_pins;
 		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
-		p->s1d13541_pins = &g_s1d135xx_pins;
+		p->s1d13541_pins = &g_s1d13541_falcon_pins;
 		p->board_gpios = g_falcon_i80_gpios;
 		p->gpio_count = ARRAY_SIZE(g_falcon_i80_gpios);
 		p->vddGPIO = RUDDOCK_5V_EN;
@@ -238,7 +248,7 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 	else if (!strcmp(selection, "FALCON_SPI" )){
 		p->it8951_pins = &g_it8951_falcon_pins;
 		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
-		p->s1d13541_pins = &g_s1d135xx_pins;
+		p->s1d13541_pins = &g_s1d13541_falcon_pins;
 		p->board_gpios = g_falcon_spi_gpios;
 		p->gpio_count = ARRAY_SIZE(g_falcon_spi_gpios);
 		p->vddGPIO = RUDDOCK_5V_EN;
@@ -330,6 +340,11 @@ static it8951_t *get_it8951_instance(hw_setup_t *p){
 	}
 
 	return it8951;
+}
+
+it8951_t *get_it8951_controller_instance(hw_setup_t *p)
+{
+	return get_it8951_instance(p);
 }
 
 /**

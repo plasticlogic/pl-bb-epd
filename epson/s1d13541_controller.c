@@ -381,7 +381,7 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm){
 	assert(s1d135xx != NULL);
 
 	// enable external 32MHz clock for s1d13524
-	pl_gpio_set(s1d135xx->gpio, CHIFFCHAFF_32MHZ_EN, 1);
+	//pl_gpio_set(s1d135xx->gpio, CHIFFCHAFF_32MHZ_EN, 1);
 
 	stat = s1d135xx->init(s1d135xx);
 #if VERBOSE
