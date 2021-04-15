@@ -207,8 +207,8 @@ static int tps65185_check_revision(pl_pmic_t *p)
 
 	LOG("Version: %d.%d.%d", ver.v.major, ver.v.minor, ver.v.version);
 
-	if (ver.byte != HVPMIC_VERSION) {
-		LOG("Wrong version: 0x%02X instead of 0x%02X",
+	if (ver.byte == 0x00 || ver.byte == 0xff) {
+		LOG("Wrong version: 0x%02X",
 		    ver.byte, HVPMIC_VERSION);
 		return -EPMIC;
 	}
