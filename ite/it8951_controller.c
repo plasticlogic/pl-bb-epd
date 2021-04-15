@@ -36,9 +36,9 @@
 #include <pl/i80.h>
 #include <pl/gpio.h>
 #define LOG_TAG "it8951_controller"
-#include "pl/utils.h"
+#include <pl/utils.h>
 
-#include "ite/it8951_controller.h"
+#include <ite/it8951_controller.h>
 
 static const struct pl_wfid wf_table[] = { { "default", 2 }, { "0", 0 }, { "1",
 		1 }, { "2", 2 }, { "3", 3 }, { "4", 4 }, { "5", 5 }, { "6", 6 }, { "7",
@@ -813,14 +813,6 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting) {
 
 	for (i = 0; i < setting.valCount; i++)
 		IT8951WriteData(interface, type, setting.val[i]);
-
-	//sleep(1);
-	//usleep(8000);
-
-	if (setting.val[0] == 0x00) {
-		TWord* value = IT8951ReadData(interface, type, 2);  //read data
-		printf("Data: 0x%x\n", *value);
-	}
 
 	return 0;
 }

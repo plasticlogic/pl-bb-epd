@@ -64,6 +64,9 @@ static int it8951_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 		uint8_t *data, uint8_t count, uint8_t flags){
 
 	struct pl_generic_controller * controller = i2c->controller;
+	it8951_t *it8951 = controller->hw_ref;
+	struct pl_generic_interface *interface = it8951->interface;
+	enum interfaceType *type = it8951->sInterfaceType;
 
 	//printf("IT8951 read I2C: Start\n");
 
@@ -80,6 +83,18 @@ static int it8951_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 	reg.val = buffer;
 
 	controller->send_cmd(controller, reg);
+
+	// give the controller some time to receive the data
+	usleep( 10000);
+	TWord* value = IT8951ReadData(interface, type, 2);  //read data
+	printf("Data: 0x%x\n", *value);
+
+	// just check whether data is large enough to receive the return value
+	if(count >= 2)
+	{
+		data[1] = (uint8_t) *value;
+		count = 2;
+	}
 
 	//printf("IT8951 read I2C: End\n");
 
