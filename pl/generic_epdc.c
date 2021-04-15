@@ -289,10 +289,6 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 
 	controller->update_temp(controller);
 
-	it8951_t *it8951 = controller->hw_ref;
-	pl_generic_interface_t *bus = it8951->interface;
-	enum interfaceType *type = it8951->sInterfaceType;
-
 // initialize hv
 	if (!p->hv)
 		return -EINVAL;
