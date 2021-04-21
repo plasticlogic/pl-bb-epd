@@ -30,7 +30,8 @@
 #include "beaglebone/beaglebone-gpio.h"
 #include <errno.h>
 
-#define VCOM_EN         BEAGLEBONE_GPIO(0,14) //P9-26 // VCOM switch enable
+//#define VCOM_EN           BEAGLEBONE_GPIO(0,14) //P9-26 // VCOM switch enable
+#define VCOM_EN           BEAGLEBONE_GPIO(1,13) //P8-11 // ACVCOM switch on Power Extension Board
 #define PMIC_EN           BEAGLEBONE_GPIO(1,14) //P8-16 // HV-PMIC enable
 #define PMIC_POK          BEAGLEBONE_GPIO(0,15) //P9-24 // HV-PMIC power OK
 #define PMIC_FLT          BEAGLEBONE_GPIO(0,27) //P8-17 // HV-PMIC fault condition
@@ -230,7 +231,8 @@ static const  struct pl_gpio_config g_falcon_i80_gpios[] = {
 	{ RUDDOCK_HDB13,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HDB14,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HDB15,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
-	{ FALCON_ACVCOM_EN,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	//{ FALCON_ACVCOM_EN,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ VCOM_EN,					PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_PWR_BOOST_EN,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_ACVCOM_HIGH_EN,	PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_ACVCOM_LOW_EN,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
@@ -268,7 +270,8 @@ static const  struct pl_gpio_config g_falcon_spi_gpios[] = {
 	{ RUDDOCK_HDB13,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HDB14,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HDB15,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
-	{ FALCON_ACVCOM_EN,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	//{ FALCON_ACVCOM_EN,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ VCOM_EN,					PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_PWR_BOOST_EN,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_ACVCOM_HIGH_EN,	PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_ACVCOM_LOW_EN,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
