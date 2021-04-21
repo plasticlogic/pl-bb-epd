@@ -98,7 +98,7 @@ static int i80_init(struct pl_parallel *p)
 	pl_i80_t * i80_ref = (pl_i80_t*) p->hw_ref;
 
 	i80_ref->fd = open("/dev/parallel", O_RDWR);
-	if(p->fd < 0){
+	if(i80_ref->fd < 0){
 		return FALSE;
 	}
 

@@ -359,7 +359,7 @@ static int fill(pl_generic_controller_t *p, const struct pl_area *area, uint8_t 
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
-	return s1d135xx->fill(s1d135xx, S1D13541_LD_IMG_8BPP, 8, area, grey);
+	return s1d135xx->fill(s1d135xx, S1D13541_LD_IMG_4BPP, 4, area, grey);
 }
 
 static int load_png_image(pl_generic_controller_t *p, const char *path,  const struct pl_area *area, int top, int left)
@@ -368,6 +368,8 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,  const s
 	assert(s1d135xx != NULL);
 	s1d135xx->cfa_overlay = p->cfa_overlay;
 	s1d135xx->display_scrambling = p->display_scrambling;
+	s1d135xx->xoffset = p->xoffset;
+	s1d135xx->yoffset = p->yoffset;
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_FRAME_DATA_LENGTH);
 

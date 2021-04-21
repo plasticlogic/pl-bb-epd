@@ -595,7 +595,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 	}
 	read_stopwatch(&t, "trigger update", 1);
 
-	//stat |= controller->wait_update_end(controller);
+	stat |= controller->wait_update_end(controller);
 
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);

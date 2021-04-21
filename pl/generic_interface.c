@@ -61,5 +61,7 @@ pl_generic_interface_t* interface_new(uint8_t spi_channel, struct pl_gpio* p_gpi
 		interface->cs_gpio = FALCON_SPI_CS_ITE;
 	}
 
+	interface->type = type;
+
 	return interface;
 }
