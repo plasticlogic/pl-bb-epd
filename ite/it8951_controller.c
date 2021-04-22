@@ -774,14 +774,14 @@ static int load_png_image(struct pl_generic_controller *controller,
 }
 
 static int wait_update_end(struct pl_generic_controller *controller) {
-	//initialize communication structure
-	it8951_t *it8951 = controller->hw_ref;
-	assert(it8951 != NULL);
-	pl_generic_interface_t *bus = it8951->interface;
-	enum interfaceType *type = it8951->sInterfaceType;
-
-	//Poll the TCON Register, to know when the update has finished
-	IT8951WaitForDisplayReady(bus, type);
+//	//initialize communication structure
+//	it8951_t *it8951 = controller->hw_ref;
+//	assert(it8951 != NULL);
+//	pl_generic_interface_t *bus = it8951->interface;
+//	enum interfaceType *type = it8951->sInterfaceType;
+//
+//	//Poll the TCON Register, to know when the update has finished
+//	IT8951WaitForDisplayReady(bus, type);
 	return 0;
 }
 

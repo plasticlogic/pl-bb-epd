@@ -159,16 +159,16 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 	//IT8951WaitForReady(bus, type);
 	data = IT8951ReadReg(bus, type, 0x1e16);
 
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	//
-	IT8951WriteData(bus, type, 0x00);
-//
-//	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
+	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
-//	//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE to enable VCom_Switch
+	//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE to enable VCom_Switch
 	data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
 
 	IT8951WriteReg(bus, type, 0x1e16, data);
+
+	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
+
+	IT8951WriteData(bus, type, 0x00);
 
 //	do {
 //		data3 = IT8951ReadReg(bus, type, 0x1E14);
