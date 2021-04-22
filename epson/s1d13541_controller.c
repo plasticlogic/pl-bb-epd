@@ -373,7 +373,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,  const s
 	s1d135xx->xres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_LINE_DATA_LENGTH);
 	s1d135xx->yres = s1d135xx->read_reg(s1d135xx, S1D13541_REG_FRAME_DATA_LENGTH);
 
-	return s1d135xx->load_png_image(s1d135xx, path, S1D13541_LD_IMG_8BPP, 8, (struct pl_area *) area, top, left);
+	return s1d135xx->load_png_image(s1d135xx, path, S1D13541_LD_IMG_4BPP, 4, (struct pl_area *) area, top, left);
 }
 /* -- initialisation -- */
 
