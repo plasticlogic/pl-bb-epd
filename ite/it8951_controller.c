@@ -169,6 +169,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 
 		send_cmd(controller, reg);
 
+		TWord* value = IT8951ReadData(bus, type, 2);  //read data
+		printf("0x%x\n", *value);
+
 		printf("PMIC Register 8 after update: ");
 
 		regSetting_t reg2;
@@ -181,6 +184,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		reg2.val = reg8;
 
 		send_cmd(controller, reg2);
+
+		value = IT8951ReadData(bus, type, 2);  //read data
+		printf("0x%x\n", *value);
 	}
 
 	//IT8951WaitForReady(bus, type);
