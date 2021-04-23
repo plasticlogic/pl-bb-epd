@@ -103,7 +103,8 @@ static int nvm_MX25U4033E_spi_read(struct pl_nvm * nvm, unsigned int addr,
 		stat = spi.set_cs(&spi, 0);
 		stat = send_cmd(&spi, MX25U4033E_READ);			// read command
 		stat = spi.write_bytes(&spi, reg, 3);			// write 3-byte address
-		stat = spi.read_bytes(&spi, data, transferChunkSize);		// read data
+		stat = spi.read_bytes(&spi, data, transferChunkSize);
+	// read data
 		stat = spi.set_cs(&spi, 1);
 
 		byte_offset += transferChunkSize;
