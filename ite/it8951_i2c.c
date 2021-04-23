@@ -39,17 +39,28 @@ static int it8951_i2c_write(struct pl_i2c *i2c, uint8_t i2c_addr,
 	regSetting_t reg;
 	reg.addr = IT8951_TCON_BYPASS_I2C;
 	reg.valCount = sizeof(buffer) / 2;
-	buffer[0] = 0x01; // 0 = read, 1 = write
+
+	if(count <= 1)
+	{
+		buffer[0] = 0x00; // 0 = read --> buffer size of 1 indicates contains only register address
+	}
+	else
+	{
+		buffer[0] = 0x01; // 1 = write
+		count -= 1;
+	}
+
 	buffer[1] = i2c_addr;
 	buffer[2] = (uint16_t) data[0];
-	buffer[3] = count - 1;
+	buffer[3] = count;
 
 	int i = 0;
-	for(i = 1; i < count; i++)
-	{
-		buffer[3 + i] = (uint16_t) data[i];
-		printf("Data: 0x%x\n", data[i]);
-	}
+	if(buffer[0] == 0x01)
+		for(i = 0; i < count; i++)
+		{
+			buffer[4 + i] = (uint16_t) data[1 + i];
+			printf("Data: 0x%x\n", data[1 + i]);
+		}
 
 	reg.val = buffer;
 
@@ -70,30 +81,14 @@ static int it8951_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 
 	//printf("IT8951 read I2C: Start\n");
 
-	uint16_t buffer[4];
-
-	regSetting_t reg;
-	reg.addr = IT8951_TCON_BYPASS_I2C;
-	reg.valCount = sizeof(buffer) / 2;
-	buffer[0] = 0x00; // 0 = read, 1 = write
-	buffer[1] = i2c_addr;
-	buffer[2] = (uint16_t) data[0];
-	buffer[3] = 1;
-
-	reg.val = buffer;
-
-	controller->send_cmd(controller, reg);
-
-	// give the controller some time to receive the data
-	usleep( 10000);
-	TWord* value = IT8951ReadData(interface, type, 2);  //read data
-	printf("Data: 0x%x\n", *value);
-
-	// just check whether data is large enough to receive the return value
-	if(count >= 2)
+	int i = 0;
+	for(i=0; i<count; i++)
 	{
-		data[1] = (uint8_t) *value;
-		count = 2;
+		usleep( 10000);
+		TWord* value = IT8951ReadData(interface, type, 2);  //read data
+		printf("Data: 0x%x\n", *value);
+
+		data[i] = (uint8_t) *value;
 	}
 
 	//printf("IT8951 read I2C: End\n");
