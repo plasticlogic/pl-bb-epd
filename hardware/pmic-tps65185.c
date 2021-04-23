@@ -382,10 +382,10 @@ static int tps65185_vcom_enable(pl_pmic_t *p){
 	//LOG("tps65185_vcom_enable - not yet implemented");
 
 	uint8_t data = 0;
-	//pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, &data);
+	pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, &data);
 
 	// enable vcom
-	data |= 0xbf;
+	data |= 0x10;
 
 	pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, data);
 	usleep(10000);
@@ -397,11 +397,11 @@ static int tps65185_vcom_disable(pl_pmic_t *p){
 	//LOG("tps65185_vcom_disable - not yet implemented");
 
 	uint8_t data = 0;
-	//pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, &data);
+	pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, &data);
 
 	// disable vcom
-	//data &= 0xef;
-	data = 0xaf;
+	data &= 0xef;
+	//data = 0xaf;
 
 	pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, data);
 
