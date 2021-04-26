@@ -18,6 +18,7 @@ typedef struct pl_spi_hrdy
   // control signal interface
   int cs_gpio; 		// chip select gpio
   int hrdy_gpio;
+  int interfaceType;
 
   int (*open)(struct pl_spi_hrdy * p);
   int (*close)(struct pl_spi_hrdy * p);

@@ -42,7 +42,7 @@ typedef struct pl_generic_interface {
 	int fd;           // open file descriptor: /dev/spi-X.Y
 	int cs_gpio; 		// chip select gpio
 	int hrdy_gpio;
-	//enum interfaceType bus_type; //SPI
+	enum interfaceType type; //SPI
 
 	int (*open)(struct pl_generic_interface * p);
 	int (*close)(struct pl_generic_interface * p);

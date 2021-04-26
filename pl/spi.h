@@ -39,7 +39,7 @@ typedef struct pl_spi
   int fd;           // open file descriptor: /dev/spi-X.Y
   int cs_gpio; 		// chip select gpio
   int hrdy_gpio;
-  //int interface_type;
+  int interfaceType;
 
   int (*open)(struct pl_spi * p);
   int (*close)(struct pl_spi * p);

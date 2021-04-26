@@ -258,7 +258,15 @@ int parse_config(hw_setup_t *setup, const char *filename){
 
 	if(!strcmp(str, "EPDC"))
 	{
-		stat = it8951_i2c_init(setup->controller, &(setup->host_i2c));
+		it8951_t * it8951_i2c = get_it8951_controller_instance(setup);
+		//it8951_i2c->interface = interface_new(0, &(setup->gpios), I80);
+		//it8951_i2c->sInterfaceType = &(it8951_i2c->interface->type);
+
+		struct pl_generic_controller * it8951_i2c_controller = generic_controller_new();
+		it8951_controller_setup(it8951_i2c_controller, it8951_i2c);
+
+		//stat = it8951_i2c_init(setup->controller, &(setup->host_i2c));
+		stat = it8951_i2c_init(it8951_i2c_controller, &(setup->host_i2c));
 		if(stat < 0) return -ENODEV;
 	}
 	else

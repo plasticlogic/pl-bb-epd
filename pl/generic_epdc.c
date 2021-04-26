@@ -289,10 +289,6 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content) {
 
 	controller->update_temp(controller);
 
-	it8951_t *it8951 = controller->hw_ref;
-	pl_generic_interface_t *bus = it8951->interface;
-	enum interfaceType *type = it8951->sInterfaceType;
-
 // initialize hv
 	if (!p->hv)
 		return -EINVAL;
@@ -599,7 +595,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 	}
 	read_stopwatch(&t, "trigger update", 1);
 
-	//stat |= controller->wait_update_end(controller);
+	stat |= controller->wait_update_end(controller);
 
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);

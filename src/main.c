@@ -654,24 +654,40 @@ int execute_fill(int argc, char **argv) {
 
 int execute_detect_i2c(int argc, char **argv) {
 
-	return 0;
+	int stat = 0;
+
+	if (argc == 2)
+	{
+		struct pl_i2c* i2c = &(hardware->host_i2c);
+
+		stat = i2c->detect(i2c);
+	}
+	else
+	{
+		LOG("Wrong number of parameter.");
+		return -1;
+	}
+
+	return stat;
 }
 
 int execute_write_i2c(int argc, char **argv) {
 
 	uint8_t addr;
-	uint8_t data[2];
+	uint8_t reg;
+	uint8_t data;
+
 	int stat = 0;
 
 	if (argc == 5)
 	{
-		addr = (int) strtol(argv[2], NULL, 0);
-		data[0] = (int) strtol(argv[3], NULL, 0);
-		data[1] = (int) strtol(argv[4], NULL, 0);
+		addr = (uint8_t) strtol(argv[2], NULL, 0);
+		reg = (uint8_t) strtol(argv[3], NULL, 0);
+		data = (uint8_t) strtol(argv[4], NULL, 0);
 
 		struct pl_i2c* i2c = &(hardware->host_i2c);
 
-		stat = i2c->write(i2c, addr, data, sizeof(data), 0);
+		stat = pl_i2c_reg_write_8(i2c, addr, reg, data);
 	}
 	else
 	{
@@ -685,17 +701,18 @@ int execute_write_i2c(int argc, char **argv) {
 int execute_read_i2c(int argc, char **argv) {
 
 	uint8_t addr;
-	uint8_t data[1];
+	uint8_t reg;
+	uint8_t *data;
 	int stat = 0;
 
 	if (argc == 4)
 	{
 		addr = (int) strtol(argv[2], NULL, 0);
-		data[0] = (int) strtol(argv[3], NULL, 0);
+		reg = (int) strtol(argv[3], NULL, 0);
 
 		struct pl_i2c* i2c = &(hardware->host_i2c);
 
-		stat = i2c->read(i2c, addr, data, sizeof(data), 0);
+		stat = pl_i2c_reg_read_8(i2c, addr, reg, data);
 	}
 	else
 	{
