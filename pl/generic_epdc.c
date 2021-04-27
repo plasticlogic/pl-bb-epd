@@ -41,6 +41,8 @@ static int do_clear_update(struct pl_generic_epdc *p);
 static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content);
 static int generic_update(struct pl_generic_epdc *p, int wfID,
 		enum pl_update_mode mode, const struct pl_area *area);
+static int generic_acep_update(struct pl_generic_epdc *p, int wfID,
+		enum pl_update_mode mode, const struct pl_area *area);
 static int get_resolution(struct pl_generic_controller *p, int* xres, int* yres);
 
 static int unpack_nvm_content(uint8_t *buffer, int bufferSize);
@@ -68,6 +70,7 @@ struct pl_generic_epdc *generic_epdc_new() {
 
 	p->init = epdc_init;
 	p->update = generic_update;
+	p->acep_update = generic_acep_update;
 	p->set_vcom = set_vcom;
 	p->get_vcom = get_vcom;
 	p->read_register = read_register;
@@ -604,6 +607,85 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 
 	if (!controller->animationMode)
 		stat |= switch_hvs_off(hv);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	read_stopwatch(&t, "switch_hvs_off", 1);
+
+	return stat;
+}
+
+/**
+ * Executes a complete update sequence on the epdc.
+ *
+ * @param p pointer to a generic epdc structure
+ * @param wfid waveform id used for the update
+ * @param mode refers to the update mode, i.e. full update, partial update
+ * @param area definition of an update area (can be NULL)
+ * @return success indicator: 0 if passed, otherwise <> 0
+ */
+static int generic_acep_update(struct pl_generic_epdc *p, int wfID,
+		enum pl_update_mode mode, const struct pl_area *area) {
+
+	assert(p != NULL);
+	pl_generic_controller_t *controller = p->controller;
+	pl_hv_t *hv = p->hv;
+	struct timespec t;
+	char system_call[100];
+
+	assert(controller != NULL);
+	assert(hv != NULL);
+
+	int stat = 0;
+
+	// switch hv on
+	stat |= switch_hvs_on(hv);
+
+	sprintf(system_call, "echo 1 > /sys/class/gpio/gpio%d/value", FALCON_PWR_BOOST_EN);
+	system(system_call);
+
+
+	read_stopwatch(&t, "switch_hvs_on", 1);
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+
+	// start BBACVCom
+	sprintf(system_call, "./BBACVCom -acvcom -phase %d > /tmp/acvcom.out &", wfID);
+	system(system_call);
+	usleep(1000000);
+
+	// The following single null frame is also used to align BBACVCom synchron to the image update.
+
+	// conditioning update (nullframe)
+	// write of pre image buffer
+	stat |= controller->configure_update(controller, 14, mode, area);
+
+	stat |= controller->trigger_update(controller);
+
+	stat |= controller->wait_update_end(controller);
+
+
+	// Initialise and trigger
+	stat |= controller->configure_update(controller, wfID, mode, area);
+
+	stat |= controller->trigger_update(controller);
+
+	stat |= controller->wait_update_end(controller);
+
+	read_stopwatch(&t, "trigger update", 1);
+
+#if VERBOSE
+	LOG("%s: stat: %i", __func__, stat);
+#endif
+	read_stopwatch(&t, "cwait_update_end", 1);
+
+	sprintf(system_call, "echo 0 > /sys/class/gpio/gpio%d/value", FALCON_PWR_BOOST_EN);
+	system(system_call);
+
+	// switch hv off
+	stat |= switch_hvs_off(hv);
+
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif

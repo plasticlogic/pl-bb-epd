@@ -386,6 +386,7 @@ static int tps65185_vcom_enable(pl_pmic_t *p){
 
 	// enable vcom
 	data |= 0x10;
+	data = 0xbf;
 
 	pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, data);
 	usleep(10000);
@@ -401,7 +402,7 @@ static int tps65185_vcom_disable(pl_pmic_t *p){
 
 	// disable vcom
 	data &= 0xef;
-	//data = 0xaf;
+	data = 0xaf;
 
 	pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, data);
 
