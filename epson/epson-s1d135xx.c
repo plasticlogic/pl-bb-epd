@@ -1243,6 +1243,11 @@ static int s1d13524_clear_init(struct s1d135xx *p) {
 
 static int s1d13541_init_controller(struct s1d135xx *p) {
 	int stat = 0;
+
+	// enable display 3V3 - its a workaround, since the epson ic is powerd by the display 3V3
+	uint8_t data[2] = {0x01, 0x20};
+	p->i2c->write(p->i2c, 0x68, data, sizeof(data), 0);
+
 	p->hrdy_mask = S1D13541_STATUS_HRDY;
 	p->hrdy_result = S1D13541_STATUS_HRDY;
 	p->measured_temp = -127;
