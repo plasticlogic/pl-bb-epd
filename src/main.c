@@ -938,6 +938,11 @@ int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 	//enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
+	//toggle PMIC WakeUP GPIO
+	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 0);
+	usleep(50000);
+	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 1);
+
 	sleep(2);
 
 	if (gpio_only == 0) {
