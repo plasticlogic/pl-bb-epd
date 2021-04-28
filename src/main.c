@@ -973,7 +973,10 @@ int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 int stop_epdc() {
 	int stat = 0;
 	stat = switch_hv(0);
-	hardware->gpios.set(hardware->vddGPIO, 0);
+
+	// de-active Epson x541 VDD
+	uint8_t data[2] = {0x01, 0x00};
+	hardware->host_i2c.write(&(hardware->host_i2c), 0x68, data, sizeof(data), 0);
 
 	// de-configure Epson GPIOs
 	stat = pl_gpio_deconfigure_list(&(hardware->gpios), hardware->board_gpios,
