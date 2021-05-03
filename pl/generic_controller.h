@@ -50,6 +50,7 @@ typedef struct pl_generic_controller {
 	unsigned imageHeight;
 	uint8_t animationMode;
 	cfa_overlay_t cfa_overlay;
+	int mediaType; // 0=BW, 1=CFA, 2=IridisRGB
 
 	void (*delete)(struct pl_generic_controller *p);
 	int (*init)(struct pl_generic_controller *p, int use_wf_from_nvm);

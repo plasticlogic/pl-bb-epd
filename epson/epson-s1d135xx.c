@@ -755,7 +755,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 
 	int memorySize = p->yres * p->xres;
 	uint8_t *scrambledPNG;
-	if (p->cfa_overlay.r_position == -1) {
+	if (p->mediaType == 0) {
 		LOG("BW");
 		uint8_t *pngBuffer;
 		// read png image
@@ -806,7 +806,23 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 				p->display_scrambling);
 		if (pngBuffer)
 			free(pngBuffer);
-	} else {
+	}
+	else if (p->mediaType == 2) {
+		LOG("ACEP");
+
+		uint8_t *pngBuffer;
+		// read png image
+		if (read_rgb_png_to_iridis(path, &pngBuffer, &width, &height))
+			return -ENOENT;
+
+		// scramble image
+		scrambledPNG = malloc(max(height, p->yres) * max(width, p->xres));
+		scramble_array(pngBuffer, scrambledPNG, &height, &width,
+				p->display_scrambling);
+		if (pngBuffer)
+			free(pngBuffer);
+	}
+	else {
 		LOG("CFA");
 		rgbw_pixel_t *pngBuffer;
 		// read png image

@@ -99,6 +99,7 @@ void swap32_array(int32_t **x, uint16_t n);
 
 /** reads a png file into a monochrome buffer */
 int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * heigth);
+int read_rgb_png_to_iridis(const char* file_name, png_byte ** image_ptr, int * width,	int * height);
 /** reads a png file into a color buffer */
 int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width, int * heigth);
 uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, rgbw_pixel_t pixel);
@@ -114,4 +115,74 @@ int maxstr2memcpy(char* to, char* from, size_t maxMemSize);
 
 unsigned long long read_stopwatch(struct timespec* starttime, char* label, int reset);
 void start_stopwatch(struct timespec* starttime);
+
+static uint8_t IRIDIS_COLOR_TO_GL_LUT[64] = {
+		0	,
+		0	,
+		0	,
+		102	,
+		102	,
+		102	,
+		102	,
+		102	,
+		102	,
+		102	,
+		102	,
+		51	,
+		85	,
+		85	,
+		85	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		51	,
+		0	,
+		0	,
+		0	,
+		102	,
+		102	,
+		102	,
+		102	,
+		102	,
+		102	,
+		102	,
+		255	,
+		255	,
+		17	,
+		17	,
+		17	,
+		17	,
+		68	,
+		68	,
+		34	,
+		34	,
+		34	,
+		34	,
+		34	,
+		34	,
+		119	,
+		119	,
+		119	,
+		119	,
+		17	,
+		17	,
+		17	,
+		255
+
+};
+
+
 #endif /* INCLUDE_UTIL_H */

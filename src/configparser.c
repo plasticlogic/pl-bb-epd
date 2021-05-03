@@ -201,6 +201,20 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "general:DISPLAY_SCRAMBLE_YOFFSET", NULL);
 	setup->controller->yoffset = (str == NULL) ? 0 : atoi(str);
 
+	str = iniparser_getstring(dictConfig, "general:MEDIA_TYPE", NULL);
+	if (str == NULL){
+		LOG("missing general:MEDIA_TYPE [BW|CFA|ACEP] setting... using default=BW");
+	}
+	else if(!strcmp(str, "CFA")){
+			setup->controller->mediaType = 1;
+	}
+	else if(!strcmp(str, "ACEP")){
+			setup->controller->mediaType = 2;
+	}
+	else{
+			setup->controller->mediaType = 0;
+	}
+
 	str = iniparser_getstring(dictConfig, "general:CFA", NULL);
 	if(str==NULL){
 		setup->controller->cfa_overlay.r_position = -1;

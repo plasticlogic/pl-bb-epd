@@ -188,7 +188,12 @@ static int wait_update_end(pl_generic_controller_t *p)
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
-	return s1d135xx->wait_update_end(s1d135xx);
+	if(s1d135xx->wait_update_end(s1d135xx))
+		if(s1d135xx->wait_update_end(s1d135xx))
+			if(s1d135xx->wait_update_end(s1d135xx))
+				return s1d135xx->wait_update_end(s1d135xx);
+
+	return 0;
 }
 
 static int read_register(pl_generic_controller_t *p, const regSetting_t* setting)
@@ -367,6 +372,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,  const s
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 	s1d135xx->cfa_overlay = p->cfa_overlay;
+	s1d135xx->mediaType = p->mediaType;
 	s1d135xx->display_scrambling = p->display_scrambling;
 	s1d135xx->xoffset = p->xoffset;
 	s1d135xx->yoffset = p->yoffset;
