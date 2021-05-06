@@ -34,7 +34,7 @@
 #define VERBOSE 0
 
 static const struct pl_wfid wf_table[] = {
-	{ "default",	   1 },
+	{ "default",	   2 },
 	{ "0",             0 },
 	{ "1",             1 },
 	{ "2",             2 },
