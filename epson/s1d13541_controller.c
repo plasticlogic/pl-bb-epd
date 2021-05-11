@@ -55,6 +55,7 @@ static const struct pl_wfid wf_table[] = {
 };
 
 const char *standard_waveform_filename = "/tmp/S1D13541_current_waveform.bin";
+const char *standard_acvcom_filename = "/tmp/BBACVCom.config";
 
 static int configure_update(pl_generic_controller_t *p, int wfid, enum pl_update_mode mode, const struct pl_area *area);
 static int trigger_update(pl_generic_controller_t *p);
@@ -273,13 +274,28 @@ static int load_wflib(pl_generic_controller_t *p, const char *filename)
 	char absolute_filename[300];
 	realpath(filename, absolute_filename);
 
-	// if not file is not the standard symlink,
+	// if file is not the standard symlink,
 	// then update the standard symlink with this file
 	if (strcmp(absolute_filename, standard_waveform_filename) != 0){
 		char command[1000];
 		sprintf(command, "ln -f -s %s %s", absolute_filename, standard_waveform_filename);
 		if (system(command)){
 			LOG("failed to set symlink for given waveform file...");
+			return -ENOENT;
+		}
+	}
+
+	char * pos = strrchr(absolute_filename, '.');
+	*pos = '\0';
+	strcat(absolute_filename, "_BBACVCom.config");
+
+	// if acvcom file is not the standard symlink,
+	// then update the standard symlink with this file
+	if (strcmp(absolute_filename, standard_acvcom_filename) != 0){
+		char command[1000];
+		sprintf(command, "ln -f -s %s %s", absolute_filename, standard_acvcom_filename);
+		if (system(command)){
+			LOG("failed to set symlink for given acvcom file...");
 			return -ENOENT;
 		}
 	}

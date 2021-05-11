@@ -651,6 +651,8 @@ static int generic_acep_update(struct pl_generic_epdc *p, int wfID,
 #endif
 
 	// start BBACVCom
+	LOG("%s: Start BBACVCom. Config file location:", __func__);
+	system("readlink -f /tmp/BBACVCom.config");
 	sprintf(system_call, "./BBACVCom -acvcom -phase %d > /tmp/acvcom.out &", wfID);
 	system(system_call);
 	usleep(1000000);
