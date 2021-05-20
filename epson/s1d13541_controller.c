@@ -55,7 +55,7 @@ static const struct pl_wfid wf_table[] = {
 };
 
 const char *standard_waveform_filename = "/tmp/S1D13541_current_waveform.bin";
-const char *standard_acvcom_filename = "/tmp/BBACVCom.config";
+const char *standard_acvcom_filename = "/tmp/AcVcom.bin";
 
 static int configure_update(pl_generic_controller_t *p, int wfid, enum pl_update_mode mode, const struct pl_area *area);
 static int trigger_update(pl_generic_controller_t *p);
@@ -287,7 +287,7 @@ static int load_wflib(pl_generic_controller_t *p, const char *filename)
 
 	char * pos = strrchr(absolute_filename, '.');
 	*pos = '\0';
-	strcat(absolute_filename, "_BBACVCom.config");
+	strcat(absolute_filename, "_AcVcom.bin");
 
 	// if acvcom file is not the standard symlink,
 	// then update the standard symlink with this file
