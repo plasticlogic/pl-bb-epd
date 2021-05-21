@@ -638,6 +638,9 @@ static int generic_acep_update(struct pl_generic_epdc *p, int wfID,
 
 	int stat = 0;
 
+	int current_temperature = 0;
+	controller->get_temp(controller, &current_temperature);
+
 	// switch hv on
 	stat |= switch_hvs_on(hv);
 
@@ -651,9 +654,11 @@ static int generic_acep_update(struct pl_generic_epdc *p, int wfID,
 #endif
 
 	// start BBACVCom
-	LOG("%s: Start BBACVCom. Config file location:", __func__);
+	LOG("%s: Start BBACVCom with wfID: %d, Temperature: %d.", __func__, wfID, current_temperature);
 	system("readlink -f /tmp/AcVcom.bin");
-	sprintf(system_call, "./BBACVCom --acvcom -b /tmp/AcVcom.bin %d > /tmp/acvcom.out &", wfID);
+	sprintf(system_call, "./BBACVCom --acvcom -b /tmp/AcVcom.bin %d %d > /tmp/acvcom.out &",
+			wfID,
+			current_temperature);
 	system(system_call);
 	usleep(1000000);
 

@@ -75,6 +75,7 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm);
 static int s1d13541_update_temp(pl_generic_controller_t *p);
 
 static void update_temp(struct s1d135xx *p, uint16_t reg);
+static int get_temp(pl_generic_controller_t *p, int* temperature);
 static int update_temp_manual(struct s1d135xx *p, int manual_temp);
 static int update_temp_auto(struct s1d135xx *p, uint16_t temp_reg);
 
@@ -110,7 +111,7 @@ int s1d13541_controller_setup(pl_generic_controller_t *p, struct s1d135xx *s1d13
 	p->set_power_state = set_power;
 	p->set_temp_mode = set_temp_mode;
 	p->update_temp = s1d13541_update_temp;
-
+	p->get_temp = get_temp;
 	p->init = init_controller;
 	p->wf_table = wf_table;
 	p->hw_ref = s1d135xx;
@@ -513,28 +514,32 @@ static void update_temp(struct s1d135xx *p, uint16_t reg)
 
 	p->measured_temp = regval;
 }
-#if 0
-static void get_temp(struct s1d135xx *p, int* temperature)
-{
 
+static int get_temp(pl_generic_controller_t *p, int* temperature)
+{
+	s1d135xx_t *s1d135xx = p->hw_ref;
 	uint16_t regval;
 
-	regval = p->read_reg(p, S1D135XX_REG_INT_RAW_STAT);
-	p->flags.needs_update = (regval & S1D13541_INT_RAW_WF_UPDATE) ? 1 : 0;
-	p->write_reg(p, S1D135XX_REG_INT_RAW_STAT,
-			   (S1D13541_INT_RAW_WF_UPDATE |
-			    S1D13541_INT_RAW_OUT_OF_RANGE));
-	regval = p->read_reg(p, reg) & S1D135XX_TEMP_MASK;
+//	regval = p->read_reg(p, S1D135XX_REG_INT_RAW_STAT);
+//	p->flags.needs_update = (regval & S1D13541_INT_RAW_WF_UPDATE) ? 1 : 0;
+//	p->write_reg(p, S1D135XX_REG_INT_RAW_STAT,
+//			   (S1D13541_INT_RAW_WF_UPDATE |
+//			    S1D13541_INT_RAW_OUT_OF_RANGE));
+
+	regval = s1d135xx->read_reg(s1d135xx, S1D13541_REG_GENERIC_TEMP_CONFIG) & S1D135XX_TEMP_MASK;
+
+	*temperature = regval;
 
 #if VERBOSE_TEMPERATURE
 	if (regval != p->measured_temp)
 		LOG("Temperature: %d", regval);
 #endif
 
-	p->measured_temp = regval;
+	s1d135xx->measured_temp = regval;
 
+	return 0;
 }
-#endif
+
 
 static int update_temp_manual(struct s1d135xx *p, int manual_temp)
 {
