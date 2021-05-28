@@ -1184,7 +1184,7 @@ int update_acep_image(char *path, const char* wfID, enum pl_update_mode mode,
 		return stat;
 
 	for (cnt = 0; cnt < updateCount; cnt++) {
-		stat = epdc->acep_update(epdc, wfId, mode, NULL);
+		stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode, NULL);
 		if (stat < 0)
 			return stat;
 

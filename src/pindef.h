@@ -55,6 +55,8 @@
 #define FALCON_ACVCOM_GD_CLK_TR_RESET_N	BEAGLEBONE_GPIO(0,27) //P8-17
 #define FALCON_ACVCOM_GD_CLK_TRIGGER 	BEAGLEBONE_GPIO(2, 1) //P8-18
 
+#define FALCON_EXT_TRIGGER_OUT			BEAGLEBONE_GPIO(0, 23) //P8-13
+
 #define FALCON_BUFFER_OUT_EN_N 	BEAGLEBONE_GPIO(3, 20) //P9-41 //by default should be low=enable
 
 #define FALCON_I80_HCS_N	BEAGLEBONE_GPIO(0,5)   //P9-17
@@ -335,6 +337,7 @@ static const  struct pl_gpio_config g_falcon_spi_ext_epdc_gpios[] = {
 	{ FALCON_PMIC_POWER_UP,		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_GPIO1,				PL_GPIO_INPUT  | PL_GPIO_PD }, 		// D054 HRDY
 	{ FALCON_GPIO2,				PL_GPIO_OUTPUT | PL_GPIO_INIT_L }, 	// D054 RESET
+	{ FALCON_EXT_TRIGGER_OUT,	PL_GPIO_OUTPUT | PL_GPIO_INIT_L }, 	// EXT TRIGGER OUTPUT for image capture during image update
 };
 
 static const struct pl_gpio_config g_HBZ1_3_gpios[] = {
