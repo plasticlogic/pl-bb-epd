@@ -643,12 +643,12 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 
 	// configure vcom neg to -10
 	LOG("Configure vcoml");
-	sprintf(system_call, "./set_digipot.py -d neg -w 1 -va 84 2>&1 >/dev/null");
+	sprintf(system_call, "set_digipot.py -d neg -w 1 -va 84 2>&1 >/dev/null");
 	system(system_call);
 
 	// configure vcom pos to +20
 	LOG("Configure vcomh");
-	sprintf(system_call, "./set_digipot.py -d pos -w 1 -va 181 2>&1 >/dev/null");
+	sprintf(system_call, "set_digipot.py -d pos -w 1 -va 181 2>&1 >/dev/null");
 	system(system_call);
 
 	// switch hv on
@@ -665,7 +665,7 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 	// start BBACVCom
 	LOG("%s: Start BBACVCom with wfID: %d, Temperature: %d.", __func__, wfID, current_temperature);
 	system("readlink -f /tmp/AcVcom.bin");
-	sprintf(system_call, "./BBACVCom --acvcom -b /tmp/AcVcom.bin %d %d > /tmp/acvcom.out &",
+	sprintf(system_call, "BBACVCom --acvcom -b /tmp/AcVcom.bin %d %d > /tmp/acvcom.out &",
 			wfID,
 			current_temperature);
 	system(system_call);
