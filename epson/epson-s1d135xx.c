@@ -755,7 +755,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 
 	int memorySize = p->yres * p->xres;
 	uint8_t *scrambledPNG;
-	if (p->mediaType == 0) {
+	if (p->update_image_mode == BW) {
 		LOG("BW");
 		uint8_t *pngBuffer;
 		// read png image
@@ -807,7 +807,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 		if (pngBuffer)
 			free(pngBuffer);
 	}
-	else if (p->mediaType == 2) {
+	else if (p->update_image_mode == ACEP || p->update_image_mode == ACEP_ACVCOM) {
 		LOG("ACEP");
 
 		uint8_t *pngBuffer;

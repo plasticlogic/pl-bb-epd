@@ -92,4 +92,11 @@ enum pl_epdc_temp_mode {
 	PL_EPDC_TEMP_INTERNAL,
 };
 
+enum pl_update_image_mode{
+	BW,
+	CFA,
+	ACEP,
+	ACEP_ACVCOM
+};
+
 #endif /* INCLUDE_PL_TYPES_H */

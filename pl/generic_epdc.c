@@ -633,6 +633,9 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 	struct timespec t;
 	char system_call[100];
 
+	uint8_t dac_vcoml = 128;
+	uint8_t dac_vcomh = 128;
+
 	assert(controller != NULL);
 	assert(hv != NULL);
 
@@ -641,14 +644,17 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 	int current_temperature = 0;
 	controller->get_temp(controller, &current_temperature);
 
-	// configure vcom neg to -10
-	LOG("Configure vcoml");
-	sprintf(system_call, "set_digipot.py -d neg -w 1 -va 84 2>&1 >/dev/null");
+	dac_vcoml = (uint8_t) DIV_ROUND_CLOSEST((p->hv->vcomConfig->vcoml - p->hv->vcomConfig->dac_vcoml_offset) , p->hv->vcomConfig->dac_vcoml_slope);
+	dac_vcomh = (uint8_t) DIV_ROUND_CLOSEST((p->hv->vcomConfig->vcomh - p->hv->vcomConfig->dac_vcomh_offset) , p->hv->vcomConfig->dac_vcomh_slope);
+
+	// configure vcom low
+	LOG("Configure vcoml: %d mV --> dac: %d", p->hv->vcomConfig->vcoml, dac_vcoml);
+	sprintf(system_call, "set_digipot.py -d neg -w 1 -va %d 2>&1 >/dev/null", dac_vcoml);
 	system(system_call);
 
-	// configure vcom pos to +20
-	LOG("Configure vcomh");
-	sprintf(system_call, "set_digipot.py -d pos -w 1 -va 181 2>&1 >/dev/null");
+	// configure vcom high
+	LOG("Configure vcomh: %d mV --> dac: %d", p->hv->vcomConfig->vcomh, dac_vcomh);
+	sprintf(system_call, "set_digipot.py -d pos -w 1 -va %d 2>&1 >/dev/null", dac_vcomh);
 	system(system_call);
 
 	// switch hv on

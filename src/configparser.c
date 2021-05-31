@@ -201,19 +201,24 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "general:DISPLAY_SCRAMBLE_YOFFSET", NULL);
 	setup->controller->yoffset = (str == NULL) ? 0 : atoi(str);
 
-	str = iniparser_getstring(dictConfig, "general:MEDIA_TYPE", NULL);
+	str = iniparser_getstring(dictConfig, "general:image_update_mode", NULL);
 	if (str == NULL){
-		LOG("missing general:MEDIA_TYPE [BW|CFA|ACEP] setting... using default=BW");
+		LOG("missing general:image_update_mode [BW|CFA|ACEP|ACEP_ACVCOM] setting... using default=BW");
 	}
 	else if(!strcmp(str, "CFA")){
-			setup->controller->mediaType = 1;
+			setup->controller->update_image_mode = CFA;
 	}
 	else if(!strcmp(str, "ACEP")){
-			setup->controller->mediaType = 2;
+			setup->controller->update_image_mode = ACEP;
+	}
+	else if(!strcmp(str, "ACEP_ACVCOM")){
+			setup->controller->update_image_mode = ACEP_ACVCOM;
 	}
 	else{
-			setup->controller->mediaType = 0;
+			setup->controller->update_image_mode = BW;
 	}
+
+
 
 	str = iniparser_getstring(dictConfig, "general:CFA", NULL);
 	if(str==NULL){
@@ -313,6 +318,45 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	if (str == NULL) LOG("missing vcom_config setting...");
 	stat = setup->initialize_vcom_config(setup, str);
 	if(stat < 0) return stat;
+
+	if(setup->controller->update_image_mode == ACEP_ACVCOM)
+	{
+		str = iniparser_getstring(dictConfig, "vcom:vcoml", NULL);
+		if (str == NULL)
+			{LOG("missing vcoml setting... set vcoml to -11V."); setup->vcomConfig->vcoml = -11000;}
+		else
+			setup->vcomConfig->vcoml = atoi(str);
+
+		str = iniparser_getstring(dictConfig, "vcom:vcomh", NULL);
+		if (str == NULL)
+			{LOG("missing vcomh setting... set vcomh to 19V."); setup->vcomConfig->vcomh = 19000;}
+		else
+			setup->vcomConfig->vcomh = atoi(str);
+
+		str = iniparser_getstring(dictConfig, "vcom:dac_vcoml_slope", NULL);
+		if (str == NULL)
+			{LOG("missing dac_vcoml_slope setting ... set dac_vcoml_slope to -105."); setup->vcomConfig->dac_vcoml_slope = -105;}
+		else
+			setup->vcomConfig->dac_vcoml_slope = atoi(str);
+
+		str = iniparser_getstring(dictConfig, "vcom:dac_vcoml_offset", NULL);
+		if (str == NULL)
+			{LOG("missing dac_vcoml_offset setting ... set dac_vcoml_offset to -1352."); setup->vcomConfig->dac_vcoml_offset = -1352;}
+		else
+			setup->vcomConfig->dac_vcoml_offset = atoi(str);
+
+		str = iniparser_getstring(dictConfig, "vcom:dac_vcomh_slope", NULL);
+		if (str == NULL)
+			{LOG("missing dac_vcomh_slope setting ... set dac_vcomh_slope to 102."); setup->vcomConfig->dac_vcomh_slope = 102;}
+		else
+			setup->vcomConfig->dac_vcomh_slope = atoi(str);
+
+		str = iniparser_getstring(dictConfig, "vcom:dac_vcomh_offset", NULL);
+		if (str == NULL)
+			{LOG("missing dac_vcomh_offset setting ... set dac_vcomh_offset to 1586."); setup->vcomConfig->dac_vcomh_offset = 1586;}
+		else
+			setup->vcomConfig->dac_vcomh_offset = atoi(str);
+	}
 
 	str = iniparser_getstring(dictConfig, "hv_hardware:vcom_driver", NULL);
 	if (str == NULL) LOG("missing vcom_driver setting...");

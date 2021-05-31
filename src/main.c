@@ -101,8 +101,6 @@ int get_temperature(void);
 int get_resolution(void);
 int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		int vcom_switch, int updateCount, int waitTime);
-int update_acep_image(char *path, const char* wfID, enum pl_update_mode mode,
-		int vcom_switch, int updateCount, int waitTime);
 int update_image_regional(char *path, const char* wfID,
 		enum pl_update_mode mode, int vcom_switch, int updateCount,
 		int waitTime, struct pl_area* area, int top, int left);
@@ -132,7 +130,6 @@ int execute_get_waveform(int argc, char **argv);
 int execute_get_temperature(int argc, char **argv);
 int execute_get_resolution(int argc, char **argv);
 int execute_update_image(int argc, char **argv);
-int execute_update_acep_image(int argc, char **argv);
 int execute_update_image_regional(int argc, char **argv);
 int execute_update_gfx(int argc, char **argv);
 int execute_slideshow(int argc, char **argv);
@@ -160,7 +157,6 @@ void printHelp_get_resolution(int identLevel);
 void printHelp_get_waveform(int identLevel);
 void printHelp_get_temperature(int identLevel);
 void printHelp_update_image(int identLevel);
-void printHelp_update_acep_image(int identLevel);
 void printHelp_update_image_regional(int identLevel);
 void printHelp_update_gfx(int identLevel);
 void printHelp_write_reg(int identLevel);
@@ -188,7 +184,6 @@ struct CmdLineOptions supportedOperations[] = {
 		{ "-get_waveform", "gets the waveform", execute_get_waveform, printHelp_get_waveform },
 		{ "-get_temperature", "gets the temperature", execute_get_temperature, printHelp_get_temperature },
 		{ "-update_image", "updates the display", execute_update_image, printHelp_update_image },
-		{ "-update_acep_image",  "updates the display", execute_update_acep_image, printHelp_update_acep_image },
 		{ "-update_image_regional", "updates the display on certain area", execute_update_image_regional, printHelp_update_image_regional },
 		{ "-update_gfx", "updates the display with auto gen. gfx image", execute_update_gfx, printHelp_update_gfx },
 		{ "-slideshow", "shows a slidshow of .png images", execute_slideshow, printHelp_slideshow },
@@ -469,39 +464,6 @@ int execute_update_image(int argc, char **argv) {
 		wfID = argv[3];
 	if (argc >= 3) {
 		stat = update_image(argv[2], wfID, (enum pl_update_mode) mode,
-				vcom_switch_enable, updateCount, waitTime);
-	} else {
-		return ERROR_ARGUMENT_COUNT_MISMATCH;
-	}
-
-	return stat;
-}
-
-int execute_update_acep_image(int argc, char **argv) {
-	int stat;
-
-	char* wfID = "default";
-	int mode = 0;
-	int vcom_switch_enable = 1;
-	int updateCount = 1;
-	int waitTime = 0;
-
-	if (argc >= 8)
-		vcom_switch_enable = atol(argv[7]);
-
-	if (argc >= 7)
-		waitTime = atoi(argv[6]);
-
-	if (argc >= 6)
-		updateCount = atoi(argv[5]);
-
-	if (argc >= 5)
-		mode = atoi(argv[4]);
-
-	if (argc >= 4)
-		wfID = argv[3];
-	if (argc >= 3) {
-		stat = update_acep_image(argv[2], wfID, (enum pl_update_mode) mode,
 				vcom_switch_enable, updateCount, waitTime);
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
@@ -1132,7 +1094,19 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		return stat;
 
 	for (cnt = 0; cnt < updateCount; cnt++) {
-		stat = epdc->update(epdc, wfId, mode, NULL);
+
+		switch(epdc->controller->update_image_mode)
+		{
+			case BW:
+			case CFA:
+				stat = epdc->update(epdc, wfId, mode, NULL);
+				break;
+			case ACEP:
+			case ACEP_ACVCOM:
+				stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode, NULL);
+				break;
+		}
+
 		if (stat < 0)
 			return stat;
 
@@ -1752,30 +1726,6 @@ void printHelp_get_temperature(int identLevel) {
 }
 
 void printHelp_update_image(int identLevel) {
-	printf("%*s Updates the display with a given image.\n", identLevel, " ");
-	printf("\n");
-	printf("%*s Usage: epdc-app -update_image_regional <image>\n", identLevel,
-			" ");
-	printf("\n");
-	printf("%*s \t<image>               : \tpath to the image file.\n",
-			identLevel, " ");
-	printf("%*s \t<wfID>                : \tid of the used waveform id.\n",
-			identLevel, " ");
-	printf("%*s \t<updateMode>          : \tid of the used update mode.\n",
-			identLevel, " ");
-	printf(
-			"%*s \t<updateCount>         : \tcount of image updates to execute.\n",
-			identLevel, " ");
-	printf(
-			"%*s \t<waitTime>            : \ttime to wait after each image update [ms].\n",
-			identLevel, " ");
-	printf(
-			"%*s \t<vcomSwitchEnable>    : \tautomatic vcom switch enable: 0=disable/1=enable.\n",
-			identLevel, " ");
-	printf("\n");
-}
-
-void printHelp_update_acep_image(int identLevel) {
 	printf("%*s Updates the display with a given image.\n", identLevel, " ");
 	printf("\n");
 	printf("%*s Usage: epdc-app -update_image_regional <image>\n", identLevel,
