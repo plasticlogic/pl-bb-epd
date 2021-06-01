@@ -204,9 +204,6 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 		}
 		IT8951LoadImgEnd(bus, type);
 
-		saveBufToPNG(pstAreaImgInfo->usWidth, pstAreaImgInfo->usHeight,
-				tempBuf);
-
 		//Second image Part
 		pstAreaImgInfo->usX = pstAreaImgInfo->usWidth;
 		IT8951LoadImgAreaStart(bus, type, pstLdImgInfo, pstAreaImgInfo);

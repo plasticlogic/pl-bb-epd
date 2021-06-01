@@ -101,6 +101,9 @@ typedef struct {
 #define IT8951_MODE_2   2
 #define IT8951_MODE_3   3
 #define IT8951_MODE_4   4
+#define IT8951_MODE_5   5
+#define IT8951_MODE_6   6
+#define IT8951_MODE_7   7
 //Endian Type
 #define IT8951_LDIMG_L_ENDIAN   0
 #define IT8951_LDIMG_B_ENDIAN   1
