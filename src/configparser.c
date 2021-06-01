@@ -204,6 +204,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "general:update_image_mode", NULL);
 	if (str == NULL){
 		LOG("missing general:update_image_mode [BW|CFA|ACEP|ACEP_ACVCOM] setting... using default=BW");
+		setup->controller->update_image_mode = BW;
 	}
 	else if(!strcmp(str, "CFA")){
 			setup->controller->update_image_mode = CFA;
@@ -215,7 +216,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 			setup->controller->update_image_mode = ACEP_ACVCOM;
 	}
 	else{
-			setup->controller->update_image_mode = BW;
+		setup->controller->update_image_mode = BW;
 	}
 
 
