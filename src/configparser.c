@@ -201,9 +201,9 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	str = iniparser_getstring(dictConfig, "general:DISPLAY_SCRAMBLE_YOFFSET", NULL);
 	setup->controller->yoffset = (str == NULL) ? 0 : atoi(str);
 
-	str = iniparser_getstring(dictConfig, "general:image_update_mode", NULL);
+	str = iniparser_getstring(dictConfig, "general:update_image_mode", NULL);
 	if (str == NULL){
-		LOG("missing general:image_update_mode [BW|CFA|ACEP|ACEP_ACVCOM] setting... using default=BW");
+		LOG("missing general:update_image_mode [BW|CFA|ACEP|ACEP_ACVCOM] setting... using default=BW");
 	}
 	else if(!strcmp(str, "CFA")){
 			setup->controller->update_image_mode = CFA;
