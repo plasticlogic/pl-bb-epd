@@ -95,6 +95,7 @@ typedef struct s1d135xx {
 	int yoffset;
 	int display_scrambling;
 	cfa_overlay_t cfa_overlay;
+	enum pl_update_image_mode update_image_mode;
 	struct s1d135xx_update_cmd next_update_cmd;
 	struct {
 		uint8_t needs_update:1;

@@ -49,6 +49,14 @@ typedef struct pl_vcom_switch{
 typedef struct pl_vcom_config{
 	void *hw_ref;
 
+	int vcomh; //mV
+	int vcoml; //mV
+
+	int dac_vcomh_slope;
+	int dac_vcomh_offset;
+	int dac_vcoml_slope;
+	int dac_vcoml_offset;
+
 	int (*set_vcom)(struct pl_vcom_config *p, double value);
 	int (*get_vcom)(struct pl_vcom_config *p);
 	int (*init)(struct pl_vcom_config *p);

@@ -84,7 +84,7 @@ static int it8951_i2c_read(struct pl_i2c *i2c, uint8_t i2c_addr,
 	int i = 0;
 	for(i=0; i<count; i++)
 	{
-		usleep( 10000);
+		usleep( 50000);
 		TWord* value = IT8951ReadData(interface, type, 2);  //read data
 		printf("Data: 0x%x\n", *value);
 

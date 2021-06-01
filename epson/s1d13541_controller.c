@@ -34,7 +34,7 @@
 #define VERBOSE 0
 
 static const struct pl_wfid wf_table[] = {
-	{ "default",	   1 },
+	{ "default",	   2 },
 	{ "0",             0 },
 	{ "1",             1 },
 	{ "2",             2 },
@@ -55,6 +55,7 @@ static const struct pl_wfid wf_table[] = {
 };
 
 const char *standard_waveform_filename = "/tmp/S1D13541_current_waveform.bin";
+const char *standard_acvcom_filename = "/tmp/AcVcom.bin";
 
 static int configure_update(pl_generic_controller_t *p, int wfid, enum pl_update_mode mode, const struct pl_area *area);
 static int trigger_update(pl_generic_controller_t *p);
@@ -74,6 +75,7 @@ static int init_controller(pl_generic_controller_t *p, int use_wf_from_nvm);
 static int s1d13541_update_temp(pl_generic_controller_t *p);
 
 static void update_temp(struct s1d135xx *p, uint16_t reg);
+static int get_temp(pl_generic_controller_t *p, int* temperature);
 static int update_temp_manual(struct s1d135xx *p, int manual_temp);
 static int update_temp_auto(struct s1d135xx *p, uint16_t temp_reg);
 
@@ -109,7 +111,7 @@ int s1d13541_controller_setup(pl_generic_controller_t *p, struct s1d135xx *s1d13
 	p->set_power_state = set_power;
 	p->set_temp_mode = set_temp_mode;
 	p->update_temp = s1d13541_update_temp;
-
+	p->get_temp = get_temp;
 	p->init = init_controller;
 	p->wf_table = wf_table;
 	p->hw_ref = s1d135xx;
@@ -188,7 +190,12 @@ static int wait_update_end(pl_generic_controller_t *p)
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 
-	return s1d135xx->wait_update_end(s1d135xx);
+	if(s1d135xx->wait_update_end(s1d135xx))
+		if(s1d135xx->wait_update_end(s1d135xx))
+			if(s1d135xx->wait_update_end(s1d135xx))
+				return s1d135xx->wait_update_end(s1d135xx);
+
+	return 0;
 }
 
 static int read_register(pl_generic_controller_t *p, const regSetting_t* setting)
@@ -268,13 +275,28 @@ static int load_wflib(pl_generic_controller_t *p, const char *filename)
 	char absolute_filename[300];
 	realpath(filename, absolute_filename);
 
-	// if not file is not the standard symlink,
+	// if file is not the standard symlink,
 	// then update the standard symlink with this file
 	if (strcmp(absolute_filename, standard_waveform_filename) != 0){
 		char command[1000];
 		sprintf(command, "ln -f -s %s %s", absolute_filename, standard_waveform_filename);
 		if (system(command)){
 			LOG("failed to set symlink for given waveform file...");
+			return -ENOENT;
+		}
+	}
+
+	char * pos = strrchr(absolute_filename, '.');
+	*pos = '\0';
+	strcat(absolute_filename, "_AcVcom.bin");
+
+	// if acvcom file is not the standard symlink,
+	// then update the standard symlink with this file
+	if (strcmp(absolute_filename, standard_acvcom_filename) != 0){
+		char command[1000];
+		sprintf(command, "ln -f -s %s %s", absolute_filename, standard_acvcom_filename);
+		if (system(command)){
+			LOG("failed to set symlink for given acvcom file...");
 			return -ENOENT;
 		}
 	}
@@ -367,6 +389,7 @@ static int load_png_image(pl_generic_controller_t *p, const char *path,  const s
 	s1d135xx_t *s1d135xx = p->hw_ref;
 	assert(s1d135xx != NULL);
 	s1d135xx->cfa_overlay = p->cfa_overlay;
+	s1d135xx->update_image_mode = p->update_image_mode;
 	s1d135xx->display_scrambling = p->display_scrambling;
 	s1d135xx->xoffset = p->xoffset;
 	s1d135xx->yoffset = p->yoffset;
@@ -491,28 +514,32 @@ static void update_temp(struct s1d135xx *p, uint16_t reg)
 
 	p->measured_temp = regval;
 }
-#if 0
-static void get_temp(struct s1d135xx *p, int* temperature)
-{
 
+static int get_temp(pl_generic_controller_t *p, int* temperature)
+{
+	s1d135xx_t *s1d135xx = p->hw_ref;
 	uint16_t regval;
 
-	regval = p->read_reg(p, S1D135XX_REG_INT_RAW_STAT);
-	p->flags.needs_update = (regval & S1D13541_INT_RAW_WF_UPDATE) ? 1 : 0;
-	p->write_reg(p, S1D135XX_REG_INT_RAW_STAT,
-			   (S1D13541_INT_RAW_WF_UPDATE |
-			    S1D13541_INT_RAW_OUT_OF_RANGE));
-	regval = p->read_reg(p, reg) & S1D135XX_TEMP_MASK;
+//	regval = p->read_reg(p, S1D135XX_REG_INT_RAW_STAT);
+//	p->flags.needs_update = (regval & S1D13541_INT_RAW_WF_UPDATE) ? 1 : 0;
+//	p->write_reg(p, S1D135XX_REG_INT_RAW_STAT,
+//			   (S1D13541_INT_RAW_WF_UPDATE |
+//			    S1D13541_INT_RAW_OUT_OF_RANGE));
+
+	regval = s1d135xx->read_reg(s1d135xx, S1D13541_REG_GENERIC_TEMP_CONFIG) & S1D135XX_TEMP_MASK;
+
+	*temperature = regval;
 
 #if VERBOSE_TEMPERATURE
 	if (regval != p->measured_temp)
 		LOG("Temperature: %d", regval);
 #endif
 
-	p->measured_temp = regval;
+	s1d135xx->measured_temp = regval;
 
+	return 0;
 }
-#endif
+
 
 static int update_temp_manual(struct s1d135xx *p, int manual_temp)
 {

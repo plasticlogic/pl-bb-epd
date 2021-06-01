@@ -755,7 +755,7 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 
 	int memorySize = p->yres * p->xres;
 	uint8_t *scrambledPNG;
-	if (p->cfa_overlay.r_position == -1) {
+	if (p->update_image_mode == BW) {
 		LOG("BW");
 		uint8_t *pngBuffer;
 		// read png image
@@ -806,7 +806,23 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 				p->display_scrambling);
 		if (pngBuffer)
 			free(pngBuffer);
-	} else {
+	}
+	else if (p->update_image_mode == ACEP || p->update_image_mode == ACEP_ACVCOM) {
+		LOG("ACEP");
+
+		uint8_t *pngBuffer;
+		// read png image
+		if (read_rgb_png_to_iridis(path, &pngBuffer, &width, &height))
+			return -ENOENT;
+
+		// scramble image
+		scrambledPNG = malloc(max(height, p->yres) * max(width, p->xres));
+		scramble_array(pngBuffer, scrambledPNG, &height, &width,
+				p->display_scrambling);
+		if (pngBuffer)
+			free(pngBuffer);
+	}
+	else {
 		LOG("CFA");
 		rgbw_pixel_t *pngBuffer;
 		// read png image
@@ -1243,6 +1259,11 @@ static int s1d13524_clear_init(struct s1d135xx *p) {
 
 static int s1d13541_init_controller(struct s1d135xx *p) {
 	int stat = 0;
+
+	// enable display 3V3 - its a workaround, since the epson ic is powerd by the display 3V3
+	uint8_t data[2] = {0x01, 0x20};
+	p->i2c->write(p->i2c, 0x68, data, sizeof(data), 0);
+
 	p->hrdy_mask = S1D13541_STATUS_HRDY;
 	p->hrdy_result = S1D13541_STATUS_HRDY;
 	p->measured_temp = -127;

@@ -50,6 +50,7 @@ typedef struct pl_generic_controller {
 	unsigned imageHeight;
 	uint8_t animationMode;
 	cfa_overlay_t cfa_overlay;
+	enum pl_update_image_mode update_image_mode;
 
 	void (*delete)(struct pl_generic_controller *p);
 	int (*init)(struct pl_generic_controller *p, int use_wf_from_nvm);

@@ -65,7 +65,7 @@
 
 #define INTERNAL_USAGE
 #define IC2_INTERFACE
-#define VERSION_INFO		"v1.2*"
+#define VERSION_INFO		"v1.3"
 
 // ----------------------------------------------------------------------
 // -  global variables
@@ -900,6 +900,11 @@ int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 	//enable VDD
 	hardware->gpios.set(hardware->vddGPIO, 1);
 
+	//toggle PMIC WakeUP GPIO
+	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 0);
+	usleep(50000);
+	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 1);
+
 	sleep(2);
 
 	if (gpio_only == 0) {
@@ -930,7 +935,10 @@ int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 int stop_epdc() {
 	int stat = 0;
 	stat = switch_hv(0);
-	hardware->gpios.set(hardware->vddGPIO, 0);
+
+	// de-active Epson x541 VDD
+	uint8_t data[2] = {0x01, 0x00};
+	hardware->host_i2c.write(&(hardware->host_i2c), 0x68, data, sizeof(data), 0);
 
 	// de-configure Epson GPIOs
 	stat = pl_gpio_deconfigure_list(&(hardware->gpios), hardware->board_gpios,
@@ -1086,7 +1094,19 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		return stat;
 
 	for (cnt = 0; cnt < updateCount; cnt++) {
-		stat = epdc->update(epdc, wfId, mode, NULL);
+
+		switch(epdc->controller->update_image_mode)
+		{
+			case BW:
+			case CFA:
+				stat = epdc->update(epdc, wfId, mode, NULL);
+				break;
+			case ACEP:
+			case ACEP_ACVCOM:
+				stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode, NULL);
+				break;
+		}
+
 		if (stat < 0)
 			return stat;
 
@@ -1100,6 +1120,59 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 
 	return 0;
 }
+
+/**
+ * Updates image.
+ * @param path image path.
+ * @param wfID refers to the waveform id.
+ * @param mode refers to the update mode, i.e. 0=full update, 1=partial update.
+ * @param vcomSwitchEnable enables vcom switch control via epdc, 1=enable, 0=bypass.
+ * @param updateCount refers to the count of image updates to execute
+ * @param waitTime [ms] refers to the time to wait after one image update
+ * @return status
+ */
+int update_acep_image(char *path, const char* wfID, enum pl_update_mode mode,
+		int vcomSwitchEnable, int updateCount, int waitTime) {
+	int cnt = 0;
+	int stat;
+
+	struct timeval tStop, tStart; // time variables
+	float tTotal;
+
+	LOG("path: %s", path);
+
+	int wfId = pl_generic_controller_get_wfid(epdc->controller, wfID);
+	LOG("wfID: %d", wfId);
+	LOG("updateMode: %d", mode);
+	LOG("updateCount: %d", updateCount);
+	LOG("waitTime: %d", waitTime);
+	LOG("vcomSwitch: %d", vcomSwitchEnable);
+
+	if (wfId < 0)
+		return -EINVAL;
+
+	gettimeofday(&tStart, NULL);
+	stat = epdc->controller->load_image(epdc->controller, path, NULL, 0, 0);
+
+	if (stat < 0)
+		return stat;
+
+	for (cnt = 0; cnt < updateCount; cnt++) {
+		stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode, NULL);
+		if (stat < 0)
+			return stat;
+
+		usleep(waitTime * 1000);
+	}
+
+	gettimeofday(&tStop, NULL);
+	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+	printf("Time Complete: %f\n", tTotal);
+
+	return 0;
+}
+
 /**
  * Updates image.
  * @param path image path.
