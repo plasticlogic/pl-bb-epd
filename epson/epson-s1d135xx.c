@@ -874,21 +874,21 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 	}
 //*
 	if (area == NULL) {
-		if (height > v_yres || width > v_xres) {
-			area = malloc(sizeof(struct pl_area));
-			area->height = min(height, v_yres);
-			area->width = min(width, v_xres);
-			area->left = ((int) (v_xres - width) < 0) ? 0 : v_xres - width;
-			area->top = ((int) (v_yres - height) < 0) ? 0 : v_yres - height;
-			//*
-			if (p->cfa_overlay.r_position != -1) {
-				area->left *= 2;
-				area->top *= 2;
-				area->width *= 2;
-				area->height *= 2;
-			}
-
-		}
+//		if (height > v_yres || width > v_xres) {
+//			area = malloc(sizeof(struct pl_area));
+//			area->height = min(height, v_yres);
+//			area->width = min(width, v_xres);
+//			area->left = ((int) (v_xres - width) < 0) ? 0 : v_xres - width;
+//			area->top = ((int) (v_yres - height) < 0) ? 0 : v_yres - height;
+//			//*
+//			if (p->cfa_overlay.r_position != -1) {
+//				area->left *= 2;
+//				area->top *= 2;
+//				area->width *= 2;
+//				area->height *= 2;
+//			}
+//
+//		}
 
 	} else {
 		if (area->height + area->top > p->yres

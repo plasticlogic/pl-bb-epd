@@ -98,7 +98,7 @@ static int i80_init(struct pl_parallel *p)
 	pl_i80_t * i80_ref = (pl_i80_t*) p->hw_ref;
 
 	i80_ref->fd = open("/dev/parallel", O_RDWR);
-	if(p->fd < 0){
+	if(i80_ref->fd < 0){
 		return FALSE;
 	}
 
@@ -452,7 +452,7 @@ static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd)
     gpio->set(i80_ref->hcs_n_gpio, 0);
     //WR Enable
     //GPIO_SET_L(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 0);
+    //gpio->set(i80_ref->hwe_n_gpio, 0);
     //Set Data output (Parallel output request)
     //See your host setting of GPIO
     //GPIO_I80_Bus[16] = usCmd;
@@ -460,7 +460,7 @@ static void gpio_i80_16b_cmd_out(struct pl_i80 *i80_ref, TWord usCmd)
 
     //WR Enable - H
     //GPIO_SET_H(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 1);
+    //gpio->set(i80_ref->hwe_n_gpio, 1);
 
     //CS-H
     //GPIO_SET_H(CS);
@@ -489,14 +489,14 @@ static void gpio_i80_16b_data_out(struct pl_i80 *i80_ref, TWord usData)
     gpio->set(i80_ref->hcs_n_gpio, 0);
     //WR Enable
     //GPIO_SET_L(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 0);
+    //gpio->set(i80_ref->hwe_n_gpio, 0);
     //Set 16 bits Bus Data
     //See your host setting of GPIO
     iResult = write(i80_ref->fd, &usData, 1);
 
     //WR Enable - H
     //GPIO_SET_H(WEN);
-    gpio->set(i80_ref->hwe_n_gpio, 1);
+    //gpio->set(i80_ref->hwe_n_gpio, 1);
     //CS-H
     //GPIO_SET_H(CS);
     gpio->set(i80_ref->hcs_n_gpio, 1);
@@ -526,7 +526,7 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
     gpio->set(i80_ref->hcs_n_gpio, 0);
     //RD Enable
     //GPIO_SET_L(REN);
-    gpio->set(i80_ref->hrd_n_gpio, 0);
+    //gpio->set(i80_ref->hrd_n_gpio, 0);
     //Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
     //See your host setting of GPIO
     //usData = GPIO_I80_Bus[16];
@@ -534,7 +534,7 @@ static TWord gpio_i80_16b_data_in(struct pl_i80 *i80_ref)
 
     //WR Enable - H
     //GPIO_SET_H(WEN);
-    gpio->set(i80_ref->hrd_n_gpio, 1);
+    //gpio->set(i80_ref->hrd_n_gpio, 1);
     //CS-H
     //GPIO_SET_H(CS);
     gpio->set(i80_ref->hcs_n_gpio, 1);

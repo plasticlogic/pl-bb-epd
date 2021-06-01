@@ -92,4 +92,6 @@ typedef struct hw_setup {
 
 hw_setup_t *hw_setup_new();
 
+it8951_t *get_it8951_controller_instance(hw_setup_t *p);
+
 #endif /* HW_SETUP_H_ */

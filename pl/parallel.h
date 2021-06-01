@@ -34,7 +34,7 @@ typedef struct pl_parallel
   int fd;           // open file descriptor: /dev/spi-X.Y
   int cs_gpio; 		// chip select gpio
   int hrdy_gpio;
- // int interface_type;
+  int interfaceType;
 
   int (*open)(struct pl_parallel * p);
   int (*close)(struct pl_parallel * p);

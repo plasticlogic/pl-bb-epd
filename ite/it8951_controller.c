@@ -36,9 +36,9 @@
 #include <pl/i80.h>
 #include <pl/gpio.h>
 #define LOG_TAG "it8951_controller"
-#include "pl/utils.h"
+#include <pl/utils.h>
 
-#include "ite/it8951_controller.h"
+#include <ite/it8951_controller.h>
 
 static const struct pl_wfid wf_table[] = { { "default", 2 }, { "0", 0 }, { "1",
 		1 }, { "2", 2 }, { "3", 3 }, { "4", 4 }, { "5", 5 }, { "6", 6 }, { "7",
@@ -169,6 +169,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 
 		send_cmd(controller, reg);
 
+		TWord* value = IT8951ReadData(bus, type, 2);  //read data
+		printf("0x%x\n", *value);
+
 		printf("PMIC Register 8 after update: ");
 
 		regSetting_t reg2;
@@ -181,6 +184,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		reg2.val = reg8;
 
 		send_cmd(controller, reg2);
+
+		value = IT8951ReadData(bus, type, 2);  //read data
+		printf("0x%x\n", *value);
 	}
 
 	//IT8951WaitForReady(bus, type);
@@ -825,14 +831,14 @@ static int load_png_image(struct pl_generic_controller *controller,
 }
 
 static int wait_update_end(struct pl_generic_controller *controller) {
-	//initialize communication structure
-	it8951_t *it8951 = controller->hw_ref;
-	assert(it8951 != NULL);
-	pl_generic_interface_t *bus = it8951->interface;
-	enum interfaceType *type = it8951->sInterfaceType;
-
-	//Poll the TCON Register, to know when the update has finished
-	IT8951WaitForDisplayReady(bus, type);
+//	//initialize communication structure
+//	it8951_t *it8951 = controller->hw_ref;
+//	assert(it8951 != NULL);
+//	pl_generic_interface_t *bus = it8951->interface;
+//	enum interfaceType *type = it8951->sInterfaceType;
+//
+//	//Poll the TCON Register, to know when the update has finished
+//	IT8951WaitForDisplayReady(bus, type);
 	return 0;
 }
 
@@ -870,14 +876,6 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting) {
 
 	for (i = 0; i < setting.valCount; i++)
 		IT8951WriteData(interface, type, setting.val[i]);
-
-	//sleep(1);
-	//usleep(8000);
-
-	if (setting.val[0] == 0x00) {
-		TWord* value = IT8951ReadData(interface, type, 1);  //read data
-		printf("Data: 0x%x\n", *value);
-	}
 
 	return 0;
 }

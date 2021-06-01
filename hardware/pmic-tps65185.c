@@ -82,7 +82,7 @@ struct pmic_data {
 };
 
 static const struct pmic_data init_data[] = {
-	{ HVPMIC_REG_ENABLE,     0x00 },
+	{ HVPMIC_REG_ENABLE,     0x20 },
 	{ HVPMIC_REG_VADJ,       0x03 },
 	{ HVPMIC_REG_VCOM1,      0x00 },
 	{ HVPMIC_REG_VCOM2,      0x00 },
@@ -194,6 +194,9 @@ static int tps65185_init(pl_pmic_t *p)
 		}
 	}
 
+	// enable 3V3 Output
+	pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_ENABLE, 0x20);
+
 	return stat;
 }
 
@@ -207,8 +210,8 @@ static int tps65185_check_revision(pl_pmic_t *p)
 
 	LOG("Version: %d.%d.%d", ver.v.major, ver.v.minor, ver.v.version);
 
-	if (ver.byte != HVPMIC_VERSION) {
-		LOG("Wrong version: 0x%02X instead of 0x%02X",
+	if (ver.byte == 0x00 || ver.byte == 0xff) {
+		LOG("Wrong version: 0x%02X",
 		    ver.byte, HVPMIC_VERSION);
 		return -EPMIC;
 	}
@@ -260,7 +263,7 @@ static int tps65185_wait_pok(pl_pmic_t *p)
 static int tps65185_hv_enable(pl_pmic_t *p)
 {
 	//LOG("tps65185_hv_enable - not yet implemented!");
-	pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_ENABLE, 0xbf);
+	pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_ENABLE, 0xaf);
 	usleep(10000);
 	return 0;
 }
@@ -270,7 +273,7 @@ static int tps65185_hv_disable(pl_pmic_t *p)
 {
 	//LOG("tps65185_hv_disable - not yet implemented!");
 	usleep(100000);
-	pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_ENABLE, 0x40);
+	pl_i2c_reg_write_8(p->i2c, p->i2c_addr,HVPMIC_REG_ENABLE, 0x60);
 
 	return 0;
 }
@@ -374,13 +377,35 @@ static int tps65185_temperature_measure(pl_pmic_t *p, int16_t *measured)
 	return 0;
 }
 
-static int tps65185_vcom_enable(pl_pmic_t *pmic){
-	LOG("tps65185_vcom_enable - not yet implemented");
-	return -ENOSYS;
+static int tps65185_vcom_enable(pl_pmic_t *p){
+
+	//LOG("tps65185_vcom_enable - not yet implemented");
+
+	uint8_t data = 0;
+	pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, &data);
+
+	// enable vcom
+	data |= 0x10;
+
+	pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, data);
+	usleep(10000);
+
+	return 0;
 }
-static int tps65185_vcom_disable(pl_pmic_t *pmic){
-	LOG("tps65185_vcom_disable - not yet implemented");
-	return -ENOSYS;
+static int tps65185_vcom_disable(pl_pmic_t *p){
+
+	//LOG("tps65185_vcom_disable - not yet implemented");
+
+	uint8_t data = 0;
+	pl_i2c_reg_read_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, &data);
+
+	// disable vcom
+	data &= 0xef;
+	//data = 0xaf;
+
+	pl_i2c_reg_write_8(p->i2c, p->i2c_addr, HVPMIC_REG_ENABLE, data);
+
+	return 0;
 }
 
 static int tps65185_apply_timings(pl_pmic_t *p){

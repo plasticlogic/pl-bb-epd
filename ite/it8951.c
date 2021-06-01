@@ -425,7 +425,7 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		//CS
 		gpio->set(i80->hcs_n_gpio, 0);
 
-		gpio->set(i80->hwe_n_gpio, 0);
+		//gpio->set(i80->hwe_n_gpio, 0);
 
 		iResult = write(i80->fd, usData, size / 2);
 		IT8951WaitForReady(bus, type);
@@ -437,7 +437,7 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		//CS
 		gpio->set(i80->hcs_n_gpio, 1);
 
-		gpio->set(i80->hwe_n_gpio, 1);
+		//gpio->set(i80->hwe_n_gpio, 1);
 	} else {
 		//error
 	}
@@ -517,7 +517,7 @@ void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 
 		//RD Enable
 		//GPIO_SET_L(REN);
-		gpio->set(i80->hrd_n_gpio, 0);
+		//gpio->set(i80->hrd_n_gpio, 0);
 
 		int i = 0;
 		for (i = 0; i < size; i++) {
@@ -534,7 +534,7 @@ void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		}
 		//RD Enable
 		//GPIO_SET_L(REN);
-		gpio->set(i80->hwe_n_gpio, 1);
+		//gpio->set(i80->hwe_n_gpio, 1);
 		//CS
 		gpio->set(i80->hcs_n_gpio, 1);
 		//-------------------------real function end-------------------------------------
@@ -678,12 +678,12 @@ static void gpio_i80_16b_cmd_out(pl_generic_interface_t *bus,
 		gpio->set(i80->hcs_n_gpio, 0);
 		//WR Enable
 		//GPIO_SET_L(WEN);
-		gpio->set(i80->hwe_n_gpio, 0);
+		//gpio->set(i80->hwe_n_gpio, 0);
 		//Set Data output (Parallel output request)
 		//See your host setting of GPIO
 		iResult = write(i80->fd, &usCmd, 1);
 
-		gpio->set(i80->hwe_n_gpio, 1);
+		//gpio->set(i80->hwe_n_gpio, 1);
 		//CS-H
 		//GPIO_SET_H(CS);
 		gpio->set(i80->hcs_n_gpio, 1);
@@ -832,7 +832,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 
 		//RD Enable
 		//GPIO_SET_L(REN);
-		gpio->set(i80->hrd_n_gpio, 0);
+		//gpio->set(i80->hrd_n_gpio, 0);
 		//Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
 		//See your host setting of GPIO
 		//usData = GPIO_I80_Bus[16];
@@ -850,7 +850,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 		}
 		//WR Enable - H
 		//GPIO_SET_H(WEN);
-		gpio->set(i80->hwe_n_gpio, 1);
+		//gpio->set(i80->hwe_n_gpio, 1);
 		//CS-H
 		//GPIO_SET_H(CS);
 		gpio->set(i80->hcs_n_gpio, 1);
