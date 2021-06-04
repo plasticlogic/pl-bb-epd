@@ -111,7 +111,7 @@
 
 #define FALCON_DISPLAY_NVM_CS		BEAGLEBONE_GPIO(3,17)	//P9-28 3/17
 #define FALCON_FIRMWARE_NVM_CS		BEAGLEBONE_GPIO(1,19)	//P9-16
-
+#define BB_VSYNC					BEAGLEBONE_GPIO(2,22)  //P8-27
 
 static const struct pl_gpio_config g_chiffchaff_gpios[] = {
 	{CHIFFCHAFF_32MHZ_EN, PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
@@ -259,6 +259,9 @@ static const  struct pl_gpio_config g_falcon_i80_gpios[] = {
 	{ FALCON_PMIC_POWER_UP,		PL_GPIO_INPUT  | PL_GPIO_PU  },
 	{ FALCON_GPIO1,				PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_GPIO2,				PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_RESERVE_2,		PL_GPIO_INPUT | PL_GPIO_PD },
+	{ RUDDOCK_RESERVE_3,		PL_GPIO_INPUT | PL_GPIO_PD },
+	{ BB_VSYNC,					PL_GPIO_INPUT | PL_GPIO_PD },
 };
 
 static const  struct pl_gpio_config g_falcon_spi_gpios[] = {
@@ -298,6 +301,9 @@ static const  struct pl_gpio_config g_falcon_spi_gpios[] = {
 	{ FALCON_PMIC_POWER_UP,		PL_GPIO_INPUT  | PL_GPIO_PU  },
 	{ FALCON_GPIO1,				PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_GPIO2,				PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+	{ RUDDOCK_RESERVE_2,		PL_GPIO_INPUT | PL_GPIO_PD },
+	{ RUDDOCK_RESERVE_3,		PL_GPIO_INPUT | PL_GPIO_PD },
+	{ BB_VSYNC,					PL_GPIO_INPUT | PL_GPIO_PD },
 };
 
 static const  struct pl_gpio_config g_falcon_spi_ext_epdc_gpios[] = {
