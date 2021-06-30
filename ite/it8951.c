@@ -60,18 +60,32 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type,
 	pBuf_->usImgBufAddrH = pstDevInfo->usImgBufAddrH;
 	pBuf_->usImgBufAddrL = pstDevInfo->usImgBufAddrL;
 
-	int i = 0;
-	int size = sizeof(pstDevInfo->usFWVersion) / 2;
-	for (i = 0; i < size; i++) {
-		pBuf_->usFWVersion[i] = pstDevInfo->usFWVersion[i];
-		pBuf_->usLUTVersion[i] = pstDevInfo->usLUTVersion[i];
-	}
+//// If using One Wire only these lines are Needed
+//24BE28 Update Buffer Adress
+////transfer info between pointers
+//	pBuf_->usPanelW = 1280;
+//	pBuf_->usPanelH = 960;
+//	pBuf_->usImgBufAddrH = 0x11;
+//	pBuf_->usImgBufAddrL = 0xfe20;
+	//pBuf_->usImgBufAddrH = 0x24;
+	//pBuf_->usImgBufAddrL = 0xbe28;
+
+//	int i = 0;
+//	int size = sizeof(pstDevInfo->usFWVersion) / 2;
+//	for (i = 0; i < size; i++) {
+//		pBuf_->usFWVersion[i] = pstDevInfo->usFWVersion[i];
+//		pBuf_->usLUTVersion[i] = pstDevInfo->usLUTVersion[i];
+//	}
 
 //Show Device information of IT8951
-	printf("Panel(W,H) = (%d,%d)\n", pstDevInfo->usPanelW,
-			pstDevInfo->usPanelH);
+	printf("Panel(W,H) = (%d,%d)\n", pBuf_->usPanelW,
+			pBuf_->usPanelH);
 	printf("Image Buffer Address = %X\r\n",
-			pstDevInfo->usImgBufAddrL | (pstDevInfo->usImgBufAddrH << 16));
+			pBuf_->usImgBufAddrL | (pBuf_->usImgBufAddrH << 16));
+//	printf("Panel(W,H) = (%d,%d)\n", pBuf_->usPanelW,
+//			pBuf_->usPanelH);
+//		printf("Image Buffer Address = %X\r\n",
+//				pBuf_->usImgBufAddrL | (pBuf_->usImgBufAddrH << 16));
 	//Show Firmware and LUT Version
 	//printf("FW Version = %s\r\n", stI80IT8951DevInfo.usFWVersion);
 	//printf("LUT Version = %s\r\n", stI80IT8951DevInfo.usLUTVersion);

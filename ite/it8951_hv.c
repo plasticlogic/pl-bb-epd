@@ -147,12 +147,12 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 	enum interfaceType *type = it8951->sInterfaceType;
 	//printf("HV off managed by ITE \n");
 
-	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-	IT8951WriteData(bus, type, 0x01); // I2C write command
-	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-	IT8951WriteData(bus, type, 0x0C); // Power Up Sequence Register
-	IT8951WriteData(bus, type, 0x01); // Write Size
-	IT8951WriteData(bus, type, 0x00); //
+//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
+//	IT8951WriteData(bus, type, 0x01); // I2C write command
+//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
+//	IT8951WriteData(bus, type, 0x0C); // Power Up Sequence Register
+//	IT8951WriteData(bus, type, 0x01); // Write Size
+//	IT8951WriteData(bus, type, 0x00); //
 
 	IT8951WaitForReady(bus, type);
 
@@ -162,12 +162,12 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 	data = IT8951ReadReg(bus, type, 0x1e16);
 
 	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
-	//
+
 	IT8951WriteData(bus, type, 0x00);
-	//
-//	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
+
+	//FLIP Bit 12 which corresponds to GPIO12/Pin 66 on ITE
 	data &= ~(1 << 12); // switches GPIO5 of ITE (Power Up Pin) low
-//	//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE to enable VCom_Switch
+	//FLIP Bit 11 which corresponds to GPIO11/Pin 65 on ITE to enable VCom_Switch
 	data &= ~(1 << 11); // switches GPIO5 of ITE (Power COM Pin) low
 
 	IT8951WriteReg(bus, type, 0x1e16, data);

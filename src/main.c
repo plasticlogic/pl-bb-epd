@@ -118,6 +118,7 @@ int counter(const char* wf);
 int fill(uint8_t gl, uint8_t wfid, int update_mode);
 //remove int interface_data(	char* interface,int number_of_values,char values);
 int slideshow(const char *path, const char* wf, int count, int anim);
+int override_post_buffer(char *path);
 
 int execute_help(int argc, char **argv);
 int execute_start_epdc(int argc, char **argv);
@@ -145,6 +146,7 @@ int execute_fill(int argc, char **argv);
 int execute_detect_i2c(int argc, char **argv);
 int execute_write_i2c(int argc, char **argv);
 int execute_read_i2c(int argc, char **argv);
+int execute_override_post_buffer(int argc, char **argv);
 int print_versionInfo(int argc, char **argv);
 
 void printHelp_start_epdc(int identLevel);
@@ -189,6 +191,7 @@ struct CmdLineOptions supportedOperations[] = {
 		{ "-slideshow", "shows a slidshow of .png images", execute_slideshow, printHelp_slideshow },
 		{ "-fill", "fill the screen with a defined greylevel", execute_fill, printHelp_fill },
 		{ "-count", "shows a counting number", execute_counter, printHelp_counter },
+		{ "-override_post_buffer", "overrides the post buffer from ITE", execute_override_post_buffer, printHelp_update_image },
 #ifdef IC2_INTERFACE
 		{ "-detect_i2c", "searches for all devices connected to ic2", execute_detect_i2c, printHelp_detect_i2c },
 		{ "-write_i2c", "send data over i2c", execute_write_i2c, printHelp_write_i2c },
@@ -470,6 +473,21 @@ int execute_update_image(int argc, char **argv) {
 	}
 
 	return stat;
+}
+
+int execute_override_post_buffer(int argc, char **argv){
+
+	int stat;
+	char* wfID = "default";
+
+	if (argc >= 3) {
+			stat = override_post_buffer(argv[2]);
+		} else {
+			return ERROR_ARGUMENT_COUNT_MISMATCH;
+		}
+
+		return stat;
+
 }
 
 int execute_update_image_regional(int argc, char **argv) {
@@ -1054,6 +1072,16 @@ int get_resolution(void) {
 	if (stat < 0)
 		return stat;
 	LOG("Physical Resolution: %ix%i", x, y);
+	return 0;
+}
+
+int override_post_buffer(char *path){
+
+	int stat;
+	LOG("path: %s", path);
+
+	stat = epdc->controller->load_image(epdc->controller, path, NULL, 99999, 99999);
+
 	return 0;
 }
 

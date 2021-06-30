@@ -493,8 +493,13 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	it8951_t *it8951 = controller->hw_ref;
 
-	partialX = left;
-	partialY = top;
+	if (left == 99999 && top == 99999) {
+		partialX = 0;
+		partialY = 0;
+	} else {
+		partialX = left;
+		partialY = top;
+	}
 
 	assert(it8951 != NULL);
 
@@ -515,8 +520,17 @@ static int load_png_image(struct pl_generic_controller *controller,
 	struct timeval tStop, tStart; // time variables
 	float tTotal;
 	gettimeofday(&tStart, NULL);
-	if (devInfo.usImgBufAddrH == NULL)
+
+	if (left == 99999 && top == 99999) {
 		GetIT8951SystemInfo(bus, type, &devInfo);
+		//devInfo.usImgBufAddrL = 0x2a70;
+		//devInfo.usImgBufAddrH = 0x12;
+		devInfo.usImgBufAddrL = 0xBE28;
+		devInfo.usImgBufAddrH = 0x24;
+	} else {
+		if (devInfo.usImgBufAddrH == NULL)
+			GetIT8951SystemInfo(bus, type, &devInfo);
+	}
 
 //	devInfo.usPanelH = 960;
 //	devInfo.usPanelW = 1280;
