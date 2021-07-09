@@ -195,7 +195,7 @@ static void open_vcom(pl_vcom_switch_t *p)
 	assert(p != NULL);
 
 	struct pl_gpio *gpio = p->hw_ref;
-	pl_gpio_set(gpio, VCOM_EN, 0);
+	pl_gpio_set(gpio, FALCON_PMIC_POWER_COM, 0);
 }
 
 /**
@@ -208,7 +208,7 @@ static void close_vcom(pl_vcom_switch_t *p)
 	assert(p != NULL);
 
 	struct pl_gpio *gpio = p->hw_ref;
-	pl_gpio_set(gpio, VCOM_EN, 1);
+	pl_gpio_set(gpio, FALCON_PMIC_POWER_COM, 1);
 }
 
 /**

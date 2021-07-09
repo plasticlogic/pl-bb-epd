@@ -267,6 +267,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 		//pstAreaImgInfo->usY = 300;
 		//saveBufToPNG(pstAreaImgInfo->usWidth, pstAreaImgInfo->usHeight,
 		//		pusFrameBuf);
+		//IT8951LoadImgStart(bus, type, pstLdImgInfo);
 		IT8951LoadImgAreaStart(bus, type, pstLdImgInfo, pstAreaImgInfo);
 
 		//Host Write Data

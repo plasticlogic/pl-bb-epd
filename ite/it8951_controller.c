@@ -319,7 +319,7 @@ static void memory_padding(uint8_t *source, uint8_t *target,
 	else
 		_sourceline_offset = target_sourcelines - source_sourcelines;
 
-	if (target_sourcelines != 1156) {
+//	if (target_sourcelines == 1156) {
 
 		for (gateline = 0; gateline < source_gatelines; gateline++)
 			for (sourceline = 0; sourceline < source_sourcelines;
@@ -333,59 +333,61 @@ static void memory_padding(uint8_t *source, uint8_t *target,
 					source[source_index] = 0x00;
 				}
 			}
-	} else {
 
-		for (gateline = 0; gateline < 412; gateline++) {
-			for (sourceline = 0; sourceline < source_sourcelines;
-					sourceline++) {
-				int source_index = gateline * source_sourcelines + sourceline;
-				//int target_index = source_index;
-				//if (!(source_index < 0 || target_index < 0)) {
-				target[source_index] = source[source_index];
-				//source[source_index] = 0x00;
-			}
-		}
-
-		for (gateline = 412; gateline < 824; gateline++)
-			for (sourceline = 0; sourceline < source_sourcelines;
-					sourceline++) {
-				int source_index = gateline * source_sourcelines + sourceline;
-				int target_index = (gateline + _gateline_offset)
-						* target_sourcelines
-						+ (sourceline + _sourceline_offset);
-				if (!(source_index < 0 || target_index < 0)) {
-					target[target_index] = source[source_index];
-					//source[source_index] = 0x00;
-				}
-			}
-////
-		for (gateline = 824; gateline < 1236; gateline++)
-			for (sourceline = 0; sourceline < source_sourcelines;
-					sourceline++) {
-				int source_index = gateline * source_sourcelines + sourceline;
-				int target_index = (gateline + _gateline_offset * 2)
-						* target_sourcelines
-						+ (sourceline + _sourceline_offset);
-				if (!(source_index < 0 || target_index < 0)) {
-					target[target_index] = source[source_index];
-					//source[source_index] = 0x00;
-				}
-			}
-
-		for (gateline = 1236; gateline < 1648; gateline++)
-			for (sourceline = 0; sourceline < source_sourcelines;
-					sourceline++) {
-				int source_index = gateline * source_sourcelines + sourceline;
-				int target_index = (gateline + _gateline_offset * 3)
-						* target_sourcelines
-						+ (sourceline + _sourceline_offset);
-				if (!(source_index < 0 || target_index < 0)) {
-					target[target_index] = source[source_index];
-					//source[source_index] = 0x00;
-				}
-			}
-		saveBufToPNG(target_sourcelines, target_gatelines, target);
-	}
+//Comment in in case of 4x11.7"
+//	} else {
+//
+//		for (gateline = 0; gateline < 412; gateline++) {
+//			for (sourceline = 0; sourceline < source_sourcelines;
+//					sourceline++) {
+//				int source_index = gateline * source_sourcelines + sourceline;
+//				//int target_index = source_index;
+//				//if (!(source_index < 0 || target_index < 0)) {
+//				target[source_index] = source[source_index];
+//				//source[source_index] = 0x00;
+//			}
+//		}
+//
+//		for (gateline = 412; gateline < 824; gateline++)
+//			for (sourceline = 0; sourceline < source_sourcelines;
+//					sourceline++) {
+//				int source_index = gateline * source_sourcelines + sourceline;
+//				int target_index = (gateline + _gateline_offset)
+//						* target_sourcelines
+//						+ (sourceline + _sourceline_offset);
+//				if (!(source_index < 0 || target_index < 0)) {
+//					target[target_index] = source[source_index];
+//					//source[source_index] = 0x00;
+//				}
+//			}
+//////
+//		for (gateline = 824; gateline < 1236; gateline++)
+//			for (sourceline = 0; sourceline < source_sourcelines;
+//					sourceline++) {
+//				int source_index = gateline * source_sourcelines + sourceline;
+//				int target_index = (gateline + _gateline_offset * 2)
+//						* target_sourcelines
+//						+ (sourceline + _sourceline_offset);
+//				if (!(source_index < 0 || target_index < 0)) {
+//					target[target_index] = source[source_index];
+//					//source[source_index] = 0x00;
+//				}
+//			}
+//
+//		for (gateline = 1236; gateline < 1648; gateline++)
+//			for (sourceline = 0; sourceline < source_sourcelines;
+//					sourceline++) {
+//				int source_index = gateline * source_sourcelines + sourceline;
+//				int target_index = (gateline + _gateline_offset * 3)
+//						* target_sourcelines
+//						+ (sourceline + _sourceline_offset);
+//				if (!(source_index < 0 || target_index < 0)) {
+//					target[target_index] = source[source_index];
+//					//source[source_index] = 0x00;
+//				}
+//			}
+//		saveBufToPNG(target_sourcelines, target_gatelines, target);
+	//}
 }
 
 static void memory_padding_area(uint8_t *source, uint8_t *target,
@@ -539,6 +541,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	//Get Image Buffer Address of IT8951
 	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
+
 
 	//Set to Enable I80 Packed mode
 	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
