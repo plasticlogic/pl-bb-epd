@@ -577,7 +577,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-
+	start_stopwatch(&t);
 	stat |= controller->configure_update(controller, wfID, mode, area);
 	read_stopwatch(&t, "configure_update", 1);
 #if VERBOSE

@@ -70,7 +70,7 @@ typedef struct pl_generic_controller {
 	int (*load_image)(struct pl_generic_controller *p, const char *path,
 			const struct pl_area *area, int left, int top);
 	int (*load_buffer)(struct pl_generic_controller *p, const char* buffer,
-			const struct pl_area *area);
+			const struct pl_area *area, int binary);
 	int (*set_power_state)(struct pl_generic_controller *p,
 			enum pl_epdc_power_state state);
 	int (*set_temp_mode)(struct pl_generic_controller *p,

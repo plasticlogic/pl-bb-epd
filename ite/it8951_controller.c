@@ -69,7 +69,7 @@ static int load_wflib(struct pl_generic_controller *controller,
 static int load_png_image(struct pl_generic_controller *controller,
 		const char *path, struct pl_area *area, int left, int top);
 static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
-		struct pl_area *area, int left, int top);
+		struct pl_area *area, int binary);
 static int wait_update_end(struct pl_generic_controller *controller);
 static int read_register(struct pl_generic_controller *controller,
 		const regSetting_t* setting);
@@ -109,6 +109,7 @@ int it8951_controller_setup(struct pl_generic_controller *controller,
 	controller->update_temp = update_temp;
 	controller->get_temp = get_temperature;
 	controller->get_resolution = get_resolution;
+	controller->load_buffer = load_buffer;
 
 	return 0;
 }
@@ -128,15 +129,28 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		partialY = 0;
 	}
 
+	if (*type == I80) {
+		TWord buf[8];
+		buf[0] = (TWord) USDEF_I80_CMD_DPY_AREA_BUFFER;
+		buf[1] = (TWord) partialX;
+		buf[2] = (TWord) partialY;
+		buf[3] = (TWord) controller->imageWidth;
+		buf[4] = (TWord) controller->imageHeight;
+		buf[5] = (TWord) wfidToUse;
+		buf[6] = (TWord) devInfo.usImgBufAddrL;
+		buf[7] = (TWord) devInfo.usImgBufAddrH;
+		IT8951WriteDataBurst(bus, type, buf, 16);
+	} else {
+		IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
+		IT8951WriteData(bus, type, (TWord) partialX);     			// Display X
+		IT8951WriteData(bus, type, (TWord) partialY); 				// Display Y
+		IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
+		IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
+		IT8951WriteData(bus, type, (TWord) wfidToUse); 			// Display Mode
+		IT8951WriteData(bus, type, (TWord) devInfo.usImgBufAddrL); // Display H devInfo.usPanelH 960
+		IT8951WriteData(bus, type, (TWord) devInfo.usImgBufAddrH);
+	}
 //Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
-	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
-	IT8951WriteData(bus, type, (TWord) partialX);     				// Display X
-	IT8951WriteData(bus, type, (TWord) partialY); 					// Display Y
-	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
-	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
-	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
-	IT8951WriteData(bus, type, (TWord) devInfo.usImgBufAddrL); // Display H devInfo.usPanelH 960
-	IT8951WriteData(bus, type, (TWord) devInfo.usImgBufAddrH);
 
 //	regSetting_t regUpdate;
 //	regUpdate.addr = (int) USDEF_I80_CMD_DPY_AREA;
@@ -154,7 +168,7 @@ static int trigger_update(struct pl_generic_controller *controller) {
 
 	if (verbose) {
 
-		IT8951WaitForDisplayReady(bus, type);
+		//IT8951WaitForDisplayReady(bus, type);
 
 		printf("PMIC Register 7 after update: ");
 
@@ -167,10 +181,24 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		reg7[3] = 0x01;
 		reg.val = reg7;
 
-		send_cmd(controller, reg);
+		if (*type == I80) {
+			TWord buf[5];
+			buf[0] = IT8951_TCON_BYPASS_I2C;
+			buf[1] = 0x00;
+			buf[2] = 0x68;
+			buf[3] = 0x07;
+			buf[4] = 0x01;
+			IT8951WaitForReady(bus, type);
+			IT8951WriteDataBurst(bus, type, buf, 10);
+			IT8951WaitForReady(bus, type);
+			TWord* value = IT8951ReadData(bus, type, 2);  //read data
+			printf("0x%x\n", *value);
 
-		TWord* value = IT8951ReadData(bus, type, 2);  //read data
-		printf("0x%x\n", *value);
+		} else {
+			send_cmd(controller, reg);
+			TWord* value = IT8951ReadData(bus, type, 2);  //read data
+			printf("0x%x\n", *value);
+		}
 
 		printf("PMIC Register 8 after update: ");
 
@@ -183,10 +211,24 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		reg8[3] = 0x01;
 		reg2.val = reg8;
 
-		send_cmd(controller, reg2);
+		if (*type == I80) {
+			TWord buf[5];
+			buf[0] = IT8951_TCON_BYPASS_I2C;
+			buf[1] = 0x00;
+			buf[2] = 0x68;
+			buf[3] = 0x08;
+			buf[4] = 0x01;
+			IT8951WaitForReady(bus, type);
+			IT8951WriteDataBurst(bus, type, buf, 10);
+			IT8951WaitForReady(bus, type);
+			TWord* value = IT8951ReadData(bus, type, 2);  //read data
+			printf("0x%x\n", *value);
+		} else {
+			send_cmd(controller, reg2);
+			TWord* value = IT8951ReadData(bus, type, 2);  //read data
+			printf("0x%x\n", *value);
+		}
 
-		value = IT8951ReadData(bus, type, 2);  //read data
-		printf("0x%x\n", *value);
 	}
 
 	//IT8951WaitForReady(bus, type);
@@ -319,7 +361,7 @@ static void memory_padding(uint8_t *source, uint8_t *target,
 	else
 		_sourceline_offset = target_sourcelines - source_sourcelines;
 
-//	if (target_sourcelines == 1156) {
+	if (target_sourcelines != 1156) {
 
 		for (gateline = 0; gateline < source_gatelines; gateline++)
 			for (sourceline = 0; sourceline < source_sourcelines;
@@ -335,59 +377,54 @@ static void memory_padding(uint8_t *source, uint8_t *target,
 			}
 
 //Comment in in case of 4x11.7"
-//	} else {
-//
-//		for (gateline = 0; gateline < 412; gateline++) {
-//			for (sourceline = 0; sourceline < source_sourcelines;
-//					sourceline++) {
-//				int source_index = gateline * source_sourcelines + sourceline;
-//				//int target_index = source_index;
-//				//if (!(source_index < 0 || target_index < 0)) {
-//				target[source_index] = source[source_index];
-//				//source[source_index] = 0x00;
-//			}
-//		}
-//
-//		for (gateline = 412; gateline < 824; gateline++)
-//			for (sourceline = 0; sourceline < source_sourcelines;
-//					sourceline++) {
-//				int source_index = gateline * source_sourcelines + sourceline;
-//				int target_index = (gateline + _gateline_offset)
-//						* target_sourcelines
-//						+ (sourceline + _sourceline_offset);
-//				if (!(source_index < 0 || target_index < 0)) {
-//					target[target_index] = source[source_index];
-//					//source[source_index] = 0x00;
-//				}
-//			}
-//////
-//		for (gateline = 824; gateline < 1236; gateline++)
-//			for (sourceline = 0; sourceline < source_sourcelines;
-//					sourceline++) {
-//				int source_index = gateline * source_sourcelines + sourceline;
-//				int target_index = (gateline + _gateline_offset * 2)
-//						* target_sourcelines
-//						+ (sourceline + _sourceline_offset);
-//				if (!(source_index < 0 || target_index < 0)) {
-//					target[target_index] = source[source_index];
-//					//source[source_index] = 0x00;
-//				}
-//			}
-//
-//		for (gateline = 1236; gateline < 1648; gateline++)
-//			for (sourceline = 0; sourceline < source_sourcelines;
-//					sourceline++) {
-//				int source_index = gateline * source_sourcelines + sourceline;
-//				int target_index = (gateline + _gateline_offset * 3)
-//						* target_sourcelines
-//						+ (sourceline + _sourceline_offset);
-//				if (!(source_index < 0 || target_index < 0)) {
-//					target[target_index] = source[source_index];
-//					//source[source_index] = 0x00;
-//				}
-//			}
-//		saveBufToPNG(target_sourcelines, target_gatelines, target);
-	//}
+	} else {
+
+		for (gateline = 0; gateline < 412; gateline++) {
+			for (sourceline = 0; sourceline < source_sourcelines;
+					sourceline++) {
+				int source_index = gateline * source_sourcelines + sourceline;
+				target[source_index] = source[source_index];
+			}
+		}
+
+		for (gateline = 412; gateline < 824; gateline++)
+			for (sourceline = 0; sourceline < source_sourcelines;
+					sourceline++) {
+				int source_index = gateline * source_sourcelines + sourceline;
+				int target_index = (gateline + _gateline_offset)
+						* target_sourcelines
+						+ (sourceline + _sourceline_offset);
+				if (!(source_index < 0 || target_index < 0)) {
+					target[target_index] = source[source_index];
+					//source[source_index] = 0x00;
+				}
+			}
+		for (gateline = 824; gateline < 1236; gateline++)
+			for (sourceline = 0; sourceline < source_sourcelines;
+					sourceline++) {
+				int source_index = gateline * source_sourcelines + sourceline;
+				int target_index = (gateline + _gateline_offset * 2)
+						* target_sourcelines
+						+ (sourceline + _sourceline_offset);
+				if (!(source_index < 0 || target_index < 0)) {
+					target[target_index] = source[source_index];
+					//source[source_index] = 0x00;
+				}
+			}
+		for (gateline = 1236; gateline < 1648; gateline++)
+			for (sourceline = 0; sourceline < source_sourcelines;
+					sourceline++) {
+				int source_index = gateline * source_sourcelines + sourceline;
+				int target_index = (gateline + _gateline_offset * 3)
+						* target_sourcelines
+						+ (sourceline + _sourceline_offset);
+				if (!(source_index < 0 || target_index < 0)) {
+					target[target_index] = source[source_index];
+					//source[source_index] = 0x00;
+				}
+			}
+		//saveBufToPNG(target_sourcelines, target_gatelines, target);
+	}
 }
 
 static void memory_padding_area(uint8_t *source, uint8_t *target,
@@ -416,12 +453,9 @@ static void memory_padding_area(uint8_t *source, uint8_t *target,
 }
 
 static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
-		struct pl_area *area, int left, int top) {
+		struct pl_area *area, int binary) {
 
 	it8951_t *it8951 = controller->hw_ref;
-
-	partialX = left;
-	partialY = top;
 
 	assert(it8951 != NULL);
 
@@ -435,11 +469,18 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 	IT8951LdImgInfo stLdImgInfo;
 	IT8951AreaImgInfo stAreaImgInfo;
 
+	int fd, stat = 0;
+
 	struct timeval tStop, tStart; // time variables
 	float tTotal;
 	gettimeofday(&tStart, NULL);
 	if (devInfo.usImgBufAddrH == NULL)
 		GetIT8951SystemInfo(bus, type, &devInfo);
+
+	if (binary == 1) {
+		devInfo.usImgBufAddrL = 0xBE28;
+		devInfo.usImgBufAddrH = 0x24;
+	}
 
 	//Get Image Buffer Address of IT8951
 	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
@@ -450,12 +491,21 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 	controller->yres = devInfo.usPanelH;
 	controller->xres = devInfo.usPanelW;
 
+	uint8_t *img_buf = malloc(
+			sizeof(uint8_t) * controller->xres * controller->yres);
+
+	fd = open(buf, O_RDONLY);
+
+	stat = read(fd, img_buf, controller->xres * controller->yres);
+
+	stat = close(fd);
+
 	//--------------------------------------------------------------------------------------------
 	//      initial display - Display white only
 	//--------------------------------------------------------------------------------------------
 	//Load Image and Display
 	//Setting Load image information
-	stLdImgInfo.ulStartFBAddr = (TDWord) buf;
+	stLdImgInfo.ulStartFBAddr = (TDWord) img_buf;
 	stLdImgInfo.usEndianType = IT8951_LDIMG_L_ENDIAN;
 	stLdImgInfo.usPixelFormat = IT8951_8BPP;
 	stLdImgInfo.usRotate = IT8951_ROTATE_0;
@@ -473,18 +523,10 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
 	printf("Time Load and Scramble: %f\n", tTotal);
 
-	//Load Image from Host to IT8951 Image Buffer
-	if (stAreaImgInfo.usWidth >= 2048) {
-		stAreaImgInfo.usHeight = stAreaImgInfo.usHeight / 2;
-		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-		stLdImgInfo.ulStartFBAddr += (stAreaImgInfo.usHeight
-				* stAreaImgInfo.usWidth / 2);
-		stLdImgInfo.ulImgBufBaseAddr += (stAreaImgInfo.usHeight
-				* stAreaImgInfo.usWidth / 2);
-		//IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-	} else {
-		IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-	}
+	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
+
+	if (img_buf)
+		free(img_buf);
 
 	return 0;
 
@@ -541,7 +583,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	//Get Image Buffer Address of IT8951
 	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
-
 
 	//Set to Enable I80 Packed mode
 	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
@@ -889,10 +930,20 @@ static int send_cmd(pl_generic_controller_t *p, const regSetting_t setting) {
 	struct pl_generic_interface *interface = it8951->interface;
 	enum interfaceType *type = it8951->sInterfaceType;
 
-	IT8951WriteCmdCode(interface, type, setting.addr);
+	if (*type == I80) {
+		TWord *buf = malloc(sizeof(TWord) * setting.valCount + sizeof(TWord));
+		buf[0] = setting.addr;
+		for (i = 1; i <= setting.valCount; i++) {
+			buf[i] = setting.val[i - 1];
+		}
+		IT8951WriteDataBurst(interface, type, buf, (setting.valCount + 1) * 2);
+		free(buf);
+	} else {
+		IT8951WriteCmdCode(interface, type, setting.addr);
 
-	for (i = 0; i < setting.valCount; i++)
-		IT8951WriteData(interface, type, setting.val[i]);
+		for (i = 0; i < setting.valCount; i++)
+			IT8951WriteData(interface, type, setting.val[i]);
+	}
 
 	return 0;
 }
@@ -990,20 +1041,30 @@ static int update_temp(struct pl_generic_controller *controller) {
 	}
 
 	if (shouldUpdate == 1) {
-		IT8951WaitForReady(interface, type);
-		// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
-		IT8951WriteCmdCode(interface, type, USDEF_I80_CMD_FORCE_SET_TEMP);
 
-		IT8951WaitForReady(interface, type);
+		if (*type == I80) {
+			TWord buf[3];
+			buf[0] = USDEF_I80_CMD_FORCE_SET_TEMP;
+			buf[1] = 0x01;
+			buf[2] = newTemp;
+			IT8951WaitForReady(interface, type);
+			IT8951WriteDataBurst(interface, type, buf, 6);
+		} else {
+			IT8951WaitForReady(interface, type);
+			// Force Set of Temperature to 37 Degree Celcius, cause acutal Waveform in the Firmware only supports 37 Degree
+			IT8951WriteCmdCode(interface, type, USDEF_I80_CMD_FORCE_SET_TEMP);
 
-		TWord dataTemp[2];
-		dataTemp[0] = 0x01;
-		dataTemp[1] = newTemp;  //37   //controller->manual_temp;
+			IT8951WaitForReady(interface, type);
 
-		//IT8951WriteDataBurst(interface, type, dataTemp, 2);
-		IT8951WriteData(interface, type, dataTemp[0]);
-		IT8951WriteData(interface, type, dataTemp[1]);
-		IT8951WaitForReady(interface, type);
+			TWord dataTemp[2];
+			dataTemp[0] = 0x01;
+			dataTemp[1] = newTemp;  //37   //controller->manual_temp;
+
+			//IT8951WriteDataBurst(interface, type, dataTemp, 2);
+			IT8951WriteData(interface, type, dataTemp[0]);
+			IT8951WriteData(interface, type, dataTemp[1]);
+			IT8951WaitForReady(interface, type);
+		}
 
 		stat = 0;
 	}
@@ -1015,17 +1076,44 @@ static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres) {
 	it8951_t *it8951 = p->hw_ref;
 	I80IT8951DevInfo* pstDevInfo;
 	assert(it8951 != NULL);
-	IT8951WriteCmdCode(it8951->interface, it8951->sInterfaceType,
-	USDEF_I80_CMD_GET_DEV_INFO);
-	if (xres && yres) {
-		// TODO: Check if scrambled!!!
-		pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface,
-				it8951->sInterfaceType, sizeof(I80IT8951DevInfo) / 2);
 
-		*xres = pstDevInfo->usPanelW;
-		*yres = pstDevInfo->usPanelH;
-		return 0;
+	if (*it8951->sInterfaceType == I80) {
+		IT8951WriteCmdCode(it8951->interface, it8951->sInterfaceType,
+		USDEF_I80_CMD_GET_DEV_INFO);
+		if (xres && yres) {
+			// TODO: Check if scrambled!!!
+			pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface,
+					it8951->sInterfaceType, sizeof(I80IT8951DevInfo));
+
+			*xres = pstDevInfo->usPanelW;
+			*yres = pstDevInfo->usPanelH;
+			return 0;
+		}
+	} else {
+		IT8951WriteCmdCode(it8951->interface, it8951->sInterfaceType,
+		USDEF_I80_CMD_GET_DEV_INFO);
+		if (xres && yres) {
+			// TODO: Check if scrambled!!!
+			pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface,
+					it8951->sInterfaceType, sizeof(I80IT8951DevInfo) / 2);
+
+			*xres = pstDevInfo->usPanelW;
+			*yres = pstDevInfo->usPanelH;
+			return 0;
+		}
 	}
+
+//	IT8951WriteCmdCode(it8951->interface, it8951->sInterfaceType,
+//	USDEF_I80_CMD_GET_DEV_INFO);
+//	if (xres && yres) {
+//		// TODO: Check if scrambled!!!
+//		pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface,
+//				it8951->sInterfaceType, sizeof(I80IT8951DevInfo) / 2);
+//
+//		*xres = pstDevInfo->usPanelW;
+//		*yres = pstDevInfo->usPanelH;
+//		return 0;
+
 	return -EINVAL;
 }
 
