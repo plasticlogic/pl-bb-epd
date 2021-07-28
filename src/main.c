@@ -537,7 +537,6 @@ int execute_update_image(int argc, char **argv) {
 int execute_override_post_buffer(int argc, char **argv) {
 
 	int stat;
-	char* wfID = "default";
 	int binary = 0;
 
 	if (argc >= 4) {
