@@ -52,8 +52,6 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type,
 
 	IT8951WaitForReady(bus, type);
 
-	//LOG("I'm here !");
-
 	//transfer info between pointers
 	pBuf_->usPanelW = pstDevInfo->usPanelW;
 	pBuf_->usPanelH = pstDevInfo->usPanelH;
@@ -89,6 +87,15 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type,
 	//Show Firmware and LUT Version
 	//printf("FW Version = %s\r\n", stI80IT8951DevInfo.usFWVersion);
 	//printf("LUT Version = %s\r\n", stI80IT8951DevInfo.usLUTVersion);
+	TWord buf[4];
+	buf[0] = 0x54;
+	buf[1] = 0x00;
+	buf[2] = 0xC9;
+	buf[3] = 0x00;
+
+	//IT8951SendCmdArg(bus, type, USDEF_I80_CMD_SET_PWR_SEQ, buf ,4);
+	IT8951MemBurstWriteProc(bus, type, USDEF_I80_CMD_SET_PWR_SEQ, 4, buf );
+
 }
 
 //-----------------------------------------------------------
@@ -569,6 +576,7 @@ void IT8951SendCmdArg(pl_generic_interface_t *bus, enum interfaceType *type,
 	IT8951WriteCmdCode(bus, type, usCmdCode);
 //Send Data
 	for (i = 0; i < usNumArg; i++) {
+		printf("Data: %x\n", pArg[i]);
 		IT8951WriteData(bus, type, pArg[i]);
 	}
 }

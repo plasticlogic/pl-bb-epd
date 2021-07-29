@@ -80,6 +80,7 @@ typedef struct {
 #define USDEF_I80_CMD_POWER_CTR	  		0x0038
 #define USDEF_I80_CMD_VCOM_CTR     		0x0039
 #define USDEF_I80_CMD_FORCE_SET_TEMP	0x0040
+#define USDEF_I80_CMD_SET_PWR_SEQ		0x00B4
 
 //Panel
 #define IT8951_PANEL_WIDTH   1024 //it Get Device information#define IT8951_PANEL_HEIGHT   758

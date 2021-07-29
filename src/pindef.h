@@ -307,7 +307,7 @@ static const  struct pl_gpio_config g_falcon_spi_gpios[] = {
 };
 
 static const  struct pl_gpio_config g_falcon_spi_ext_epdc_gpios[] = {
-	{ FALCON_DISPLAY_NVM_CS,      		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
+	{ FALCON_DISPLAY_NVM_CS,    PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_FIRMWARE_NVM_CS, 	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_SPI_CS_ITE, 		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_I80_HCS_N,			PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
@@ -330,7 +330,7 @@ static const  struct pl_gpio_config g_falcon_spi_ext_epdc_gpios[] = {
 	{ RUDDOCK_HDB13,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HDB14,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ RUDDOCK_HDB15,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
-	//{ FALCON_ACVCOM_EN,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
+//	{ FALCON_ACVCOM_EN,			PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ VCOM_EN,					PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_PWR_BOOST_EN,		PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
 	{ FALCON_ACVCOM_HIGH_EN,	PL_GPIO_OUTPUT | PL_GPIO_INIT_L },
@@ -341,12 +341,9 @@ static const  struct pl_gpio_config g_falcon_spi_ext_epdc_gpios[] = {
 	{ FALCON_PMIC_WAKE_UP,		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_PMIC_POWER_COM,	PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
 	{ FALCON_PMIC_POWER_UP,		PL_GPIO_OUTPUT | PL_GPIO_INIT_H },
-	{ FALCON_GPIO1,				PL_GPIO_INPUT  | PL_GPIO_PD }, 		// D054 HRDY
+	{ FALCON_GPIO1,				PL_GPIO_INPUT  | PL_GPIO_PD 	}, 	// D054 HRDY
 	{ FALCON_GPIO2,				PL_GPIO_OUTPUT | PL_GPIO_INIT_L }, 	// D054 RESET
 	{ FALCON_EXT_TRIGGER_OUT,	PL_GPIO_OUTPUT | PL_GPIO_INIT_L }, 	// EXT TRIGGER OUTPUT for image capture during image update
-	{ RUDDOCK_RESERVE_2,		PL_GPIO_INPUT | PL_GPIO_PD },
-	{ RUDDOCK_RESERVE_3,		PL_GPIO_INPUT | PL_GPIO_PD },
-	{ BB_VSYNC,					PL_GPIO_INPUT | PL_GPIO_PD },
 };
 
 static const struct pl_gpio_config g_HBZ1_3_gpios[] = {
