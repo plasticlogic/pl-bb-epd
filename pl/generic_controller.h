@@ -49,6 +49,7 @@ typedef struct pl_generic_controller {
 	unsigned imageWidth;
 	unsigned imageHeight;
 	uint8_t animationMode;
+	uint8_t bufferNumber;
 	cfa_overlay_t cfa_overlay;
 	enum pl_update_image_mode update_image_mode;
 

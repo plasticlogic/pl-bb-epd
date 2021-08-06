@@ -361,7 +361,9 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 				test = write(burst_var, &burst_en, 1);
 			}
 
-			TWord *usArg = malloc((12 + pstAreaImgInfo->usWidth * pstAreaImgInfo->usHeight) * sizeof(TWord));
+			TWord *usArg = malloc(
+					(12 + pstAreaImgInfo->usWidth * pstAreaImgInfo->usHeight)
+							* sizeof(TWord));
 			//Setting Argument for Load image start
 			usArg[0] = IT8951_TCON_LD_IMG_AREA;
 			usArg[1] = (pstLdImgInfo->usEndianType << 8)
@@ -408,8 +410,7 @@ void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 		gettimeofday(&tStop, NULL);
 		tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
 				+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
-		printf("Data Transmission --> Time: %f\n", tTotal);
-
+		//printf("Data Transmission --> Time: %f\n", tTotal);
 		IT8951LoadImgEnd(bus, type);
 
 	}
@@ -547,37 +548,15 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		}
 #endif
 
-		//wait for ready
-		//IT8951WaitForReady(bus, type);
+		//int i = 0;
 
-		//Switch C/D to Data => Data - H
-		//gpio->set(i80->hdc_gpio, 1);
-
-		//CS
-		//gpio->set(i80->hcs_n_gpio, 0);
-
-		//gpio->set(i80->hwe_n_gpio, 0);
-
-		int i = 0;
-
-		while (i++ < WAIT_FOR_READY_TIMEOUT_I80) {
-
-			if (write(i80->fd, usData, size) > 0) {
-				return;
-			}
-		}
-		//iResult = write(i80->fd, usData, size);
-		//IT8951WaitForReady(bus, type);
-		//iResult = write(i80->fd, usData + size / 2, size / 2);
-
-		//wait for ready
-		//IT8951WaitForReady(bus, type);
-
-		//CS
-		//gpio->set(i80->hcs_n_gpio, 1);
-
-		//gpio->set(i80->hwe_n_gpio, 1);
-	} else {
+		//while (i++ < WAIT_FOR_READY_TIMEOUT_I80) {
+		write(i80->fd, usData, size);
+//			if (write(i80->fd, usData, size) > 0) {
+//				return;
+//			}
+//		}
+//			} else {
 		//error
 	}
 	//return iResult;
@@ -589,8 +568,6 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type,
 		int size) {
 	TWord* usData;
-//wait for ready
-//IT8951WaitForReady(bus, type);
 
 	usData = gpio_i80_16b_data_in(bus, type, size);
 
@@ -655,10 +632,6 @@ void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		//CS
 		gpio->set(i80->hcs_n_gpio, 0);
 
-		//RD Enable
-		//GPIO_SET_L(REN);
-		//gpio->set(i80->hrd_n_gpio, 0);
-
 		int i = 0;
 		for (i = 0; i < size; i++) {
 			// Executing read within the loop is necessary,
@@ -672,9 +645,6 @@ void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 			}
 #endif
 		}
-		//RD Enable
-		//GPIO_SET_L(REN);
-		//gpio->set(i80->hwe_n_gpio, 1);
 		//CS
 		gpio->set(i80->hcs_n_gpio, 1);
 		//-------------------------real function end-------------------------------------
@@ -944,7 +914,6 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 		enum interfaceType *type, int size) {
 
 	TWord usData;
-//int iResult = 0;
 	TWord* iResult = (TWord*) malloc(size);
 
 	if (*type == SPI_HRDY) {
@@ -985,52 +954,17 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 
 		//Set SPI-CS high
 		gpio->set(spi->cs_gpio, 1);
+
 	} else if (*type == I80) {
 		pl_i80_t *i80 = (pl_i80_t*) bus->hw_ref;
 		struct pl_gpio * gpio = (struct pl_gpio *) i80->hw_ref;
 
-		//IT8951WaitForReady(bus, type);
-
-		//Set GPIO 0~7 to input mode
-		//See your host setting of GPIO
-		//Switch C/D to Data - DATA - H
-		//GPIO_SET_H(CD);
-		//gpio->set(i80->hdc_gpio, 1);
-
-		//CS-L
-		//GPIO_SET_L(CS);
-		//gpio->set(i80->hcs_n_gpio, 0);
-
-		//RD Enable
-		//GPIO_SET_L(REN);
-		//gpio->set(i80->hrd_n_gpio, 0);
-		//Get 8-bits Bus Data (Collect 8 GPIO pins to Byte Data)
-		//See your host setting of GPIO
-		//usData = GPIO_I80_Bus[16];
-
-		//
-		//int i = 0;
-		//for (i = 0; i < size; i++) {
-
-		//usleep(10);
-		//if (i%2 == 0){
-		//IT8951WaitForReady(bus, type);
-		//}
 		read(i80->fd, iResult, size);
-		//iResult[i] = usData;
-		//}
-		//WR Enable - H
-		//GPIO_SET_H(WEN);
-		//gpio->set(i80->hwe_n_gpio, 1);
-		//CS-H
-		//GPIO_SET_H(CS);
-		//gpio->set(i80->hcs_n_gpio, 1);
 
 	} else {
 		//error
 	}
 
-//return usData;
 	return iResult;
 }
 

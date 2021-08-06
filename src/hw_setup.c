@@ -183,7 +183,7 @@ static int initialize_control_system(hw_setup_t *p,const char *selection){
 		p->i2c_port = 3;
 	else if (!strcmp(selection, "BEAGLEBONE_BLACK" ))
 		// beaglebone black (using i2c-2 (hw descripion), but mapped to /dev/i2c-1)
-		p->i2c_port = 1;
+		p->i2c_port = 2;
 	else {
 		LOG("Given control system type %s not supported.", selection);
 		return -EINVAL;

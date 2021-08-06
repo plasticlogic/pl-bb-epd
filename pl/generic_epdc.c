@@ -41,8 +41,8 @@ static int do_clear_update(struct pl_generic_epdc *p);
 static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content);
 static int generic_update(struct pl_generic_epdc *p, int wfID,
 		enum pl_update_mode mode, const struct pl_area *area);
-static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios, int wfID,
-		enum pl_update_mode mode, const struct pl_area *area);
+static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
+		int wfID, enum pl_update_mode mode, const struct pl_area *area);
 static int get_resolution(struct pl_generic_controller *p, int* xres, int* yres);
 
 static int unpack_nvm_content(uint8_t *buffer, int bufferSize);
@@ -554,7 +554,7 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 	assert(p != NULL);
 	pl_generic_controller_t *controller = p->controller;
 	pl_hv_t *hv = p->hv;
-	struct timespec t;
+	struct timespec t, t1;
 
 	assert(controller != NULL);
 	assert(hv != NULL);
@@ -567,19 +567,13 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 
 	int stat = 0;
 
-//	if (controller->temp_mode != PL_EPDC_TEMP_MANUAL
-//			&& controller->temp_mode != PL_EPDC_TEMP_INTERNAL) {
-//		if (controller->update_temp != NULL)
-//			stat |= controller->update_temp(controller);
-	//}
-	//gettimeofday(&tStart, NULL);
-//read_stopwatch(&t, "update_temp", 1);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
 	start_stopwatch(&t);
 	stat |= controller->configure_update(controller, wfID, mode, area);
-	read_stopwatch(&t, "configure_update", 1);
+	//read_stopwatch(&t, "configure_update", 1);
+
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
@@ -588,29 +582,32 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
 		if (!controller->animationMode)
 			stat |= switch_hvs_on(hv);
 	}
-	read_stopwatch(&t, "switch_hvs_on", 1);
+	//read_stopwatch(&t, "switch_hvs_on", 1);
 
+	start_stopwatch(&t1);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
 	if (!nowait) {
 		stat |= controller->trigger_update(controller);
 	}
-	read_stopwatch(&t, "trigger update", 1);
+	//read_stopwatch(&t1, "trigger update", 1);
 
-	stat |= controller->wait_update_end(controller);
+	if (!controller->animationMode) {
+		stat |= controller->wait_update_end(controller);
 
 #if VERBOSE
-	LOG("%s: stat: %i", __func__, stat);
+		LOG("%s: stat: %i", __func__, stat);
 #endif
-	read_stopwatch(&t, "cwait_update_end", 1);
+		read_stopwatch(&t1, "cwait_update_end", 1);
+	}
 
 	if (!controller->animationMode)
 		stat |= switch_hvs_off(hv);
 #if VERBOSE
 	LOG("%s: stat: %i", __func__, stat);
 #endif
-	read_stopwatch(&t, "switch_hvs_off", 1);
+	//read_stopwatch(&t1, "switch_hvs_off", 1);
 
 	return stat;
 }
@@ -624,8 +621,8 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
  * @param area definition of an update area (can be NULL)
  * @return success indicator: 0 if passed, otherwise <> 0
  */
-static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios, int wfID,
-		enum pl_update_mode mode, const struct pl_area *area) {
+static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
+		int wfID, enum pl_update_mode mode, const struct pl_area *area) {
 
 	assert(p != NULL);
 	pl_generic_controller_t *controller = p->controller;
@@ -644,23 +641,32 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 	int current_temperature = 0;
 	controller->get_temp(controller, &current_temperature);
 
-	dac_vcoml = (uint8_t) DIV_ROUND_CLOSEST((p->hv->vcomConfig->vcoml - p->hv->vcomConfig->dac_vcoml_offset) , p->hv->vcomConfig->dac_vcoml_slope);
-	dac_vcomh = (uint8_t) DIV_ROUND_CLOSEST((p->hv->vcomConfig->vcomh - p->hv->vcomConfig->dac_vcomh_offset) , p->hv->vcomConfig->dac_vcomh_slope);
+	dac_vcoml = (uint8_t) DIV_ROUND_CLOSEST(
+			(p->hv->vcomConfig->vcoml - p->hv->vcomConfig->dac_vcoml_offset),
+			p->hv->vcomConfig->dac_vcoml_slope);
+	dac_vcomh = (uint8_t) DIV_ROUND_CLOSEST(
+			(p->hv->vcomConfig->vcomh - p->hv->vcomConfig->dac_vcomh_offset),
+			p->hv->vcomConfig->dac_vcomh_slope);
 
 	// configure vcom low
-	LOG("Configure vcoml: %d mV --> dac: %d", p->hv->vcomConfig->vcoml, dac_vcoml);
-	sprintf(system_call, "set_digipot.py -d neg -w 1 -va %d 2>&1 >/dev/null", dac_vcoml);
+	LOG("Configure vcoml: %d mV --> dac: %d", p->hv->vcomConfig->vcoml,
+			dac_vcoml);
+	sprintf(system_call, "set_digipot.py -d neg -w 1 -va %d 2>&1 >/dev/null",
+			dac_vcoml);
 	system(system_call);
 
 	// configure vcom high
-	LOG("Configure vcomh: %d mV --> dac: %d", p->hv->vcomConfig->vcomh, dac_vcomh);
-	sprintf(system_call, "set_digipot.py -d pos -w 1 -va %d 2>&1 >/dev/null", dac_vcomh);
+	LOG("Configure vcomh: %d mV --> dac: %d", p->hv->vcomConfig->vcomh,
+			dac_vcomh);
+	sprintf(system_call, "set_digipot.py -d pos -w 1 -va %d 2>&1 >/dev/null",
+			dac_vcomh);
 	system(system_call);
 
 	// switch hv on
 	stat |= switch_hvs_on(hv);
 
-	sprintf(system_call, "echo 1 > /sys/class/gpio/gpio%d/value", FALCON_PWR_BOOST_EN);
+	sprintf(system_call, "echo 1 > /sys/class/gpio/gpio%d/value",
+	FALCON_PWR_BOOST_EN);
 	system(system_call);
 
 	read_stopwatch(&t, "switch_hvs_on", 1);
@@ -669,11 +675,12 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 #endif
 
 	// start BBACVCom
-	LOG("%s: Start BBACVCom with wfID: %d, Temperature: %d.", __func__, wfID, current_temperature);
-	system("readlink -f /tmp/AcVcom.bin");
-	sprintf(system_call, "BBACVCom --acvcom -b /tmp/AcVcom.bin %d %d > /tmp/acvcom.out &",
-			wfID,
+	LOG("%s: Start BBACVCom with wfID: %d, Temperature: %d.", __func__, wfID,
 			current_temperature);
+	system("readlink -f /tmp/AcVcom.bin");
+	sprintf(system_call,
+			"BBACVCom --acvcom -b /tmp/AcVcom.bin %d %d > /tmp/acvcom.out &",
+			wfID, current_temperature);
 	system(system_call);
 	usleep(1000000);
 
@@ -687,19 +694,18 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 
 	stat |= controller->wait_update_end(controller);
 
-
 	// Initialise and trigger
 	stat |= controller->configure_update(controller, wfID, mode, area);
 
 	// switch ext trigger output for image capture --> high
-	gpios->set(FALCON_EXT_TRIGGER_OUT, 1 );
+	gpios->set(FALCON_EXT_TRIGGER_OUT, 1);
 
 	stat |= controller->trigger_update(controller);
 
 	stat |= controller->wait_update_end(controller);
 
 	// switch ext trigger output for image capture --> low
-	gpios->set(FALCON_EXT_TRIGGER_OUT, 0 );
+	gpios->set(FALCON_EXT_TRIGGER_OUT, 0);
 
 	read_stopwatch(&t, "trigger update", 1);
 
@@ -708,7 +714,8 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 #endif
 	read_stopwatch(&t, "cwait_update_end", 1);
 
-	sprintf(system_call, "echo 0 > /sys/class/gpio/gpio%d/value", FALCON_PWR_BOOST_EN);
+	sprintf(system_call, "echo 0 > /sys/class/gpio/gpio%d/value",
+	FALCON_PWR_BOOST_EN);
 	system(system_call);
 
 	// switch hv off

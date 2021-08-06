@@ -109,19 +109,6 @@ static int it8951_hv_driver_on(struct pl_hv_driver *p) {
 	} else {
 		IT8951WaitForReady(bus, type);
 
-//		IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//		IT8951WriteData(bus, type, 0x01); // I2C write command
-//		IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//		IT8951WriteData(bus, type, 0x09); // Power Up Sequence Register
-//		IT8951WriteData(bus, type, 0x01); // Write Size
-//		IT8951WriteData(bus, type, 0xC9); //
-
-		IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-		IT8951WriteData(bus, type, 0x01); // I2C write command
-		IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-		IT8951WriteData(bus, type, 0x0A); // Power Up Sequence Register
-		IT8951WriteData(bus, type, 0x01); // Write Size
-		IT8951WriteData(bus, type, 0x00); //
 		IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_POWER_CTR);
 		IT8951WriteData(bus, type, 0x01);
 	}
@@ -142,13 +129,6 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 	assert(bus != NULL);
 	enum interfaceType *type = it8951->sInterfaceType;
 	//printf("HV off managed by ITE \n");
-
-//	IT8951WriteCmdCode(bus, type, IT8951_TCON_BYPASS_I2C);
-//	IT8951WriteData(bus, type, 0x01); // I2C write command
-//	IT8951WriteData(bus, type, 0x68); // TPS65815 Chip Address
-//	IT8951WriteData(bus, type, 0x0C); // Power Up Sequence Register
-//	IT8951WriteData(bus, type, 0x01); // Write Size
-//	IT8951WriteData(bus, type, 0x00); //
 
 	IT8951WaitForReady(bus, type);
 
@@ -174,15 +154,6 @@ static int it8951_hv_driver_off(struct pl_hv_driver *p) {
 
 	IT8951WriteReg(bus, type, 0x1e16, data);
 
-//	do {
-//		data3 = IT8951ReadReg(bus, type, 0x1E14);
-//		timeout--;
-//	} while ((data3 & 0x20) && timeout);
-//
-//	if (data3 & 0x20) {
-//		LOG("Failed to turn the EPDC power off");
-//		return -EEPDC;
-//	}
 	return 0;
 }
 

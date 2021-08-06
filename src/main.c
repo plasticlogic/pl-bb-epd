@@ -117,11 +117,11 @@ int show_image(const char *dir, const char *file, int wfid);
 int counter(const char* wf);
 int fill(uint8_t gl, uint8_t wfid, int update_mode);
 //remove int interface_data(	char* interface,int number_of_values,char values);
-int slideshow(const char *path, const char* wf, int count, int anim);
+int slideshow(const char *path, const char* wf, int count, int anim,
+		struct pl_area *area);
 int override_post_buffer(char *path, int binary);
-int load_buffer(char *buf, const char* wfID,
-		enum pl_update_mode mode, int vcom_switch, int updateCount,
-		int waitTime);
+int load_buffer(char *buf, const char* wfID, enum pl_update_mode mode,
+		struct pl_area *area);
 
 int execute_help(int argc, char **argv);
 int execute_start_epdc(int argc, char **argv);
@@ -403,28 +403,18 @@ int execute_load_buffer(int argc, char **argv) {
 
 	char* wfID = "default";
 	int mode = 0;
-	int vcom_switch_enable = 1;
-	int updateCount = 1;
-	int waitTime = 0;
-
-	if (argc >= 8)
-		vcom_switch_enable = atol(argv[7]);
-
-	if (argc >= 7)
-		waitTime = atoi(argv[6]);
+	struct pl_area *area = malloc(sizeof(struct pl_area));
 
 	if (argc >= 6)
-		updateCount = atoi(argv[5]);
+		parser_read_area(argv[5], ",", area);
 
 	if (argc >= 5)
 		mode = atoi(argv[4]);
 
 	if (argc >= 4)
 		wfID = argv[3];
-		if (argc >= 3) {
-		stat = load_buffer(argv[2], wfID,
-				(enum pl_update_mode) mode, vcom_switch_enable, updateCount,
-				waitTime);
+	if (argc >= 3) {
+		stat = load_buffer(argv[2], wfID, (enum pl_update_mode) mode, area);
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
 	}
@@ -465,7 +455,7 @@ int execute_set_temperature(int argc, char **argv) {
 	float temperature;
 
 	if (argc == 3) {
-		temperature = atof(argv[2]);
+		temperature = atoi(argv[2]);
 		stat = set_temperature(temperature);
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
@@ -636,18 +626,22 @@ int execute_counter(int argc, char**argv) {
 int execute_slideshow(int argc, char**argv) {
 	int stat;
 	//slideshow path wfid waittime
-	int waitTime = 0;
 	int anim = 0;
 	char* wfID = NULL;
+	int count = 1;
+	struct pl_area* area = malloc(sizeof(struct pl_area));
+
+	if (argc >= 7)
+		parser_read_area(argv[6], ",", area);
 	if (argc >= 6)
 		anim = atoi(argv[5]);
 	if (argc >= 5)
-		waitTime = atoi(argv[4]);
+		count = atoi(argv[4]);
 	if (argc >= 4)
 		wfID = argv[3];
 
 	if (argc >= 3) {
-		stat = slideshow(argv[2], wfID, waitTime, anim);
+		stat = slideshow(argv[2], wfID, count, anim, area);
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
 	}
@@ -1210,9 +1204,8 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 	return 0;
 }
 
-int load_buffer(char *path, const char* wfID,
-		enum pl_update_mode mode, int vcomSwitchEnable, int updateCount,
-		int waitTime) {
+int load_buffer(char *path, const char* wfID, enum pl_update_mode mode,
+		struct pl_area *area) {
 	int cnt, binary = 0;
 	int stat;
 	int fd = 0;
@@ -1220,31 +1213,31 @@ int load_buffer(char *path, const char* wfID,
 	struct timeval tStop, tStart; // time variables
 	float tTotal;
 
+	epdc->controller->imageWidth = area->width;
+	epdc->controller->imageHeight = area->height;
+	epdc->controller->xres = area->width;
+	epdc->controller->yres = area->height;
+
 	LOG("path: %s", path);
 
 	int wfId = pl_generic_controller_get_wfid(epdc->controller, wfID);
 	LOG("wfID: %d", wfId);
 	LOG("updateMode: %d", mode);
-	LOG("updateCount: %d", updateCount);
-	LOG("waitTime: %d", waitTime);
-	LOG("vcomSwitch: %d", vcomSwitchEnable);
 
 	if (wfId < 0)
 		return -EINVAL;
 
 	gettimeofday(&tStart, NULL);
 
-	stat = epdc->controller->load_buffer(epdc->controller, path, NULL, binary);
+	stat = epdc->controller->load_buffer(epdc->controller, path, area, binary);
 
 	if (stat < 0)
 		return stat;
 
-	for (cnt = 0; cnt < updateCount; cnt++) {
-
 //		switch (epdc->controller->update_image_mode) {
 //		case BW:
 //		case CFA:
-		stat = epdc->update(epdc, wfId, mode, NULL);
+	stat = epdc->update(epdc, wfId, 1, area);
 //			break;
 //		case ACEP:
 //		case ACEP_ACVCOM:
@@ -1253,11 +1246,8 @@ int load_buffer(char *path, const char* wfID,
 //			break;
 //		}
 
-		if (stat < 0)
-			return stat;
-
-		usleep(waitTime * 1000);
-	}
+	if (stat < 0)
+		return stat;
 
 	gettimeofday(&tStop, NULL);
 	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
@@ -1619,7 +1609,8 @@ int counter(const char* wf) {
 // ----------------------------------------------------------------------
 // Slideshow
 // ----------------------------------------------------------------------
-int slideshow(const char *path, const char* wf, int waittime, int anim) {
+int slideshow(const char *path, const char* wf, int count, int anim,
+		struct pl_area *area) {
 	DIR *dir;
 	struct dirent *d;
 	int wfid = -1;
@@ -1628,13 +1619,18 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 		LOG("Using Waveform %i", wfid);
 	}
 	int stat;
+	char pathComplete[256];
 	assert(path != NULL);
-	int count = 10;
 //#if VERBOSE
 	LOG("Running slideshow");
 //#endif
 //*
 	epdc->controller->animationMode = anim;
+	epdc->controller->imageWidth = area->width;
+	epdc->controller->imageHeight = area->height;
+	epdc->controller->xres = area->width;
+	epdc->controller->yres = area->height;
+	epdc->controller->bufferNumber = 0;
 
 	if (anim == 1) {
 
@@ -1654,11 +1650,33 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 						i++;
 						continue;
 					}
+					struct timeval tStop, tStart; // time variables
+					float tTotal;
+					gettimeofday(&tStart, NULL);
 
-					printf("%s\n", namelist[i]->d_name);
+					//printf("%s\n", namelist[i]->d_name);
+					join_path(pathComplete, sizeof(pathComplete), path,
+							namelist[i]->d_name);
+					stat = epdc->controller->load_buffer(epdc->controller,
+							pathComplete, area, 0);
+					if (count == 0 && i == (n - 1)) {
+						stat = epdc->update(epdc, 2, 1, area);
+					} else {
+						stat = epdc->update(epdc, wfid, 1, area);
+					}
 
-					stat = show_image(path, namelist[i]->d_name, wfid);
-//				free(namelist[i]);
+					if (count == 0 && i == (n - 1)) {
+						it8951_t *it8951 = epdc->controller->hw_ref;
+						IT8951WaitForReady(it8951->interface,
+								it8951->sInterfaceType);
+						IT8951WaitForDisplayReady(it8951->interface,
+								it8951->sInterfaceType);
+					}
+					gettimeofday(&tStop, NULL);
+					tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+							+ ((float) (tStop.tv_usec - tStart.tv_usec)
+									/ 1000000);
+					printf("Time: %f\n", tTotal);
 					++i;
 					if (stat < 0) {
 						LOG("Failed to show image");
@@ -1669,6 +1687,7 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 				i = 0;
 			}
 			free(namelist);
+			usleep(200000);
 			switch_hv(0);
 		}
 	} else {
@@ -1689,12 +1708,11 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 					return stat;
 
 				}
-				usleep(waittime);
+				//usleep(waittime);
 			}
 		}
+		closedir(dir);
 	}
-	closedir(dir);
-
 	return 0;
 }
 
@@ -1717,7 +1735,7 @@ int show_image(const char *dir, const char *file, int wfid) {
 		stat = join_path(path, sizeof(path), dir, file);
 		if (stat < 0)
 			return stat;
-		LOG("Show: %s", path);
+		//printf("Show: %s", path);
 		stat = epdc->controller->load_image(epdc->controller, path, NULL, 0, 0);
 		if (stat < 0)
 			return stat;

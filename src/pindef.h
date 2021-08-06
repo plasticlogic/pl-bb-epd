@@ -350,9 +350,9 @@ static const  struct pl_gpio_config g_falcon_spi_ext_epdc_gpios[] = {
 	{ FALCON_GPIO1,				PL_GPIO_INPUT  | PL_GPIO_PD }, 		// D054 HRDY
 	{ FALCON_GPIO2,				PL_GPIO_OUTPUT | PL_GPIO_INIT_L }, 	// D054 RESET
 	{ FALCON_EXT_TRIGGER_OUT,	PL_GPIO_OUTPUT | PL_GPIO_INIT_L }, 	// EXT TRIGGER OUTPUT for image capture during image update
-	{ RUDDOCK_RESERVE_2,		PL_GPIO_INPUT | PL_GPIO_PD },
-	{ RUDDOCK_RESERVE_3,		PL_GPIO_INPUT | PL_GPIO_PD },
-	{ BB_VSYNC,					PL_GPIO_INPUT | PL_GPIO_PD },
+	//{ RUDDOCK_RESERVE_2,		PL_GPIO_INPUT | PL_GPIO_PD },
+	//{ RUDDOCK_RESERVE_3,		PL_GPIO_INPUT | PL_GPIO_PD },
+	//{ BB_VSYNC,					PL_GPIO_INPUT | PL_GPIO_PD },
 };
 
 static const struct pl_gpio_config g_HBZ1_3_gpios[] = {
