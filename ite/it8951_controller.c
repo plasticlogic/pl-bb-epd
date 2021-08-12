@@ -162,6 +162,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		}
 	}
 
+	//IT8951WaitForDisplayReady(bus, type);
+	//IT8951WaitForReady(bus, type);
+
 //Check if Frame Buffer configuration Mode, when only 1BPP (Bit per Pixel), configure for Black and white update
 
 //	regSetting_t regUpdate;
@@ -508,27 +511,19 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 	if (devInfo.usImgBufAddrH == NULL)
 		GetIT8951SystemInfo(bus, type, &devInfo);
 
-	if (binary == 1) {
-		devInfo.usImgBufAddrL = 0xBE28;
-		devInfo.usImgBufAddrH = 0x24;
-	}
-
-//	if (controller->animationMode == 1) {
-//		if (controller->bufferNumber == 0) {
-//			devInfo.usImgBufAddrL = 0xFF50;
-//			devInfo.usImgBufAddrH = 0x11;
-//		} else if (controller->bufferNumber == 1) {
-//			devInfo.usImgBufAddrL = 0x7F60;
-//			devInfo.usImgBufAddrH = 0x37;
-//		}
-//	}
-
 	//Get Image Buffer Address of IT8951
 	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 
-	//Set to Enable I80 Packed mode
+	if (binary == 1) {
+		TDWord calculatedUpdateBuffer = gulImgBufAddr + (1 * devInfo.usPanelW * devInfo.usPanelH) + 8;
+		devInfo.usImgBufAddrL = calculatedUpdateBuffer;
+		devInfo.usImgBufAddrH = calculatedUpdateBuffer >> 16;
+		gulImgBufAddr = calculatedUpdateBuffer;
+	}
+
+//Set to Enable I80 Packed mode
 	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
-	//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 
 	if (area != NULL) {
 		controller->yres = area->height;
@@ -551,17 +546,17 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 	stat = close(fd);
 	stLdImgInfo.ulStartFBAddr = (TDWord) img_buf;
 
-	//--------------------------------------------------------------------------------------------
-	//      initial display - Display white only
-	//--------------------------------------------------------------------------------------------
-	//Load Image and Display
-	//Setting Load image information
+//--------------------------------------------------------------------------------------------
+//      initial display - Display white only
+//--------------------------------------------------------------------------------------------
+//Load Image and Display
+//Setting Load image information
 	stLdImgInfo.usEndianType = IT8951_LDIMG_L_ENDIAN;
 	stLdImgInfo.usPixelFormat = IT8951_8BPP;
 	stLdImgInfo.usRotate = IT8951_ROTATE_0;
 	stLdImgInfo.ulImgBufBaseAddr = gulImgBufAddr;
-	//Set Load Area
-	//ToDo: Pipe x/y position through from console
+//Set Load Area
+//ToDo: Pipe x/y position through from console
 	if (area != NULL) {
 		stAreaImgInfo.usX = area->left;
 		stAreaImgInfo.usY = area->top;
@@ -583,10 +578,10 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
 
-	//if (img_buf)
-	//free(img_buf);
-	//if (png_buffer)
-	//free(png_buffer);
+//if (img_buf)
+//free(img_buf);
+//if (png_buffer)
+//free(png_buffer);
 
 	return 0;
 
@@ -617,9 +612,9 @@ static int load_png_image(struct pl_generic_controller *controller,
 	IT8951LdImgInfo stLdImgInfo;
 	IT8951AreaImgInfo stAreaImgInfo;
 
-	//Host Init
-	//------------------------------------------------------------------
-	//Get Device Info
+//Host Init
+//------------------------------------------------------------------
+//Get Device Info
 
 	struct timeval tStop, tStart; // time variables
 	float tTotal;
@@ -627,13 +622,17 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	if (left == 99999 && top == 99999) {
 		GetIT8951SystemInfo(bus, type, &devInfo);
-		//devInfo.usImgBufAddrL = 0x2a70;
-		//devInfo.usImgBufAddrH = 0x12;
-		devInfo.usImgBufAddrL = 0xBE28;
-		devInfo.usImgBufAddrH = 0x24;
+		gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
+
+		TDWord calculatedUpdateBuffer = gulImgBufAddr + (1 * devInfo.usPanelW * devInfo.usPanelH) + 8;
+		devInfo.usImgBufAddrL = calculatedUpdateBuffer;
+		devInfo.usImgBufAddrH = calculatedUpdateBuffer >> 16;
+		gulImgBufAddr = calculatedUpdateBuffer;
+		printf("Write to Buffer %x\n", gulImgBufAddr);
 	} else {
 		if (devInfo.usImgBufAddrH == NULL)
 			GetIT8951SystemInfo(bus, type, &devInfo);
+		gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 	}
 
 //	devInfo.usPanelH = 960;
@@ -641,12 +640,19 @@ static int load_png_image(struct pl_generic_controller *controller,
 //	devInfo.usImgBufAddrL = 0x2a70;
 //	devInfo.usImgBufAddrH = 0x12;
 
-	//Get Image Buffer Address of IT8951
-	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
+//Get Image Buffer Address of IT8951
 
-	//Set to Enable I80 Packed mode
+//Image Buffer 0 11FF50
+//Update Buffer 1= 24BF58 + 8
+//Image Buffer 2 377F60 + 16
+//Image Buffer 3 4A3F68 + 24
+//Image Buffer 4 5CFF70 + 32
+
+//printf(gulImgBufAddr + 5 * 1280 * 960);
+
+//Set to Enable I80 Packed mode
 	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
-	//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 	controller->yres = devInfo.usPanelH;
 	controller->xres = devInfo.usPanelW;
 
@@ -755,7 +761,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 		}
 	}
 
-	// scramble image
+// scramble image
 	TByte* scrambledPNG;
 	if (controller->cfa_overlay.r_position == -1 || clear) {
 		if (controller->display_scrambling) {
@@ -831,21 +837,21 @@ static int load_png_image(struct pl_generic_controller *controller,
 		memcpy(targetBuf, scrambledPNG, width * height);
 	}
 
-	//Check TCon is free ? Wait TCon Ready (optional)
-	//IT8951WaitForDisplayReady(bus, type);
+//Check TCon is free ? Wait TCon Ready (optional)
+//IT8951WaitForDisplayReady(bus, type);
 
-	//--------------------------------------------------------------------------------------------
-	//      initial display - Display white only
-	//--------------------------------------------------------------------------------------------
-	//Load Image and Display
-	//Setting Load image information
+//--------------------------------------------------------------------------------------------
+//      initial display - Display white only
+//--------------------------------------------------------------------------------------------
+//Load Image and Display
+//Setting Load image information
 	stLdImgInfo.ulStartFBAddr = (TDWord) targetBuf;
 	stLdImgInfo.usEndianType = IT8951_LDIMG_L_ENDIAN;
 	stLdImgInfo.usPixelFormat = IT8951_8BPP;
 	stLdImgInfo.usRotate = IT8951_ROTATE_0;
 	stLdImgInfo.ulImgBufBaseAddr = gulImgBufAddr;
-	//Set Load Area
-	//ToDo: Pipe x/y position through from console
+//Set Load Area
+//ToDo: Pipe x/y position through from console
 	stAreaImgInfo.usX = partialX;
 	stAreaImgInfo.usY = partialY;
 
@@ -863,31 +869,31 @@ static int load_png_image(struct pl_generic_controller *controller,
 	if (!controller->animationMode)
 		printf("Time Load and Scramble: %f\n", tTotal);
 
-	//multiple Buffer Calculation
+//multiple Buffer Calculation
 //	For each address the formula is Image buffer address + number * panel height* panel width.
 //	ex:
 //	(#0)Image buffer address = 0x10000
 //	#1  = 0x10000 + panel height* panel width
 //	#2  = 0x10000 + 2*(panel height* panel width)
 
-	//TDWord buf1 = 0x4A3E38;
-	//TDWord buf2 = 0x377E30;
-	//TDWord buf3 = 0x5CFE40;
+//TDWord buf1 = 0x4A3E38;
+//TDWord buf2 = 0x377E30;
+//TDWord buf3 = 0x5CFE40;
 
-	//int test = 0;
-	//TWord tempBuf[1280 * 960];
-	//while(test < (1280*960)){
+//int test = 0;
+//TWord tempBuf[1280 * 960];
+//while(test < (1280*960)){
 
-	//printf("Image Buffer Address = %X\r\n", buf2);
+//printf("Image Buffer Address = %X\r\n", buf2);
 
-	//stLdImgInfo.ulImgBufBaseAddr = buf2;
+//stLdImgInfo.ulImgBufBaseAddr = buf2;
 
-	//memset(tempBuf, 0x00, 1280 * 960);
-	//stLdImgInfo.ulStartFBAddr = tempBuf;
+//memset(tempBuf, 0x00, 1280 * 960);
+//stLdImgInfo.ulStartFBAddr = tempBuf;
 
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
 
-	//IT8951WaitForReady(bus, type);
+//IT8951WaitForReady(bus, type);
 
 //	//TestBufferUpdate
 //	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
@@ -1246,17 +1252,19 @@ static int fill(struct pl_generic_controller *controller,
 	IT8951LdImgInfo stLdImgInfo;
 	IT8951AreaImgInfo stAreaImgInfo;
 
-	//Host Init
-	//------------------------------------------------------------------
-	//Get Device Info
+//Host Init
+//------------------------------------------------------------------
+//Get Device Info
+
+	IT8951WaitForReady(bus, type);
 
 	if (devInfo.usImgBufAddrH == NULL)
 		GetIT8951SystemInfo(bus, type, &devInfo);
 
-	//devInfo.usPanelW = 2048;
+//devInfo.usPanelW = 2048;
 
 	fillBuffer = malloc(devInfo.usPanelW * devInfo.usPanelH);
-	//Write pixel 0xF0(White) to Frame Buffer
+//Write pixel 0xF0(White) to Frame Buffer
 	memset(fillBuffer, grey, devInfo.usPanelW * devInfo.usPanelH);
 
 	return 0;

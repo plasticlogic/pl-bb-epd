@@ -1637,6 +1637,8 @@ int slideshow(const char *path, const char* wf, int count, int anim,
 		struct dirent **namelist;
 		int n;
 		int i = 0;
+		struct timeval tStop, tStart; // time variables
+		float tTotal;
 
 		n = scandir(path, &namelist, NULL, alphasort);
 
@@ -1644,14 +1646,13 @@ int slideshow(const char *path, const char* wf, int count, int anim,
 			perror("scandir");
 		else {
 			while (count--) {
+				it8951_t *it8951 = epdc->controller->hw_ref;
 				while (i < n) {
 
 					if (namelist[i]->d_name[0] == '.') {
 						i++;
 						continue;
 					}
-					struct timeval tStop, tStart; // time variables
-					float tTotal;
 					gettimeofday(&tStart, NULL);
 
 					//printf("%s\n", namelist[i]->d_name);
