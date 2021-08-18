@@ -115,6 +115,19 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	if (str == NULL) LOG("missing general:epdc_spi_port setting...");
 	int epdc_spi_channel = atoi(str);
 
+	// Historically I2C port is setup by control_system key.
+	// But with new linux image/kernel i2c port changed, by no reason .... for BeagleBoneBlack is now 2 instead of 1 ????
+	// Now the epdc_i2c_port key gives the possibility to define the i2c port directly.
+	str = iniparser_getstring(dictConfig, "general:epdc_i2c_port", NULL);
+	if (str == NULL)
+	{
+		LOG("missing general:epdc_i2c_port setting...");
+	}
+	else
+	{
+		setup->i2c_port = atoi(str);
+	}
+
 	// ------------------------------------
 	// initialize spi devices
 	// ----------------------
