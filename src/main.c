@@ -117,8 +117,11 @@ int show_image(const char *dir, const char *file, int wfid);
 int counter(const char* wf);
 int fill(uint8_t gl, uint8_t wfid, int update_mode);
 //remove int interface_data(	char* interface,int number_of_values,char values);
-int slideshow(const char *path, const char* wf, int count, int anim);
-int override_post_buffer(char *path);
+int slideshow(const char *path, const char* wf, int count, int anim,
+		struct pl_area *area);
+int override_post_buffer(char *path, int binary);
+int load_buffer(char *buf, const char* wfID, enum pl_update_mode mode,
+		struct pl_area *area);
 
 int execute_help(int argc, char **argv);
 int execute_start_epdc(int argc, char **argv);
@@ -148,6 +151,7 @@ int execute_write_i2c(int argc, char **argv);
 int execute_read_i2c(int argc, char **argv);
 int execute_override_post_buffer(int argc, char **argv);
 int print_versionInfo(int argc, char **argv);
+int execute_load_buffer(int argc, char **argv);
 
 void printHelp_start_epdc(int identLevel);
 void printHelp_stop_epdc(int identLevel);
@@ -175,39 +179,60 @@ void printHelp_detect_i2c(int identLevel);
 void printHelp_write_i2c(int identLevel);
 void printHelp_read_i2c(int identLevel);
 
-struct CmdLineOptions supportedOperations[] = {
-		{ "-start_epdc", "initializes the EPD controller", execute_start_epdc, printHelp_start_epdc },
-		{ "-stop_epdc", "de-initializes the EPD controller", execute_stop_epdc, printHelp_stop_epdc },
-		{ "-set_vcom", "sets com voltage", execute_set_vcom, printHelp_set_vcom },
-		{ "-set_waveform", "sets the waveform", execute_set_waveform, printHelp_set_waveform },
-		{ "-set_temperature", "sets the temperature", execute_set_temperature, printHelp_set_temperature },
-		{ "-get_vcom", "gets com voltage", execute_get_vcom, printHelp_get_vcom },
-		{ "-get_resolution", "gets display resolution", execute_get_resolution, printHelp_get_resolution },
-		{ "-get_waveform", "gets the waveform", execute_get_waveform, printHelp_get_waveform },
-		{ "-get_temperature", "gets the temperature", execute_get_temperature, printHelp_get_temperature },
-		{ "-update_image", "updates the display", execute_update_image, printHelp_update_image },
-		{ "-update_image_regional", "updates the display on certain area", execute_update_image_regional, printHelp_update_image_regional },
-		{ "-update_gfx", "updates the display with auto gen. gfx image", execute_update_gfx, printHelp_update_gfx },
-		{ "-slideshow", "shows a slidshow of .png images", execute_slideshow, printHelp_slideshow },
-		{ "-fill", "fill the screen with a defined greylevel", execute_fill, printHelp_fill },
-		{ "-count", "shows a counting number", execute_counter, printHelp_counter },
-		{ "-override_post_buffer", "overrides the post buffer from ITE", execute_override_post_buffer, printHelp_update_image },
+struct CmdLineOptions supportedOperations[] = { { "-start_epdc",
+		"initializes the EPD controller", execute_start_epdc,
+		printHelp_start_epdc }, { "-stop_epdc",
+		"de-initializes the EPD controller", execute_stop_epdc,
+		printHelp_stop_epdc }, { "-set_vcom", "sets com voltage",
+		execute_set_vcom, printHelp_set_vcom }, { "-set_waveform",
+		"sets the waveform", execute_set_waveform, printHelp_set_waveform }, {
+		"-set_temperature", "sets the temperature", execute_set_temperature,
+		printHelp_set_temperature }, { "-get_vcom", "gets com voltage",
+		execute_get_vcom, printHelp_get_vcom }, { "-get_resolution",
+		"gets display resolution", execute_get_resolution,
+		printHelp_get_resolution }, { "-get_waveform", "gets the waveform",
+		execute_get_waveform, printHelp_get_waveform }, { "-get_temperature",
+		"gets the temperature", execute_get_temperature,
+		printHelp_get_temperature }, { "-update_image", "updates the display",
+		execute_update_image, printHelp_update_image }, {
+		"-update_image_regional", "updates the display on certain area",
+		execute_update_image_regional, printHelp_update_image_regional }, {
+		"-update_gfx", "updates the display with auto gen. gfx image",
+		execute_update_gfx, printHelp_update_gfx }, { "-slideshow",
+		"shows a slideshow of .png images", execute_slideshow,
+		printHelp_slideshow },
+		{ "-fill", "fill the screen with a defined greylevel", execute_fill,
+				printHelp_fill }, { "-count", "shows a counting number",
+				execute_counter, printHelp_counter }, { "-override_post_buffer",
+				"overrides the post buffer from ITE",
+				execute_override_post_buffer, printHelp_update_image }, {
+				"-load_buffer", "updates the Image with a given buffer",
+				execute_load_buffer, printHelp_update_image },
 #ifdef IC2_INTERFACE
-		{ "-detect_i2c", "searches for all devices connected to ic2", execute_detect_i2c, printHelp_detect_i2c },
-		{ "-write_i2c", "send data over i2c", execute_write_i2c, printHelp_write_i2c },
-		{ "-read_i2c", "receives data over i2c", execute_read_i2c, printHelp_read_i2c },
+		{ "-detect_i2c", "searches for all devices connected to ic2",
+				execute_detect_i2c, printHelp_detect_i2c }, { "-write_i2c",
+				"send data over i2c", execute_write_i2c, printHelp_write_i2c },
+		{ "-read_i2c", "receives data over i2c", execute_read_i2c,
+				printHelp_read_i2c },
 #endif
 #ifdef INTERNAL_USAGE
-		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd, printHelp_send_cmd },
-		{ "-write_reg", "writes to a register of EPD controller", execute_write_reg, printHelp_write_reg },
-		{ "-read_reg", "reads from a register of EPD controller", execute_read_reg, printHelp_read_reg },
-		{ "-pgm_epdc", "programs firmware to the EPD controller", execute_pgm_epdc, printHelp_pgm_epdc },
-		{ "-info", "displays general display informations", execute_info, printHelp_info },
+		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd,
+				printHelp_send_cmd }, { "-write_reg",
+				"writes to a register of EPD controller", execute_write_reg,
+				printHelp_write_reg }, { "-read_reg",
+				"reads from a register of EPD controller", execute_read_reg,
+				printHelp_read_reg }, { "-pgm_epdc",
+				"programs firmware to the EPD controller", execute_pgm_epdc,
+				printHelp_pgm_epdc }, { "-info",
+				"displays general display informations", execute_info,
+				printHelp_info },
 #endif
-		{ "-switch_hv", "switches hv on/off based on parameter", execute_switch_hv, printHelp_switch_hv },
-		{ "-switch_com", "switches com on/off based on parameter", execute_switch_com, printHelp_switch_com },
-		{ "--version", "displays version info", print_versionInfo, NULL },
-		{ "--help", "prints this help message", execute_help, NULL }, };
+		{ "-switch_hv", "switches hv on/off based on parameter",
+				execute_switch_hv, printHelp_switch_hv }, { "-switch_com",
+				"switches com on/off based on parameter", execute_switch_com,
+				printHelp_switch_com }, { "--version", "displays version info",
+				print_versionInfo, NULL }, { "--help",
+				"prints this help message", execute_help, NULL }, };
 
 /**
  * Main sequence
@@ -373,6 +398,30 @@ int execute_stop_epdc(int argc, char **argv) {
 	return stat;
 }
 
+int execute_load_buffer(int argc, char **argv) {
+	int stat;
+
+	char* wfID = "default";
+	int mode = 0;
+	struct pl_area *area = malloc(sizeof(struct pl_area));
+
+	if (argc >= 6)
+		parser_read_area(argv[5], ",", area);
+
+	if (argc >= 5)
+		mode = atoi(argv[4]);
+
+	if (argc >= 4)
+		wfID = argv[3];
+	if (argc >= 3) {
+		stat = load_buffer(argv[2], wfID, (enum pl_update_mode) mode, area);
+	} else {
+		return ERROR_ARGUMENT_COUNT_MISMATCH;
+	}
+
+	return stat;
+}
+
 int execute_set_vcom(int argc, char **argv) {
 	int stat;
 
@@ -406,7 +455,7 @@ int execute_set_temperature(int argc, char **argv) {
 	float temperature;
 
 	if (argc == 3) {
-		temperature = atof(argv[2]);
+		temperature = atoi(argv[2]);
 		stat = set_temperature(temperature);
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
@@ -475,18 +524,21 @@ int execute_update_image(int argc, char **argv) {
 	return stat;
 }
 
-int execute_override_post_buffer(int argc, char **argv){
+int execute_override_post_buffer(int argc, char **argv) {
 
 	int stat;
-	char* wfID = "default";
+	int binary = 0;
 
+	if (argc >= 4) {
+		binary = atoi(argv[3]);
+	}
 	if (argc >= 3) {
-			stat = override_post_buffer(argv[2]);
-		} else {
-			return ERROR_ARGUMENT_COUNT_MISMATCH;
-		}
+		stat = override_post_buffer(argv[2], binary);
+	} else {
+		return ERROR_ARGUMENT_COUNT_MISMATCH;
+	}
 
-		return stat;
+	return stat;
 
 }
 
@@ -574,18 +626,22 @@ int execute_counter(int argc, char**argv) {
 int execute_slideshow(int argc, char**argv) {
 	int stat;
 	//slideshow path wfid waittime
-	int waitTime = 0;
 	int anim = 0;
 	char* wfID = NULL;
+	int count = 1;
+	struct pl_area* area = malloc(sizeof(struct pl_area));
+
+	if (argc >= 7)
+		parser_read_area(argv[6], ",", area);
 	if (argc >= 6)
 		anim = atoi(argv[5]);
 	if (argc >= 5)
-		waitTime = atoi(argv[4]);
+		count = atoi(argv[4]);
 	if (argc >= 4)
 		wfID = argv[3];
 
 	if (argc >= 3) {
-		stat = slideshow(argv[2], wfID, waitTime, anim);
+		stat = slideshow(argv[2], wfID, count, anim, area);
 	} else {
 		return ERROR_ARGUMENT_COUNT_MISMATCH;
 	}
@@ -674,14 +730,11 @@ int execute_detect_i2c(int argc, char **argv) {
 
 	int stat = 0;
 
-	if (argc == 2)
-	{
+	if (argc == 2) {
 		struct pl_i2c* i2c = &(hardware->host_i2c);
 
 		stat = i2c->detect(i2c);
-	}
-	else
-	{
+	} else {
 		LOG("Wrong number of parameter.");
 		return -1;
 	}
@@ -697,8 +750,7 @@ int execute_write_i2c(int argc, char **argv) {
 
 	int stat = 0;
 
-	if (argc == 5)
-	{
+	if (argc == 5) {
 		addr = (uint8_t) strtol(argv[2], NULL, 0);
 		reg = (uint8_t) strtol(argv[3], NULL, 0);
 		data = (uint8_t) strtol(argv[4], NULL, 0);
@@ -706,9 +758,7 @@ int execute_write_i2c(int argc, char **argv) {
 		struct pl_i2c* i2c = &(hardware->host_i2c);
 
 		stat = pl_i2c_reg_write_8(i2c, addr, reg, data);
-	}
-	else
-	{
+	} else {
 		LOG("Wrong number of parameter.");
 		return -1;
 	}
@@ -723,17 +773,14 @@ int execute_read_i2c(int argc, char **argv) {
 	uint8_t *data;
 	int stat = 0;
 
-	if (argc == 4)
-	{
+	if (argc == 4) {
 		addr = (int) strtol(argv[2], NULL, 0);
 		reg = (int) strtol(argv[3], NULL, 0);
 
 		struct pl_i2c* i2c = &(hardware->host_i2c);
 
 		stat = pl_i2c_reg_read_8(i2c, addr, reg, data);
-	}
-	else
-	{
+	} else {
 		LOG("Wrong number of parameter.");
 		return -1;
 	}
@@ -955,8 +1002,9 @@ int stop_epdc() {
 	stat = switch_hv(0);
 
 	// de-active Epson x541 VDD
-	uint8_t data[2] = {0x01, 0x00};
-	hardware->host_i2c.write(&(hardware->host_i2c), 0x68, data, sizeof(data), 0);
+	uint8_t data[2] = { 0x01, 0x00 };
+	hardware->host_i2c.write(&(hardware->host_i2c), 0x68, data, sizeof(data),
+			0);
 
 	// de-configure Epson GPIOs
 	stat = pl_gpio_deconfigure_list(&(hardware->gpios), hardware->board_gpios,
@@ -1075,12 +1123,19 @@ int get_resolution(void) {
 	return 0;
 }
 
-int override_post_buffer(char *path){
+int override_post_buffer(char *path, int binary) {
 
 	int stat;
 	LOG("path: %s", path);
 
-	stat = epdc->controller->load_image(epdc->controller, path, NULL, 99999, 99999);
+	if (binary == 1) {
+		stat = epdc->controller->load_buffer(epdc->controller, path, NULL,
+				binary);
+
+	} else if (binary == 0) {
+		stat = epdc->controller->load_image(epdc->controller, path, NULL, 99999,
+				99999);
+	}
 
 	return 0;
 }
@@ -1123,16 +1178,16 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 
 	for (cnt = 0; cnt < updateCount; cnt++) {
 
-		switch(epdc->controller->update_image_mode)
-		{
-			case BW:
-			case CFA:
-				stat = epdc->update(epdc, wfId, mode, NULL);
-				break;
-			case ACEP:
-			case ACEP_ACVCOM:
-				stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode, NULL);
-				break;
+		switch (epdc->controller->update_image_mode) {
+		case BW:
+		case CFA:
+			stat = epdc->update(epdc, wfId, mode, NULL);
+			break;
+		case ACEP:
+		case ACEP_ACVCOM:
+			stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode,
+			NULL);
+			break;
 		}
 
 		if (stat < 0)
@@ -1140,6 +1195,59 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 
 		usleep(waitTime * 1000);
 	}
+
+	gettimeofday(&tStop, NULL);
+	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+			+ ((float) (tStop.tv_usec - tStart.tv_usec) / 1000000);
+	printf("Time Complete: %f\n", tTotal);
+
+	return 0;
+}
+
+int load_buffer(char *path, const char* wfID, enum pl_update_mode mode,
+		struct pl_area *area) {
+	int cnt, binary = 0;
+	int stat;
+	int fd = 0;
+
+	struct timeval tStop, tStart; // time variables
+	float tTotal;
+
+	epdc->controller->imageWidth = area->width;
+	epdc->controller->imageHeight = area->height;
+	epdc->controller->xres = area->width;
+	epdc->controller->yres = area->height;
+
+	LOG("path: %s", path);
+
+	int wfId = pl_generic_controller_get_wfid(epdc->controller, wfID);
+	LOG("wfID: %d", wfId);
+	LOG("updateMode: %d", mode);
+
+	if (wfId < 0)
+		return -EINVAL;
+
+	gettimeofday(&tStart, NULL);
+
+	stat = epdc->controller->load_buffer(epdc->controller, path, area, binary);
+
+	if (stat < 0)
+		return stat;
+
+//		switch (epdc->controller->update_image_mode) {
+//		case BW:
+//		case CFA:
+	stat = epdc->update(epdc, wfId, 1, area);
+//			break;
+//		case ACEP:
+//		case ACEP_ACVCOM:
+//			stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode,
+//					NULL);
+//			break;
+//		}
+
+	if (stat < 0)
+		return stat;
 
 	gettimeofday(&tStop, NULL);
 	tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
@@ -1501,7 +1609,8 @@ int counter(const char* wf) {
 // ----------------------------------------------------------------------
 // Slideshow
 // ----------------------------------------------------------------------
-int slideshow(const char *path, const char* wf, int waittime, int anim) {
+int slideshow(const char *path, const char* wf, int count, int anim,
+		struct pl_area *area) {
 	DIR *dir;
 	struct dirent *d;
 	int wfid = -1;
@@ -1510,19 +1619,26 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 		LOG("Using Waveform %i", wfid);
 	}
 	int stat;
+	char pathComplete[256];
 	assert(path != NULL);
-	int count = 10;
 //#if VERBOSE
 	LOG("Running slideshow");
 //#endif
 //*
 	epdc->controller->animationMode = anim;
+	epdc->controller->imageWidth = area->width;
+	epdc->controller->imageHeight = area->height;
+	epdc->controller->xres = area->width;
+	epdc->controller->yres = area->height;
+	epdc->controller->bufferNumber = 0;
 
 	if (anim == 1) {
 
 		struct dirent **namelist;
 		int n;
 		int i = 0;
+		struct timeval tStop, tStart; // time variables
+		float tTotal;
 
 		n = scandir(path, &namelist, NULL, alphasort);
 
@@ -1530,17 +1646,38 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 			perror("scandir");
 		else {
 			while (count--) {
+				it8951_t *it8951 = epdc->controller->hw_ref;
 				while (i < n) {
 
 					if (namelist[i]->d_name[0] == '.') {
 						i++;
 						continue;
 					}
+					gettimeofday(&tStart, NULL);
 
-					printf("%s\n", namelist[i]->d_name);
+					//printf("%s\n", namelist[i]->d_name);
+					join_path(pathComplete, sizeof(pathComplete), path,
+							namelist[i]->d_name);
+					stat = epdc->controller->load_buffer(epdc->controller,
+							pathComplete, area, 0);
+					if (count == 0 && i == (n - 1)) {
+						stat = epdc->update(epdc, 2, 1, area);
+					} else {
+						stat = epdc->update(epdc, wfid, 1, area);
+					}
 
-					stat = show_image(path, namelist[i]->d_name, wfid);
-//				free(namelist[i]);
+					if (count == 0 && i == (n - 1)) {
+						it8951_t *it8951 = epdc->controller->hw_ref;
+						IT8951WaitForReady(it8951->interface,
+								it8951->sInterfaceType);
+						IT8951WaitForDisplayReady(it8951->interface,
+								it8951->sInterfaceType);
+					}
+					gettimeofday(&tStop, NULL);
+					tTotal = (float) (tStop.tv_sec - tStart.tv_sec)
+							+ ((float) (tStop.tv_usec - tStart.tv_usec)
+									/ 1000000);
+					printf("Time: %f\n", tTotal);
 					++i;
 					if (stat < 0) {
 						LOG("Failed to show image");
@@ -1551,6 +1688,7 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 				i = 0;
 			}
 			free(namelist);
+			usleep(200000);
 			switch_hv(0);
 		}
 	} else {
@@ -1571,12 +1709,11 @@ int slideshow(const char *path, const char* wf, int waittime, int anim) {
 					return stat;
 
 				}
-				usleep(waittime);
+				//usleep(waittime);
 			}
 		}
+		closedir(dir);
 	}
-	closedir(dir);
-
 	return 0;
 }
 
@@ -1599,7 +1736,7 @@ int show_image(const char *dir, const char *file, int wfid) {
 		stat = join_path(path, sizeof(path), dir, file);
 		if (stat < 0)
 			return stat;
-		LOG("Show: %s", path);
+		//printf("Show: %s", path);
 		stat = epdc->controller->load_image(epdc->controller, path, NULL, 0, 0);
 		if (stat < 0)
 			return stat;
@@ -1916,34 +2053,25 @@ void printHelp_read_reg(int identLevel) {
 
 void printHelp_detect_i2c(int identLevel) {
 
-	printf(
-			"%*s Detects all devices on the epdc I2C bus.\n",
-			identLevel, " ");
+	printf("%*s Detects all devices on the epdc I2C bus.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -detect_i2c\n", identLevel,
-			" ");
+	printf("%*s Usage: epdc-app -detect_i2c\n", identLevel, " ");
 	printf("\n");
 }
 
 void printHelp_write_i2c(int identLevel) {
 
-	printf(
-			"%*s Writes data to the epdc I2C bus.\n",
-			identLevel, " ");
+	printf("%*s Writes data to the epdc I2C bus.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -write_i2c\n", identLevel,
-			" ");
+	printf("%*s Usage: epdc-app -write_i2c\n", identLevel, " ");
 	printf("\n");
 }
 
 void printHelp_read_i2c(int identLevel) {
 
-	printf(
-			"%*s Reads data frome the epdc I2C bus.\n",
-			identLevel, " ");
+	printf("%*s Reads data frome the epdc I2C bus.\n", identLevel, " ");
 	printf("\n");
-	printf("%*s Usage: epdc-app -read_i2c\n", identLevel,
-			" ");
+	printf("%*s Usage: epdc-app -read_i2c\n", identLevel, " ");
 	printf("\n");
 }
 

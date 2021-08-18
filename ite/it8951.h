@@ -80,6 +80,7 @@ typedef struct {
 #define USDEF_I80_CMD_POWER_CTR	  		0x0038
 #define USDEF_I80_CMD_VCOM_CTR     		0x0039
 #define USDEF_I80_CMD_FORCE_SET_TEMP	0x0040
+#define USDEF_I80_CMD_SET_PWR_SEQ		0x0041
 
 //Panel
 #define IT8951_PANEL_WIDTH   1024 //it Get Device information#define IT8951_PANEL_HEIGHT   758
@@ -116,9 +117,10 @@ typedef struct {
 //-----------------------------------------------------------------------
 // IT8951 TCon Registers defines
 //-----------------------------------------------------------------------
+//-------System Registers----------------
+#define SYS_REG_BASE 0x0000
 //Register Base Address
-#define DISPLAY_REG_BASE 0x1000               //Register RW access for I80 only//Base Address of Basic LUT Registers#define LUT0EWHR  (DISPLAY_REG_BASE + 0x00)   //LUT0 Engine Width Height Reg#define LUT0XYR   (DISPLAY_REG_BASE + 0x40)   //LUT0 XY Reg#define LUT0BADDR (DISPLAY_REG_BASE + 0x80)   //LUT0 Base Address Reg#define LUT0MFN   (DISPLAY_REG_BASE + 0xC0)   //LUT0 Mode and Frame number Reg#define LUT01AF   (DISPLAY_REG_BASE + 0x114)  //LUT0 and LUT1 Active Flag Reg//Update Parameter Setting Register#define UP0SR (DISPLAY_REG_BASE + 0x134)      //Update Parameter0 Setting Reg#define UP1SR     (DISPLAY_REG_BASE + 0x138)  //Update Parameter1 Setting Reg#define LUT0ABFRV (DISPLAY_REG_BASE + 0x13C)  //LUT0 Alpha blend and Fill rectangle Value#define UPBBADDR  (DISPLAY_REG_BASE + 0x17C)  //Update Buffer Base Address#define LUT0IMXY  (DISPLAY_REG_BASE + 0x180)  //LUT0 Image buffer X/Y offset Reg#define LUTAFSR   (DISPLAY_REG_BASE + 0x224)  //LUT Status Reg (status of All LUT Engines)#define BGVR      (DISPLAY_REG_BASE + 0x250)  //Bitmap (1bpp) image color table//-------System Registers----------------#define SYS_REG_BASE 0x0000
-
+#define DISPLAY_REG_BASE 0x1000               //Register RW access for I80 only//Base Address of Basic LUT Registers#define LUT0EWHR  (DISPLAY_REG_BASE + 0x00)   //LUT0 Engine Width Height Reg#define LUT0XYR   (DISPLAY_REG_BASE + 0x40)   //LUT0 XY Reg#define LUT0BADDR (DISPLAY_REG_BASE + 0x80)   //LUT0 Base Address Reg#define LUT0MFN   (DISPLAY_REG_BASE + 0xC0)   //LUT0 Mode and Frame number Reg#define LUT01AF   (DISPLAY_REG_BASE + 0x114)  //LUT0 and LUT1 Active Flag Reg//Update Parameter Setting Register#define UP0SR (DISPLAY_REG_BASE + 0x134)      //Update Parameter0 Setting Reg#define UP1SR     (DISPLAY_REG_BASE + 0x138)  //Update Parameter1 Setting Reg#define LUT0ABFRV (DISPLAY_REG_BASE + 0x13C)  //LUT0 Alpha blend and Fill rectangle Value#define UPBBADDR  (DISPLAY_REG_BASE + 0x17C)  //Update Buffer Base Address#define LUT0IMXY  (DISPLAY_REG_BASE + 0x180)  //LUT0 Image buffer X/Y offset Reg#define LUTAFSR   (DISPLAY_REG_BASE + 0x224)  //LUT Status Reg (status of All LUT Engines)#define BGVR      (DISPLAY_REG_BASE + 0x250)  //Bitmap (1bpp) image color table
 //Address of System Registers
 #define I80CPCR (SYS_REG_BASE + 0x04)
 //-------Memory Converter Registers----------------
