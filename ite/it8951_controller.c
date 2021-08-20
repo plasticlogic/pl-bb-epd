@@ -458,7 +458,7 @@ static void memory_padding(uint8_t *source, uint8_t *target,
 			}
 
 		//Comment in to save prescambled and padded Img for S468
-		saveBufToPNG(target_sourcelines, target_gatelines, target);
+		//saveBufToPNG(target_sourcelines, target_gatelines, target);
 	}
 }
 
