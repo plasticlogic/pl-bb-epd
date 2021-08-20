@@ -162,6 +162,9 @@ static int trigger_update(struct pl_generic_controller *controller) {
 		}
 	}
 
+	//IT8951WaitForReady(bus, type);
+	//IT8951WaitForDisplayReady(bus, type);
+
 	//IT8951WaitForDisplayReady(bus, type);
 	//IT8951WaitForReady(bus, type);
 
@@ -453,7 +456,9 @@ static void memory_padding(uint8_t *source, uint8_t *target,
 					//source[source_index] = 0x00;
 				}
 			}
-		//saveBufToPNG(target_sourcelines, target_gatelines, target);
+
+		//Comment in to save prescambled and padded Img for S468
+		saveBufToPNG(target_sourcelines, target_gatelines, target);
 	}
 }
 
@@ -515,7 +520,8 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 	gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 
 	if (binary == 1) {
-		TDWord calculatedUpdateBuffer = gulImgBufAddr + (1 * devInfo.usPanelW * devInfo.usPanelH) + 8;
+		TDWord calculatedUpdateBuffer = gulImgBufAddr
+				+ (1 * devInfo.usPanelW * devInfo.usPanelH) + 8;
 		devInfo.usImgBufAddrL = calculatedUpdateBuffer;
 		devInfo.usImgBufAddrH = calculatedUpdateBuffer >> 16;
 		gulImgBufAddr = calculatedUpdateBuffer;
@@ -555,8 +561,8 @@ static int load_buffer(struct pl_generic_controller *controller, uint8_t *buf,
 	stLdImgInfo.usPixelFormat = IT8951_8BPP;
 	stLdImgInfo.usRotate = IT8951_ROTATE_0;
 	stLdImgInfo.ulImgBufBaseAddr = gulImgBufAddr;
+
 //Set Load Area
-//ToDo: Pipe x/y position through from console
 	if (area != NULL) {
 		stAreaImgInfo.usX = area->left;
 		stAreaImgInfo.usY = area->top;
@@ -624,7 +630,15 @@ static int load_png_image(struct pl_generic_controller *controller,
 		GetIT8951SystemInfo(bus, type, &devInfo);
 		gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 
-		TDWord calculatedUpdateBuffer = gulImgBufAddr + (1 * devInfo.usPanelW * devInfo.usPanelH) + 8;
+		//Get Image Buffer Address of IT8951 then calculate imgBufBaseAdress + (bufferNumber * devInfo.width * devInfo.height) + (bufferNumber * 8)
+		//Image Buffer 0 11FF50
+		//Update Buffer 1= 24BF58 + 8
+		//Image Buffer 2 377F60 + 16
+		//Image Buffer 3 4A3F68 + 24
+		//Image Buffer 4 5CFF70 + 32
+
+		TDWord calculatedUpdateBuffer = gulImgBufAddr
+				+ (1 * devInfo.usPanelW * devInfo.usPanelH) + 8;
 		devInfo.usImgBufAddrL = calculatedUpdateBuffer;
 		devInfo.usImgBufAddrH = calculatedUpdateBuffer >> 16;
 		gulImgBufAddr = calculatedUpdateBuffer;
@@ -634,21 +648,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 			GetIT8951SystemInfo(bus, type, &devInfo);
 		gulImgBufAddr = devInfo.usImgBufAddrL | (devInfo.usImgBufAddrH << 16);
 	}
-
-//	devInfo.usPanelH = 960;
-//	devInfo.usPanelW = 1280;
-//	devInfo.usImgBufAddrL = 0x2a70;
-//	devInfo.usImgBufAddrH = 0x12;
-
-//Get Image Buffer Address of IT8951
-
-//Image Buffer 0 11FF50
-//Update Buffer 1= 24BF58 + 8
-//Image Buffer 2 377F60 + 16
-//Image Buffer 3 4A3F68 + 24
-//Image Buffer 4 5CFF70 + 32
-
-//printf(gulImgBufAddr + 5 * 1280 * 960);
 
 //Set to Enable I80 Packed mode
 	IT8951WriteReg(bus, type, I80CPCR, 0x0001);
@@ -669,10 +668,8 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 	if (clear) {
 		//Host Frame Buffer allocation
-		//configure_update(controller, 0, 0, area);
 		gpFrameBuf = malloc(devInfo.usPanelW * devInfo.usPanelH);
 		//Write pixel 0xF0(White) to Frame Buffer
-		//memset(gpFrameBuf, 0xff, devInfo.usPanelW * devInfo.usPanelH);
 		gpFrameBuf = fillBuffer;
 		width = devInfo.usPanelW;
 		height = devInfo.usPanelH;
@@ -684,13 +681,6 @@ static int load_png_image(struct pl_generic_controller *controller,
 
 		if (read_png(path, &gpFrameBuf, &width, &height))
 			return -ENOENT;
-
-//		FILE *fp;
-//		fp = fopen("/tmp/img.txt", "w");
-//
-//		fwrite(gpFrameBuf, sizeof(gpFrameBuf[0]), 1280 * 960, fp);
-//
-//		fclose(fp);
 
 		controller->imageWidth = width;
 		controller->imageHeight = height;
@@ -825,12 +815,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 			memory_padding_area(scrambledPNG, targetBuf, height, width,
 					controller->yoffset, controller->xoffset, area, partialY,
 					partialX);
-
-//			targetBuf = malloc(width * height);
-//					memcpy(targetBuf, scrambledPNG, width * height);
 		}
-
-		//}
 
 	} else {
 		targetBuf = malloc(width * height);
@@ -850,8 +835,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 	stLdImgInfo.usPixelFormat = IT8951_8BPP;
 	stLdImgInfo.usRotate = IT8951_ROTATE_0;
 	stLdImgInfo.ulImgBufBaseAddr = gulImgBufAddr;
-//Set Load Area
-//ToDo: Pipe x/y position through from console
+
 	stAreaImgInfo.usX = partialX;
 	stAreaImgInfo.usY = partialY;
 
@@ -869,77 +853,7 @@ static int load_png_image(struct pl_generic_controller *controller,
 	if (!controller->animationMode)
 		printf("Time Load and Scramble: %f\n", tTotal);
 
-//multiple Buffer Calculation
-//	For each address the formula is Image buffer address + number * panel height* panel width.
-//	ex:
-//	(#0)Image buffer address = 0x10000
-//	#1  = 0x10000 + panel height* panel width
-//	#2  = 0x10000 + 2*(panel height* panel width)
-
-//TDWord buf1 = 0x4A3E38;
-//TDWord buf2 = 0x377E30;
-//TDWord buf3 = 0x5CFE40;
-
-//int test = 0;
-//TWord tempBuf[1280 * 960];
-//while(test < (1280*960)){
-
-//printf("Image Buffer Address = %X\r\n", buf2);
-
-//stLdImgInfo.ulImgBufBaseAddr = buf2;
-
-//memset(tempBuf, 0x00, 1280 * 960);
-//stLdImgInfo.ulStartFBAddr = tempBuf;
-
 	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-
-//IT8951WaitForReady(bus, type);
-
-//	//TestBufferUpdate
-//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
-//	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
-//	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
-//	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
-//	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
-//	IT8951WriteData(bus, type, (TWord) wfidToUse); 				// Display Mode
-//	IT8951WriteData(bus, type, (TWord) gulImgBufAddr & 0xFFFF);
-//	IT8951WriteData(bus, type, (TWord) (gulImgBufAddr >> 16) & 0xFFFF);
-
-//	stLdImgInfo.ulImgBufBaseAddr = buf1;
-//
-//	memset(tempBuf, 0xFF, 1280 * 960);
-//	stLdImgInfo.ulStartFBAddr = tempBuf;
-//
-//	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-//
-//	IT8951WaitForReady(bus, type);
-//
-//	//TestBufferUpdate
-//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
-//	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
-//	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
-//	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
-//	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
-//	IT8951WriteData(bus, type, (TWord) 4); 				// Display Mode
-//	IT8951WriteData(bus, type, (TWord) buf1 & 0xFFFF);
-//	IT8951WriteData(bus, type, (TWord) (buf1 >> 16) & 0xFFFF);
-//
-//	stLdImgInfo.ulImgBufBaseAddr = buf3;
-//	stLdImgInfo.ulStartFBAddr = targetBuf;
-//
-//	IT8951HostAreaPackedPixelWrite(bus, type, &stLdImgInfo, &stAreaImgInfo);
-//
-//	IT8951WaitForReady(bus, type);
-//
-//	//TestBufferUpdate
-//	IT8951WriteCmdCode(bus, type, USDEF_I80_CMD_DPY_AREA_BUFFER);
-//	IT8951WriteData(bus, type, (TWord) 0);     				// Display X
-//	IT8951WriteData(bus, type, (TWord) 0); 					// Display Y
-//	IT8951WriteData(bus, type, (TWord) controller->imageWidth); // Display W devInfo.usPanelW 1200
-//	IT8951WriteData(bus, type, (TWord) controller->imageHeight); // Display H devInfo.usPanelH 960
-//	IT8951WriteData(bus, type, (TWord) 4); 				// Display Mode
-//	IT8951WriteData(bus, type, (TWord) buf3 & 0xFFFF);
-//	IT8951WriteData(bus, type, (TWord) (buf3 >> 16) & 0xFFFF);
 
 	if (scrambledPNG)
 		free(scrambledPNG);
@@ -1092,27 +1006,6 @@ static int update_temp(struct pl_generic_controller *controller) {
 		newTemp = controller->manual_temp;
 		printf("Manual set Temperature to %i \n", newTemp);
 	} else if (controller->temp_mode == PL_EPDC_TEMP_EXTERNAL) {
-
-//		IT8951WaitForReady(interface, type);
-//
-//		IT8951WriteCmdCode(interface, type, IT8951_TCON_BYPASS_I2C);
-//		IT8951WriteData(interface, type, 0x01); // I2C write command
-//		IT8951WriteData(interface, type, 0x68); // TPS65815 Chip Address0
-//		IT8951WriteData(interface, type, 0x0D); // Power Up Sequence Register
-//		IT8951WriteData(interface, type, 0x01); // Write Size
-//		IT8951WriteData(interface, type, 0x80);
-//
-//		IT8951WaitForReady(interface, type);
-//
-//		TWord pmicTemp;
-//		IT8951WriteCmdCode(interface, type, IT8951_TCON_BYPASS_I2C);
-//		IT8951WriteData(interface, type, 0x00); // I2C write command
-//		IT8951WriteData(interface, type, 0x68); // TPS65815 Chip Address0
-//		IT8951WriteData(interface, type, 0x00); // Power Up Sequence Register
-//		IT8951WriteData(interface, type, 0x01); // Write Size
-//		pmicTemp = (int) IT8951ReadData(interface, type, 1);  //read data
-//		newTemp = pmicTemp >> 8;
-//		printf("PMIC Temp is %x \n", pmicTemp >> 8);
 		printf("Not yet implemented, using internal mode ! \n");
 	} else if (controller->temp_mode == PL_EPDC_TEMP_INTERNAL) {
 		printf("Using internal measured Temp ! \n");
@@ -1183,18 +1076,6 @@ static int get_resolution(pl_generic_controller_t *p, int* xres, int* yres) {
 			return 0;
 		}
 	}
-
-//	IT8951WriteCmdCode(it8951->interface, it8951->sInterfaceType,
-//	USDEF_I80_CMD_GET_DEV_INFO);
-//	if (xres && yres) {
-//		// TODO: Check if scrambled!!!
-//		pstDevInfo = (I80IT8951DevInfo*) IT8951ReadData(it8951->interface,
-//				it8951->sInterfaceType, sizeof(I80IT8951DevInfo) / 2);
-//
-//		*xres = pstDevInfo->usPanelW;
-//		*yres = pstDevInfo->usPanelH;
-//		return 0;
-
 	return -EINVAL;
 }
 
@@ -1260,8 +1141,6 @@ static int fill(struct pl_generic_controller *controller,
 
 	if (devInfo.usImgBufAddrH == NULL)
 		GetIT8951SystemInfo(bus, type, &devInfo);
-
-//devInfo.usPanelW = 2048;
 
 	fillBuffer = malloc(devInfo.usPanelW * devInfo.usPanelH);
 //Write pixel 0xF0(White) to Frame Buffer
