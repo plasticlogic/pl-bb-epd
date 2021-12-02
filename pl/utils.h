@@ -100,6 +100,7 @@ void swap32_array(int32_t **x, uint16_t n);
 /** reads a png file into a monochrome buffer */
 int read_png(const char* file_name, png_byte ** image_ptr, int * width, int * heigth);
 int read_rgb_png_to_iridis(const char* file_name, png_byte ** image_ptr, int * width,	int * height);
+int read_rgb_png_to_iridis_32(const char* file_name, png_byte ** image_ptr, int * width,	int * height, int isPostImage);
 /** reads a png file into a color buffer */
 int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width, int * heigth);
 uint8_t get_rgbw_pixel_value(uint8_t pixel_position, cfa_overlay_t cfa_overlay, rgbw_pixel_t pixel);

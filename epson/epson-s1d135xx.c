@@ -807,13 +807,27 @@ static int s1d135xx_load_png_image(struct s1d135xx *p, const char *path,
 		if (pngBuffer)
 			free(pngBuffer);
 	}
-	else if (p->update_image_mode == ACEP || p->update_image_mode == ACEP_ACVCOM) {
+	else if (p->update_image_mode == ACEP ||
+			p->update_image_mode == ACEP_ACVCOM ||
+			p->update_image_mode == ACEP_ACVCOM_32) {
+
 		LOG("ACEP");
 
 		uint8_t *pngBuffer;
-		// read png image
-		if (read_rgb_png_to_iridis(path, &pngBuffer, &width, &height))
-			return -ENOENT;
+
+		if(p->update_image_mode == ACEP_ACVCOM_32)
+		{
+			// read png image
+			if (read_rgb_png_to_iridis_32(path, &pngBuffer, &width, &height, left))
+				return -ENOENT;
+		}
+		else
+		{
+			// read png image
+			if (read_rgb_png_to_iridis(path, &pngBuffer, &width, &height))
+				return -ENOENT;
+		}
+
 
 		// scramble image
 		scrambledPNG = malloc(max(height, p->yres) * max(width, p->xres));

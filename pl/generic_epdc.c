@@ -42,7 +42,7 @@ static int epdc_init(struct pl_generic_epdc *p, int load_nvm_content);
 static int generic_update(struct pl_generic_epdc *p, int wfID,
 		enum pl_update_mode mode, const struct pl_area *area);
 static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
-		int wfID, enum pl_update_mode mode, const struct pl_area *area);
+		int wfID, enum pl_update_mode mode, char *path);
 static int get_resolution(struct pl_generic_controller *p, int* xres, int* yres);
 
 static int unpack_nvm_content(uint8_t *buffer, int bufferSize);
@@ -622,7 +622,8 @@ static int generic_update(struct pl_generic_epdc *p, int wfID,
  * @return success indicator: 0 if passed, otherwise <> 0
  */
 static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
-		int wfID, enum pl_update_mode mode, const struct pl_area *area) {
+		int wfID, enum pl_update_mode mode, char *path) {
+
 
 	assert(p != NULL);
 	pl_generic_controller_t *controller = p->controller;
@@ -688,14 +689,21 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 
 	// conditioning update (nullframe)
 	// write of pre image buffer
-	stat |= controller->configure_update(controller, 14, mode, area);
+	stat |= controller->configure_update(controller, 14, mode, NULL);
 
 	stat |= controller->trigger_update(controller);
 
 	stat |= controller->wait_update_end(controller);
 
+	// load different preImage for 32 Color Mode
+	if(controller->update_image_mode == ACEP_ACVCOM_32){
+
+		int isPostImage = 1;
+		stat |= controller->load_image(controller, path, NULL, 0, isPostImage);
+	}
+
 	// Initialise and trigger
-	stat |= controller->configure_update(controller, wfID, mode, area);
+	stat |= controller->configure_update(controller, wfID, mode, NULL);
 
 	// switch ext trigger output for image capture --> high
 	gpios->set(FALCON_EXT_TRIGGER_OUT, 1);

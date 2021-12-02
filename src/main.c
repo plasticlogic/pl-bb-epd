@@ -1170,6 +1170,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		return -EINVAL;
 
 	gettimeofday(&tStart, NULL);
+
 	stat = epdc->controller->load_image(epdc->controller, path, NULL, 0, 0);
 
 	if (stat < 0)
@@ -1184,8 +1185,8 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 			break;
 		case ACEP:
 		case ACEP_ACVCOM:
-			stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode,
-			NULL);
+		case ACEP_ACVCOM_32:
+			stat = epdc->acep_update(epdc, &(hardware->gpios), wfId, mode, path);
 			break;
 		}
 
@@ -1339,8 +1340,8 @@ int update_image_regional(char *path, const char* wfID,
 	if (wfId < 0)
 		return -EINVAL;
 
-	stat = epdc->controller->load_image(epdc->controller, path, area, left,
-			top);
+	stat = epdc->controller->load_image(epdc->controller, path, area, top,
+			left);
 	if (stat < 0)
 		return stat;
 

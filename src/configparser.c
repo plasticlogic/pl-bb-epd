@@ -216,7 +216,7 @@ int parse_config(hw_setup_t *setup, const char *filename){
 
 	str = iniparser_getstring(dictConfig, "general:update_image_mode", NULL);
 	if (str == NULL){
-		LOG("missing general:update_image_mode [BW|CFA|ACEP|ACEP_ACVCOM] setting... using default=BW");
+		LOG("missing general:update_image_mode [BW|CFA|ACEP|ACEP_ACVCOM|ACEP_ACVCOM_32] setting... using default=BW");
 		setup->controller->update_image_mode = BW;
 	}
 	else if(!strcmp(str, "CFA")){
@@ -227,6 +227,9 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	}
 	else if(!strcmp(str, "ACEP_ACVCOM")){
 			setup->controller->update_image_mode = ACEP_ACVCOM;
+	}
+	else if(!strcmp(str, "ACEP_ACVCOM_32")){
+			setup->controller->update_image_mode = ACEP_ACVCOM_32;
 	}
 	else{
 		setup->controller->update_image_mode = BW;
@@ -333,7 +336,8 @@ int parse_config(hw_setup_t *setup, const char *filename){
 	stat = setup->initialize_vcom_config(setup, str);
 	if(stat < 0) return stat;
 
-	if(setup->controller->update_image_mode == ACEP_ACVCOM)
+	if(setup->controller->update_image_mode == ACEP_ACVCOM ||
+	   setup->controller->update_image_mode == ACEP_ACVCOM_32)
 	{
 		str = iniparser_getstring(dictConfig, "vcom:vcoml", NULL);
 		if (str == NULL)

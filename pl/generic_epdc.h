@@ -43,7 +43,7 @@ typedef struct pl_generic_epdc {
 	int (*update)(struct pl_generic_epdc *p, int wfid, enum pl_update_mode mode,
 			const struct pl_area *area);
 	int (*acep_update)(struct pl_generic_epdc *p, struct pl_gpios *gpios, int wfid, enum pl_update_mode mode,
-			const struct pl_area *area);
+			char *path);
 	int (*set_vcom)(struct pl_generic_epdc *p, int vcomInMillivolt);
 	int (*get_vcom)(struct pl_generic_epdc *p);
 	int (*read_register)(struct pl_generic_epdc *p, const regSetting_t* setting);
