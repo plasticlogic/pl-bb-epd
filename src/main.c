@@ -179,10 +179,9 @@ void printHelp_detect_i2c(int identLevel);
 void printHelp_write_i2c(int identLevel);
 void printHelp_read_i2c(int identLevel);
 
-struct CmdLineOptions supportedOperations[] = { { "-start_epdc",
-		"initializes the EPD controller", execute_start_epdc,
-		printHelp_start_epdc }, { "-stop_epdc",
-		"de-initializes the EPD controller", execute_stop_epdc,
+struct CmdLineOptions supportedOperations[] = {
+		{ "-start_epdc","initializes the EPD controller", execute_start_epdc, printHelp_start_epdc },
+		{ "-stop_epdc","de-initializes the EPD controller", execute_stop_epdc,
 		printHelp_stop_epdc }, { "-set_vcom", "sets com voltage",
 		execute_set_vcom, printHelp_set_vcom }, { "-set_waveform",
 		"sets the waveform", execute_set_waveform, printHelp_set_waveform }, {
@@ -1639,6 +1638,7 @@ int slideshow(const char *path, const char* wf, int count, int anim,
 		int i = 0;
 		struct timeval tStop, tStart; // time variables
 		float tTotal;
+		int first = 0;
 
 		n = scandir(path, &namelist, NULL, alphasort);
 
@@ -1661,8 +1661,12 @@ int slideshow(const char *path, const char* wf, int count, int anim,
 					stat = epdc->controller->load_buffer(epdc->controller,
 							pathComplete, area, 0);
 					if (count == 0 && i == (n - 1)) {
-						stat = epdc->update(epdc, 2, 1, area);
+						stat = epdc->update(epdc, 6, 1, area);
 					} else {
+						if (first != 1){
+							stat = epdc->update(epdc, 5, 1, area);
+							first = 1;
+						}
 						stat = epdc->update(epdc, wfid, 1, area);
 					}
 
