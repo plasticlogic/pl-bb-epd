@@ -65,7 +65,7 @@
 
 #define INTERNAL_USAGE
 #define IC2_INTERFACE
-#define VERSION_INFO		"v1.3"
+#define VERSION_INFO		"v1.4"
 
 // ----------------------------------------------------------------------
 // -  global variables
