@@ -26,9 +26,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <hardware/nvm-spi-MX25U4033E.h>
+#include <hardware/nvm_spi_MX25U4033E.h>
 #include <pl/assert.h>
-#include <src/pindef.h>
+#include <pindef.h>
 
 #define LOG_TAG "nvm_MX25U4033E"
 #include <pl/utils.h>
