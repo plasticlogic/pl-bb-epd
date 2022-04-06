@@ -24,11 +24,11 @@
  */
 
 #include <pl/generic_interface.h>
-#include <beaglebone/beaglebone-i80.h>
-#include <beaglebone/beaglebone-spi_hrdy.h>
+#include <beaglebone/beaglebone_i80.h>
+#include <beaglebone/beaglebone_spi_hrdy.h>
 #include <pl/i80.h>
 #include <pl/spi_hrdy.h>
-#include <src/pindef.h>
+#include <pindef.h>
 
 struct pl_gpio;
 
