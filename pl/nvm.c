@@ -27,8 +27,8 @@
 #include <pl/nvm.h>
 
 #define LOG_TAG "nvm"
-#include "pl/utils.h"
-#include "epson/s1d13541-nvm.h"
+#include <pl/utils.h>
+#include <epson/s1d13541_nvm.h>
 
 /**
  * frees memory specified by a given pointer
