@@ -27,7 +27,7 @@
 #define PINDEF_H_
 
 #include "pl/gpio.h"
-#include "beaglebone/beaglebone-gpio.h"
+#include "beaglebone/beaglebone_gpio.h"
 #include <errno.h>
 
 #define VCOM_EN           BEAGLEBONE_GPIO(0,14) //P9-26 // VCOM switch enable
