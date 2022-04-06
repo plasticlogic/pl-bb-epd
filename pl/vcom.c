@@ -23,12 +23,12 @@
  *
  */
 
-#include "assert.h"
-#include "vcom.h"
+#include <pl/assert.h>
+#include <pl/vcom.h>
 #include <stdlib.h>
 
 #define LOG_TAG "vcom"
-#include "utils.h"
+#include <pl/utils.h>
 
 void vcom_init(struct vcom_cal *v, struct pl_hw_vcom_info *c)
 {
