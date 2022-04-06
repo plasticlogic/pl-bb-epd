@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <hardware/nvm-i2c-24AA256.h>
+#include <hardware/nvm_i2c_24AA256.h>
 #include <pl/assert.h>
 
 #define LOG_TAG "nvm_24AA256"
