@@ -30,6 +30,7 @@
 #include <pl/gpio.h>
 #include <pl/types.h>
 #include <pl/spi.h>
+#include <pindef.h>
 
 static void generic_epdc_delete(struct pl_generic_epdc *p);
 static int set_vcom(struct pl_generic_epdc *p, int vcomInMillivolt);
@@ -127,7 +128,7 @@ int do_load_nvm_content(struct pl_generic_epdc *p) {
 	int bufferSize;
 
 	struct pl_spi *spi = (struct pl_spi *) p->nvm->hw_ref;
-	spi->cs_gpio = (3 << 5 | 17);//FALCON_DISPLAY_NVM_CS;
+	spi->cs_gpio = FALCON_DISPLAY_NVM_CS;
 
 	p->nvm->hw_ref = spi;
 
@@ -667,7 +668,7 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 	stat |= switch_hvs_on(hv);
 
 	sprintf(system_call, "echo 1 > /sys/class/gpio/gpio%d/value",
-	(1 << 5 | 12));//FALCON_PWR_BOOST_EN);
+	FALCON_PWR_BOOST_EN);
 	system(system_call);
 
 	read_stopwatch(&t, "switch_hvs_on", 1);
@@ -699,14 +700,14 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 	stat |= controller->configure_update(controller, wfID, mode, area);
 
 	// switch ext trigger output for image capture --> high
-	gpios->set(23/*FALCON_EXT_TRIGGER_OUT*/, 1);
+	gpios->set(FALCON_EXT_TRIGGER_OUT, 1);
 
 	stat |= controller->trigger_update(controller);
 
 	stat |= controller->wait_update_end(controller);
 
 	// switch ext trigger output for image capture --> low
-	gpios->set(23/*FALCON_EXT_TRIGGER_OUT*/, 0);
+	gpios->set(FALCON_EXT_TRIGGER_OUT, 0);
 
 	read_stopwatch(&t, "trigger update", 1);
 
@@ -716,7 +717,7 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 	read_stopwatch(&t, "cwait_update_end", 1);
 
 	sprintf(system_call, "echo 0 > /sys/class/gpio/gpio%d/value",
-	(1 << 5 | 12));//FALCON_PWR_BOOST_EN);
+	FALCON_PWR_BOOST_EN);
 	system(system_call);
 
 	// switch hv off
