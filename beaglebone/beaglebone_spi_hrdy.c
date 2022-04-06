@@ -1,12 +1,12 @@
-#include <beaglebone/beaglebone-spi_hrdy.h>
-#include <beaglebone/beaglebone-spi.h>
+#include <beaglebone/beaglebone_spi_hrdy.h>
+#include <beaglebone/beaglebone_spi.h>
 #include <linux/spi/spidev.h>
 #include <linux/types.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <string.h>
-#include <src/pindef.h>
+#include <pindef.h>
 
 #define VERBOSE 0
 
