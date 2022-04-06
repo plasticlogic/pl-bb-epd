@@ -24,12 +24,12 @@
 #include <pl/i2c.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "pl/assert.h"
-#include "pl/vcom.h"
-#include "pmic-tps65185.h"
+#include <pl/assert.h>
+#include <pl/vcom.h>
+#include <hardware/pmic_tps65185.h>
 
 #define LOG_TAG "tps65185"
-#include "pl/utils.h"
+#include <pl/utils.h>
 
 /* Set to 1 to enable verbose log messages */
 #define VERBOSE 0
