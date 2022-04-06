@@ -14,8 +14,10 @@ add_library(${LIB_NAME} STATIC
         s1d13541_nvm.c
 )
 
-target_include_directories(${APP_NAME}
-        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories(${LIB_NAME}
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_SOURCE_DIR}/beaglebone/include
 )
 
 target_link_libraries(${LIB_NAME}
