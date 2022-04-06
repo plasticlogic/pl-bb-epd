@@ -26,8 +26,8 @@
 #ifndef GENERIC_INTERFACE_H_
 #define GENERIC_INTERFACE_H_
 
-#include <beaglebone/beaglebone-spi.h>
-#include <beaglebone/beaglebone-parallel.h>
+#include <beaglebone/beaglebone_spi.h>
+#include <beaglebone/beaglebone_parallel.h>
 #include <errno.h>
 
 enum interfaceType{
