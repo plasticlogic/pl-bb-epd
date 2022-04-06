@@ -23,29 +23,31 @@
  *      Author: sebastian.friebe
  */
 
-#include "stdlib.h"
-#include "pl/assert.h"
-#include "pindef.h"
-#include "hw_setup.h"
-#include "epson/s1d135xx_controller.h"
-#include "epson/epson-s1d135xx.h"
-#include "epson/s1d135xx_hv.h"
-#include "epson/s1d13541-nvm.h"
-#include "ite/it8951_controller.h"
-#include "hardware/pmic-max17135.h"
-#include "hardware/pmic-tps65185.h"
-#include <hardware/nvm-i2c-24LC014H.h>
-#include <hardware/nvm-i2c-24AA256.h>
-#include <hardware/nvm-spi-MX25U4033E.h>
-#include <beaglebone/beaglebone-hv.h>
-#include <hardware/pmic-max17135-hv.h>
-#include <hardware/pmic-tps65185-hv.h>
-#include <hardware/dac-max5820-hv.h>
-#include <beaglebone/beaglebone-spi.h>
-#include "configparser.h"
+#include <stdlib.h>
+#include <string.h>
+#include <pl/assert.h>
+#include <pindef.h>
+#include <hw_setup.h>
+#include <epson/s1d135xx_controller.h>
+#include <epson/epson_s1d135xx.h>
+#include <epson/s1d135xx_hv.h>
+#include <epson/s1d13541_nvm.h>
+#include <ite/it8951_controller.h>
+#include <ite/it8951_hv.h>
+#include <hardware/pmic_max17135.h>
+#include <hardware/pmic_tps65185.h>
+#include <hardware/nvm_i2c_24LC014H.h>
+#include <hardware/nvm_i2c_24AA256.h>
+#include <hardware/nvm_spi_MX25U4033E.h>
+#include <beaglebone/beaglebone_hv.h>
+#include <hardware/pmic_max17135_hv.h>
+#include <hardware/pmic_tps65185_hv.h>
+#include <hardware/dac_max5820_hv.h>
+#include <beaglebone/beaglebone_spi.h>
+#include <configparser.h>
 
 #define LOG_TAG "hw-setup"
-#include "pl/utils.h"
+#include <pl/utils.h>
 
 
 static pl_pmic_t *get_max17135_instance(hw_setup_t *p);
