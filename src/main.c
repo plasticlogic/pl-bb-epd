@@ -36,14 +36,17 @@
  *
  *
  */
+#define _DEFAULT_SOURCE
 #include <errno.h>
 #include <stdio.h>
 #include <linux/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>
@@ -55,13 +58,13 @@
 #include <pl/hwinfo.h>
 #include <pl/assert.h>
 #include <pl/parser.h>
-#include "pindef.h"
-#include "hw_setup.h"
+#include <pindef.h>
+#include <hw_setup.h>
 #define LOG_TAG "main"
 #include <pl/utils.h>
-#include "text.h"
-#include <libgd/src/gd.h>
-#include <libgd/src/gdfontl.h>
+#include <text.h>
+#include <gd.h>
+#include <gdfontl.h>
 
 #define INTERNAL_USAGE
 #define IC2_INTERFACE
@@ -966,7 +969,7 @@ int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 
 	//toggle PMIC WakeUP GPIO
 	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 0);
-	usleep(50000);
+	msleep(50);
 	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 1);
 
 	sleep(2);
@@ -1192,7 +1195,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		if (stat < 0)
 			return stat;
 
-		usleep(waitTime * 1000);
+		msleep(waitTime);
 	}
 
 	gettimeofday(&tStop, NULL);
@@ -1297,7 +1300,7 @@ int update_acep_image(char *path, const char* wfID, enum pl_update_mode mode,
 		if (stat < 0)
 			return stat;
 
-		usleep(waitTime * 1000);
+		msleep(waitTime);
 	}
 
 	gettimeofday(&tStop, NULL);
