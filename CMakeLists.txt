@@ -26,8 +26,6 @@ add_executable(${APP_NAME}
 
 target_include_directories(${APP_NAME}
         PUBLIC ${CMAKE_SOURCE_DIR}/include
-        PRIVATE ${CMAKE_SYSROOT}/usr/include/libpng
-        PRIVATE ${CMAKE_SYSROOT}/usr/include/libgd
 )
 
 add_subdirectory(beaglebone)
@@ -35,6 +33,14 @@ add_subdirectory(epson)
 add_subdirectory(hardware)
 add_subdirectory(ite)
 add_subdirectory(pl)
+
+target_link_libraries(${APP_NAME}
+        pl
+        beaglebone
+        ite
+        epson
+        hardware
+)
 
 #-------------------------------------------------------------------------------
 # Add tests
