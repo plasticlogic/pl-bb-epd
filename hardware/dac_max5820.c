@@ -28,10 +28,10 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
-#include "pl/vcom.h"
-#include <hardware/dac-max5820.h>
+#include <pl/vcom.h>
+#include <hardware/dac_max5820.h>
 #define LOG_TAG "max5820"
-#include "pl/utils.h"
+#include <pl/utils.h>
 
 #define MAX5820_DAC_MIN 0x00
 #define MAX5820_DAC_MAX 0xFF
