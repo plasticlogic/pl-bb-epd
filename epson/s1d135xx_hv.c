@@ -23,10 +23,10 @@
  *      Author: sebastian.friebe
  */
 
-#include "pl/assert.h"
-#include "s1d135xx_hv.h"
+#include <pl/assert.h>
+#include <epson/s1d135xx_hv.h>
 #define LOG_TAG "s1d13524_hv"
-#include "pl/utils.h"
+#include <pl/utils.h>
 
 static int s1d135xx_hv_driver_on(struct pl_hv_driver *p);
 static int s1d135xx_hv_driver_off(struct pl_hv_driver *p);
