@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <hardware/nvm-i2c-24LC014H.h>
+#include <hardware/nvm_i2c_24LC014H.h>
 #include <pl/assert.h>
 
 static int nvm_24LC014H_i2c_read (struct pl_nvm * nvm, unsigned int addr, uint8_t * blob, int len);
