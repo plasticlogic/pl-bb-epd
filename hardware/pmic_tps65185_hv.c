@@ -23,10 +23,10 @@
  *      Author: sebastian.friebe
  */
 
-#include "hardware/pmic-tps65185-hv.h"
+#include "hardware/pmic_tps65185_hv.h"
 
 #include <stdlib.h>
-#include <hardware/pmic-tps65185-hv.h>
+#include <hardware/pmic_tps65185_hv.h>
 #include <pl/assert.h>
 #define LOG_TAG "tps65185_hv"
 #include <pl/utils.h>
