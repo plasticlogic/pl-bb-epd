@@ -27,21 +27,21 @@
 
 #include <pl/parser.h>
 #include <pl/assert.h>
-#include "iniparser.h"
-#include <src/pindef.h>
+#include <iniparser.h>
+#include <pindef.h>
 
-#include "beaglebone/beaglebone-gpio.h"
-#include "beaglebone/beaglebone-i2c.h"
-#include "ite/it8951_i2c.h"
+#include <beaglebone/beaglebone_gpio.h>
+#include <beaglebone/beaglebone_i2c.h>
+#include <ite/it8951_i2c.h>
 //#include "beaglebone/beaglebone-spi.h"
 #include <pl/generic_interface.h>
-#include "epson/epson-i2c.h"
+#include <epson/epson_i2c.h>
 
-#include "configparser.h"
-#include "hw_setup.h"
+#include <configparser.h>
+#include <hw_setup.h>
 
 #define LOG_TAG "configparser"
-#include "pl/utils.h"
+#include <pl/utils.h>
 
 
 
