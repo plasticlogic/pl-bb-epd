@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <pl/parser.h>
 #include <pl/gpio.h>
 #include <pl/assert.h>
@@ -96,7 +97,7 @@ void GetIT8951SystemInfo(pl_generic_interface_t *bus, enum interfaceType *type,
 }
 
 //-----------------------------------------------------------
-//Initial function 2 ¡V Set Image buffer base address
+//Initial function 2 ï¿½V Set Image buffer base address
 //-----------------------------------------------------------
 void IT8951SetImgBufBaseAddr(pl_generic_interface_t *bus,
 		enum interfaceType *type, TDWord ulImgBufAddr) {
@@ -177,13 +178,13 @@ int IT8951_update_reg(pl_generic_interface_t *bus, enum interfaceType *type,
 //-----------------------------------------------------------
 void IT8951WaitForDisplayReady(pl_generic_interface_t *bus,
 		enum interfaceType *type) {
-	//Check IT8951 Register LUTAFSR => NonZero ¡V Busy, 0 - Free
+	//Check IT8951 Register LUTAFSR => NonZero ï¿½V Busy, 0 - Free
 	while (IT8951ReadReg(bus, type, DISPLAY_REG_BASE + 0x224))
 		;
 }
 
 //-----------------------------------------------------------
-//Display function 2 ¡V Load Image Area process
+//Display function 2 ï¿½V Load Image Area process
 //-----------------------------------------------------------
 void IT8951HostAreaPackedPixelWrite(pl_generic_interface_t *bus,
 		enum interfaceType *type, IT8951LdImgInfo* pstLdImgInfo,
@@ -433,7 +434,7 @@ void IT8951DisplayArea(pl_generic_interface_t *bus, enum interfaceType *type,
 }
 
 //-----------------------------------------------------------
-//Host controller function 1 ¡V Wait for host data Bus Ready
+//Host controller function 1 ï¿½V Wait for host data Bus Ready
 //-----------------------------------------------------------
 int IT8951WaitForReady(pl_generic_interface_t *bus, enum interfaceType *type) {
 
@@ -481,7 +482,7 @@ void IT8951WriteCmdCode(pl_generic_interface_t *bus, enum interfaceType *type,
 }
 
 //-----------------------------------------------------------
-//Host controller function 3 ¡V Write Data to host data Bus
+//Host controller function 3 ï¿½V Write Data to host data Bus
 //-----------------------------------------------------------
 void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type,
 		TWord usData) {
@@ -494,7 +495,7 @@ void IT8951WriteData(pl_generic_interface_t *bus, enum interfaceType *type,
 }
 
 //-----------------------------------------------------------
-//Host controller function 3 ¡V Write Data to host data Bus
+//Host controller function 3 ï¿½V Write Data to host data Bus
 //-----------------------------------------------------------
 void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 		TWord *usData, int size) {
@@ -563,7 +564,7 @@ void IT8951WriteDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 }
 
 //-----------------------------------------------------------
-//Host controller function 4 ¡V Read Data from host data Bus
+//Host controller function 4 ï¿½V Read Data from host data Bus
 //-----------------------------------------------------------
 TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type,
 		int size) {
@@ -581,7 +582,7 @@ TWord* IT8951ReadData(pl_generic_interface_t *bus, enum interfaceType *type,
 }
 
 //-----------------------------------------------------------
-//Host controller function 4 ¡V Read Data from host data Bus
+//Host controller function 4 ï¿½V Read Data from host data Bus
 //-----------------------------------------------------------
 
 void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
@@ -654,7 +655,7 @@ void IT8951ReadDataBurst(pl_generic_interface_t *bus, enum interfaceType *type,
 }
 
 //-----------------------------------------------------------
-//Host controller function 5 ¡V Write command to host data Bus with aruments
+//Host controller function 5 ï¿½V Write command to host data Bus with aruments
 //-----------------------------------------------------------
 
 void IT8951SendCmdArg(pl_generic_interface_t *bus, enum interfaceType *type,
