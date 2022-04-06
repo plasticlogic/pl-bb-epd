@@ -25,7 +25,8 @@ add_executable(${APP_NAME}
 )
 
 target_include_directories(${APP_NAME}
-        PUBLIC ${CMAKE_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_SOURCE_DIR}/include
+        PRIVATE ${CMAKE_SYSROOT}/usr/include/freetype2
 )
 
 add_subdirectory(beaglebone)
