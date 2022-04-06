@@ -27,13 +27,13 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
-#include "assert.h"
+#include <assert.h>
 #include <pl/generic_controller.h>
 
 
 #include <math.h>
 // let's use freetype api ;)
-#include <ft2build.h>
+#include <freetype2/ft2build.h>
 #include FT_FREETYPE_H
 
 
@@ -42,8 +42,8 @@
 
 
 #define LOG_TAG "text"
-#include "utils.h"
-#include "pl/types.h"
+#include <pl/utils.h>
+#include <pl/types.h>
 
 /* origin is the upper left corner */
 //unsigned char image[HEIGHT][WIDTH];
