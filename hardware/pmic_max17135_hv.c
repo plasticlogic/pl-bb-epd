@@ -25,7 +25,7 @@
 
 
 #include <stdlib.h>
-#include <hardware/pmic-max17135-hv.h>
+#include <hardware/pmic_max17135_hv.h>
 #include <pl/assert.h>
 #define LOG_TAG "max17135_hv"
 #include <pl/utils.h>
