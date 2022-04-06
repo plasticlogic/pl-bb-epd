@@ -26,9 +26,9 @@
 #ifndef GENERIC_INTERFACE_H_
 #define GENERIC_INTERFACE_H_
 
-#include <beaglebone/beaglebone_spi.h>
-#include <beaglebone/beaglebone_parallel.h>
+#include <stdint.h>
 #include <errno.h>
+#include <pl/gpio.h>
 
 enum interfaceType{
 	PARALLEL = 0,
