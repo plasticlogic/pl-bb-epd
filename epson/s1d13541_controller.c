@@ -29,7 +29,7 @@
 #include <pl/utils.h>
 #include <pl/assert.h>
 #include <pl/gpio.h>
-#include <src/pindef.h>
+#include <pindef.h>
 
 #define VERBOSE 0
 
