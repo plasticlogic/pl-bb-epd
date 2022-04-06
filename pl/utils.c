@@ -27,13 +27,13 @@
 //#include <pl/endian.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/time.h>
-#include <time.h>
-#include "assert.h"
+#include <linux/time.h>
+#include <string.h>
+#include <pl/assert.h>
 #define LOG_TAG "utils"
-#include "utils.h"
-#include "parser.h"
-#include <libpng-1.2.51/png.h>
+#include <pl/utils.h>
+#include <pl/parser.h>
+#include <png.h>
 
 void swap32(void *x) {
 	uint8_t *b = x;
@@ -258,7 +258,7 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width,
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL) {
 		fclose(fp);
-		png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, NULL, NULL);
 		return (-ENOMEM);
 	}
 
@@ -269,7 +269,7 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width,
 
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		/* Free all of the memory associated with the png_ptr and info_ptr */
-		png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		fclose(fp);
 		/* If we get here, we had a problem reading the file */
 		return (-EINVAL);
@@ -321,7 +321,7 @@ int read_png(const char* file_name, png_byte ** image_ptr, int * width,
 	*image_ptr = image_buffer;
 
 	/* Clean up after the read, and free any memory allocated - REQUIRED */
-	png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 	/* Close the file */
 	fclose(fp);
@@ -360,7 +360,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL) {
 		fclose(fp);
-		png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, NULL, NULL);
 		return (-ENOMEM);
 	}
 
@@ -371,7 +371,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
 
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		/* Free all of the memory associated with the png_ptr and info_ptr */
-		png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		fclose(fp);
 		/* If we get here, we had a problem reading the file */
 		return (-EINVAL);
@@ -446,7 +446,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
 	*image_ptr = image_buffer;
 
 	/* Clean up after the read, and free any memory allocated - REQUIRED */
-	png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 	/* Close the file */
 	fclose(fp);
@@ -485,7 +485,7 @@ int read_rgb_png_to_iridis(const char* file_name, png_byte ** image_ptr, int * w
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL) {
 		fclose(fp);
-		png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, NULL, NULL);
 		return (-ENOMEM);
 	}
 
@@ -496,7 +496,7 @@ int read_rgb_png_to_iridis(const char* file_name, png_byte ** image_ptr, int * w
 
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		/* Free all of the memory associated with the png_ptr and info_ptr */
-		png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		fclose(fp);
 		/* If we get here, we had a problem reading the file */
 		return (-EINVAL);
@@ -567,7 +567,7 @@ int read_rgb_png_to_iridis(const char* file_name, png_byte ** image_ptr, int * w
 	*image_ptr = image_buffer;
 
 	/* Clean up after the read, and free any memory allocated - REQUIRED */
-	png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 	/* Close the file */
 	fclose(fp);
