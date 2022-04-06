@@ -28,7 +28,7 @@
 #include "assert.h"
 
 #define LOG_TAG "gpio"
-#include "utils.h"
+#include <pl/utils.h>
 
 int pl_gpio_config_list(struct pl_gpio *gpio,
 			const struct pl_gpio_config *config, size_t n)
