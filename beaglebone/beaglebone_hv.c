@@ -61,7 +61,7 @@ static int beaglebone_wait_pok(struct pl_gpio *gpio)
 
 	while (!pok) {
 
-		usleep(POLL_DELAY_MS*1000);
+		usleep(POLL_DELAY_MS * 1000);
 
 		pok = gpio->get(PMIC_POK);
 
