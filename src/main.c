@@ -969,7 +969,7 @@ int start_epdc(int load_nvm_content, int execute_clear, int gpio_only) {
 
 	//toggle PMIC WakeUP GPIO
 	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 0);
-	msleep(50);
+	usleep(50000);
 	hardware->gpios.set(FALCON_PMIC_WAKE_UP, 1);
 
 	sleep(2);
@@ -1195,7 +1195,7 @@ int update_image(char *path, const char* wfID, enum pl_update_mode mode,
 		if (stat < 0)
 			return stat;
 
-		msleep(waitTime);
+		usleep(waitTime * 1000);
 	}
 
 	gettimeofday(&tStop, NULL);
@@ -1300,7 +1300,7 @@ int update_acep_image(char *path, const char* wfID, enum pl_update_mode mode,
 		if (stat < 0)
 			return stat;
 
-		msleep(waitTime);
+		usleep(waitTime * 1000);
 	}
 
 	gettimeofday(&tStop, NULL);
