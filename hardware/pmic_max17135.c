@@ -291,7 +291,7 @@ static int max17135_wait_pok(pl_pmic_t *pmic)
 	while (!pok) {
 		union max17135_fault fault;
 
-		msleep(POLL_DELAY_MS);
+		usleep(POLL_DELAY_MS * 1000);
 
 		if (pl_i2c_reg_read_8(pmic->i2c, pmic->i2c_addr,
 				      HVPMIC_REG_FAULT, &fault.byte)) {
