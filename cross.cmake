@@ -2,8 +2,7 @@ set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
 set(cc_toolchain_path C:/SysGCC/beaglebone)
-#set(sysroot_target ${cc_toolchain_path}/arm-linux-gnueabihf/sysroot)
-set(sysroot_target C:\\Users\\lars.goerner\\Desktop\\sysroot)
+set(sysroot_target ${cc_toolchain_path}/arm-linux-gnueabihf/sysroot)
 set(tools ${cc_toolchain_path}/bin)
 
 set(CMAKE_C_COMPILER ${tools}/arm-linux-gnueabihf-gcc.exe)
