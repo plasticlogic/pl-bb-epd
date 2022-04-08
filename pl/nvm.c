@@ -24,6 +24,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <pl/nvm.h>
 
 #define LOG_TAG "nvm"

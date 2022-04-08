@@ -25,7 +25,7 @@
 
 #include <unistd.h>
 #include <string.h>
-#include <linux/time.h>
+#include <time.h>
 #include <fcntl.h>
 
 #include <pl/parser.h>
