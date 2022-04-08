@@ -684,7 +684,7 @@ static int generic_acep_update(struct pl_generic_epdc *p, struct pl_gpio *gpios,
 			"BBACVCom --acvcom -b /tmp/AcVcom.bin %d %d > /tmp/acvcom.out &",
 			wfID, current_temperature);
 	system(system_call);
-	msleep(1000);
+	usleep(1000000);
 
 	// The following single null frame is also used to align BBACVCom synchron to the image update.
 
