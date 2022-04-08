@@ -32,11 +32,11 @@
 #include <pl/i2c.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pl/assert.h>
-#include <unistd.h>
+#include <endian.h>
 
 #define LOG_TAG "s1d135xx"
 #include <pl/utils.h>
+#include <pl/assert.h>
 #include <pl/parser.h>
 #include <pl/scramble.h>
 #include <pl/color.h>
