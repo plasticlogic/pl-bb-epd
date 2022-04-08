@@ -41,6 +41,10 @@ target_link_libraries(${APP_NAME}
         ite
         epson
         hardware
+        png
+        gd
+        freetype
+        m
 )
 
 #-------------------------------------------------------------------------------
