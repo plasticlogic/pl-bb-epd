@@ -120,8 +120,9 @@ target_link_libraries(${APP_NAME}
 # Parameters
 set(BB_IP 192.168.7.2)
 set(BB_PORT 8090)
-set(BB_USR debian)
-set(BB_PW temppwd)
+set(BB_USR root)
+set(BB_PW root)
+set(DEBUG_FOLDER /tmp)
 
 # Custom Targets
 
@@ -133,9 +134,9 @@ add_custom_target(DB_no_args ALL DEPENDS ${APP_NAME})
 
 add_custom_command(TARGET DB_no_args
         POST_BUILD
-        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:/home/${BB_USR}
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'chmod 0755 ${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'gdbserver :${BB_PORT} ./${APP_NAME}'
+        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME}'
 )
 
 # Build and Debug with -start_epdc
@@ -143,9 +144,9 @@ add_custom_target(DB_start_epdc ALL DEPENDS ${APP_NAME})
 
 add_custom_command(TARGET DB_start_epdc
         POST_BUILD
-        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:/home/${BB_USR}
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'chmod 0755 ${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'gdbserver :${BB_PORT} ./${APP_NAME} -start_epdc'
+        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME} -start_epdc'
 )
 
 # Build and Debug with -stop_epdc
@@ -153,9 +154,9 @@ add_custom_target(DB_stop_epdc ALL DEPENDS ${APP_NAME})
 
 add_custom_command(TARGET DB_stop_epdc
         POST_BUILD
-        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:/home/${BB_USR}
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'chmod 0755 ${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'gdbserver :${BB_PORT} ./${APP_NAME} -stop_epdc'
+        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME} -stop_epdc'
 )
 
 # Build and Debug with -fill GL15
@@ -163,7 +164,7 @@ add_custom_target(DB_fill ALL DEPENDS ${APP_NAME})
 
 add_custom_command(TARGET DB_fill
         POST_BUILD
-        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:/home/${BB_USR}
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'chmod 0755 ${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'gdbserver :${BB_PORT} ./${APP_NAME} -fill GL15'
+        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME} -fill GL15'
 )
