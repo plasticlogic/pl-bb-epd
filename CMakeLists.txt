@@ -8,6 +8,29 @@ project(pl-bb-epd
 set(APP_NAME epdc-app)
 
 #-------------------------------------------------------------------------------
+# Options
+#-------------------------------------------------------------------------------
+
+option(OPTIMIZE_EXE "Enables optimizations (not usable for debug)" OFF)
+option(SHOW_WARNINGS "Print out compiler warnings during compilation" ON)
+
+#-------------------------------------------------------------------------------
+# CMake Configurations
+#-------------------------------------------------------------------------------
+
+if(OPTIMIZE_EXE)
+        # set optimization to O3
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+else()
+        # set optimization to O0
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+endif()
+
+if(SHOW_WARNINGS)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wpedantic")
+endif()
+
+#-------------------------------------------------------------------------------
 # Add executable
 #-------------------------------------------------------------------------------
 
@@ -103,7 +126,7 @@ set(BB_PW temppwd)
 # Custom Targets
 
 # Build Only
-add_custom_target(build ALL)
+add_custom_target(build ALL DEPENDS ${APP_NAME})
 
 # Build and Debug
 add_custom_target(DB_no_args ALL DEPENDS ${APP_NAME})
