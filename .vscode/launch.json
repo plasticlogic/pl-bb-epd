@@ -2,7 +2,7 @@
         "version": "0.1.0",
         "configurations": [
                 {
-                        "name": "(gdb) Launch App",
+                        "name": "(gdb) Debug",
                         "type": "cppdbg",
                         "request": "launch",
                         "program": "${workspaceRoot}/build/epdc-app",
