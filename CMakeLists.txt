@@ -89,3 +89,25 @@ target_link_libraries(${APP_NAME}
 #-------------------------------------------------------------------------------
 # Add tests
 #-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Build Targets
+#-------------------------------------------------------------------------------
+
+# Custom target for build only
+add_custom_target(build ALL)
+
+# Custom command for building and debugging
+add_custom_target(build_and_debug ALL DEPENDS ${APP_NAME})
+
+set(BB_IP 192.168.7.2)
+set(BB_PORT 8090)
+set(BB_USR debian)
+set(BB_PW temppwd)
+
+add_custom_command(TARGET build_and_debug
+        POST_BUILD
+        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:/home/${BB_USR}
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'chmod 0755 ${APP_NAME}'
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP}:/home/${BB_USR} 'gdbserver :${BB_PORT} ./${APP_NAME}'
+)

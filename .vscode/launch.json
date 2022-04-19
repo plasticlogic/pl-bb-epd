@@ -1,0 +1,27 @@
+{
+        "version": "0.1.0",
+        "configurations": [
+                {
+                        "name": "(gdb) Launch App",
+                        "type": "cppdbg",
+                        "request": "launch",
+                        "program": "${workspaceRoot}/build/epdc-app",
+                        "args": [],
+                        "stopAtEntry": true,
+                        "cwd": "${workspaceRoot}",
+                        "environment": [],
+                        "externalConsole": true,
+                        "targetArchitecture": "arm",
+                        "miDebuggerServerAddress": "192.168.7.2:8090",
+                        "MIMode": "gdb",
+                        "miDebuggerPath": "c:/SysGCC/beaglebone/bin/arm-linux-gnueabihf-gdb.exe",
+                        "setupCommands": [
+                                {
+                                        "description": "Enable pretty-printing for gdb",
+                                        "text": "-enable-pretty-printing",
+                                        "ignoreFailures": true
+                                }
+                        ]
+                }
+        ]
+}
