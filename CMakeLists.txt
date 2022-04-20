@@ -130,41 +130,19 @@ set(DEBUG_FOLDER /tmp)
 add_custom_target(build ALL DEPENDS ${APP_NAME})
 
 # Build and Debug
-add_custom_target(DB_no_args ALL DEPENDS ${APP_NAME})
 
-add_custom_command(TARGET DB_no_args
+# Custom target build function
+function(add_debug_target target_name call_args)
+        add_custom_target(${target_name} ALL DEPENDS ${APP_NAME})
+        add_custom_command(TARGET ${target_name}
         POST_BUILD
         COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
         COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME}'
-)
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME} "${call_args}"'
+        )
+endfunction()
 
-# Build and Debug with -start_epdc
-add_custom_target(DB_start_epdc ALL DEPENDS ${APP_NAME})
-
-add_custom_command(TARGET DB_start_epdc
-        POST_BUILD
-        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME} -start_epdc'
-)
-
-# Build and Debug with -stop_epdc
-add_custom_target(DB_stop_epdc ALL DEPENDS ${APP_NAME})
-
-add_custom_command(TARGET DB_stop_epdc
-        POST_BUILD
-        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME} -stop_epdc'
-)
-
-# Build and Debug with -fill GL15
-add_custom_target(DB_fill ALL DEPENDS ${APP_NAME})
-
-add_custom_command(TARGET DB_fill
-        POST_BUILD
-        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:${DEBUG_FOLDER}
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 ${DEBUG_FOLDER}/${APP_NAME}'
-        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'gdbserver :${BB_PORT} ${DEBUG_FOLDER}/${APP_NAME} -fill GL15'
-)
+add_debug_target(DB_no_args "")
+add_debug_target(DB_start_epdc "-start_epdc 1 1")
+add_debug_target(DB_stop_epdc "-stop_epdc")
+add_debug_target(DB_fill "-fill GL15")
