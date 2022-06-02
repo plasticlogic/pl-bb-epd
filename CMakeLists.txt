@@ -146,3 +146,12 @@ add_debug_target(DB_no_args "")
 add_debug_target(DB_start_epdc "-start_epdc 1 1")
 add_debug_target(DB_stop_epdc "-stop_epdc")
 add_debug_target(DB_fill "-fill GL15")
+
+# install target
+add_custom_target(build_install ALL DEPENDS ${APP_NAME})
+add_custom_command(
+        TARGET build_install
+        POST_BUILD
+        COMMAND pscp -pw ${BB_PW} ${CMAKE_BINARY_DIR}/${APP_NAME} ${BB_USR}@${BB_IP}:/usr/bin
+        COMMAND plink -pw ${BB_PW} ${BB_USR}@${BB_IP} 'chmod 0755 /usr/bin/${APP_NAME}'
+)
