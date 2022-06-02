@@ -13,7 +13,7 @@ set(CMAKE_SYSROOT "${sysroot_target}")
 set(CMAKE_FIND_ROOT_PATH "${sysroot_target}")
 
 set(CROSS_FLAGS " -march=armv7-a -marm -mfpu=neon -mfloat-abi=hard --sysroot=${sysroot_target}")
-set(CMAKE_C_FLAGS " -std=gnu17 ${CROSS_FLAGS}")
+set(CMAKE_C_FLAGS " -std=gnu11 -O2 -Wall -Wpedantic ${CROSS_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "--sysroot=${sysroot_target}")
 
 set(CMAKE_FIND_ROOT_MODE_PROGRAM NEVER)
