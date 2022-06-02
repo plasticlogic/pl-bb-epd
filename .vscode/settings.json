@@ -8,5 +8,9 @@
         },
         "cmake.configureArgs": [
                 "-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/cross.cmake"
-        ]
+        ],
+        "C_Cpp.default.includePath": [
+                "{workspaceFolder}/include"
+        ],
+        "C_Cpp.errorSquiggles": "Disabled"
 }
