@@ -941,7 +941,7 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 		bus->read_bytes(spi, &usData, sizeof(TWord));
 
 		//Loop through the various data
-		for (int i = 0; i < size; i += sizeof(TWord)) {
+		for (int i = 0; i < size / sizeof(TWord); i++) {
 			IT8951WaitForReady(bus, type);
 			bus->read_bytes(spi, &usData, sizeof(TWord));
 			iResult[i] = swap_endianess(usData);
