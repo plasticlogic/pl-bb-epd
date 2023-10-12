@@ -936,21 +936,16 @@ static TWord* gpio_i80_16b_data_in(pl_generic_interface_t *bus,
 		//send SPI read data preamble
 		stat = bus->write_bytes(bus, preamble_, 2);
 
+		// throw away first read, as this only contains rubbish (as documented by ITE)
+		IT8951WaitForReady(bus, type);
+		bus->read_bytes(spi, &usData, sizeof(TWord));
+
 		//Loop through the various data
-		int i = 0;
-		for (i = 0; i < (size + 1); i++) {
-			// throw away first read, as this only contains rubbish (as documented by ITE)
-			if (i == 0) {
-				IT8951WaitForReady(bus, type);
-				bus->read_bytes(spi, &usData, sizeof(TWord));
-			}
-			//next read will give the value that you want to receive
-			else {
-				IT8951WaitForReady(bus, type);
-				bus->read_bytes(spi, &usData, sizeof(TWord));
-				iResult[i - 1] = swap_endianess(usData);
-				//usleep(250);
-			}
+		for (int i = 0; i < size; i += sizeof(TWord)) {
+			IT8951WaitForReady(bus, type);
+			bus->read_bytes(spi, &usData, sizeof(TWord));
+			iResult[i] = swap_endianess(usData);
+			//usleep(250);
 		}
 
 		//Set SPI-CS high
