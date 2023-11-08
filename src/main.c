@@ -184,57 +184,40 @@ void printHelp_read_i2c(int identLevel);
 
 struct CmdLineOptions supportedOperations[] = {
 		{ "-start_epdc","initializes the EPD controller", execute_start_epdc, printHelp_start_epdc },
-		{ "-stop_epdc","de-initializes the EPD controller", execute_stop_epdc,
-		printHelp_stop_epdc }, { "-set_vcom", "sets com voltage",
-		execute_set_vcom, printHelp_set_vcom }, { "-set_waveform",
-		"sets the waveform", execute_set_waveform, printHelp_set_waveform }, {
-		"-set_temperature", "sets the temperature", execute_set_temperature,
-		printHelp_set_temperature }, { "-get_vcom", "gets com voltage",
-		execute_get_vcom, printHelp_get_vcom }, { "-get_resolution",
-		"gets display resolution", execute_get_resolution,
-		printHelp_get_resolution }, { "-get_waveform", "gets the waveform",
-		execute_get_waveform, printHelp_get_waveform }, { "-get_temperature",
-		"gets the temperature", execute_get_temperature,
-		printHelp_get_temperature }, { "-update_image", "updates the display",
-		execute_update_image, printHelp_update_image }, {
-		"-update_image_regional", "updates the display on certain area",
-		execute_update_image_regional, printHelp_update_image_regional }, {
-		"-update_gfx", "updates the display with auto gen. gfx image",
-		execute_update_gfx, printHelp_update_gfx }, { "-slideshow",
-		"shows a slideshow of .png images", execute_slideshow,
-		printHelp_slideshow },
-		{ "-fill", "fill the screen with a defined greylevel", execute_fill,
-				printHelp_fill }, { "-count", "shows a counting number",
-				execute_counter, printHelp_counter }, { "-override_post_buffer",
-				"overrides the post buffer from ITE",
-				execute_override_post_buffer, printHelp_update_image }, {
-				"-load_buffer", "updates the Image with a given buffer",
-				execute_load_buffer, printHelp_update_image },
+		{ "-stop_epdc","de-initializes the EPD controller", execute_stop_epdc, printHelp_stop_epdc }, 
+		{ "-set_vcom", "sets com voltage", execute_set_vcom, printHelp_set_vcom }, 
+		{ "-set_waveform", "sets the waveform", execute_set_waveform, printHelp_set_waveform }, 
+		{ "-set_temperature", "sets the temperature", execute_set_temperature, printHelp_set_temperature }, 
+		{ "-get_vcom", "gets com voltage", execute_get_vcom, printHelp_get_vcom }, 
+		{ "-get_resolution", "gets display resolution", execute_get_resolution, printHelp_get_resolution }, 
+		{ "-get_waveform", "gets the waveform", execute_get_waveform, printHelp_get_waveform }, 
+		{ "-get_temperature", "gets the temperature", execute_get_temperature, printHelp_get_temperature }, 
+		{ "-update_image", "updates the display", execute_update_image, printHelp_update_image }, 
+		{ "-update_image_regional", "updates the display on certain area", execute_update_image_regional, printHelp_update_image_regional }, 
+		{ "-update_gfx", "updates the display with auto gen. gfx image", execute_update_gfx, printHelp_update_gfx }, 
+		{ "-slideshow", "shows a slideshow of .png images", execute_slideshow, printHelp_slideshow },
+		{ "-fill", "fill the screen with a defined greylevel", execute_fill, printHelp_fill }, 
+		{ "-count", "shows a counting number", execute_counter, printHelp_counter }, 
+		{ "-override_post_buffer", "overrides the post buffer from ITE", execute_override_post_buffer, printHelp_update_image }, 
+		{ "-load_buffer", "updates the Image with a given buffer", execute_load_buffer, printHelp_update_image },
+
 #ifdef IC2_INTERFACE
-		{ "-detect_i2c", "searches for all devices connected to ic2",
-				execute_detect_i2c, printHelp_detect_i2c }, { "-write_i2c",
-				"send data over i2c", execute_write_i2c, printHelp_write_i2c },
-		{ "-read_i2c", "receives data over i2c", execute_read_i2c,
-				printHelp_read_i2c },
+		{ "-detect_i2c", "searches for all devices connected to ic2", execute_detect_i2c, printHelp_detect_i2c }, 
+		{ "-write_i2c", "send data over i2c", execute_write_i2c, printHelp_write_i2c },
+		{ "-read_i2c", "receives data over i2c", execute_read_i2c, printHelp_read_i2c },
 #endif
+
 #ifdef INTERNAL_USAGE
-		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd,
-				printHelp_send_cmd }, { "-write_reg",
-				"writes to a register of EPD controller", execute_write_reg,
-				printHelp_write_reg }, { "-read_reg",
-				"reads from a register of EPD controller", execute_read_reg,
-				printHelp_read_reg }, { "-pgm_epdc",
-				"programs firmware to the EPD controller", execute_pgm_epdc,
-				printHelp_pgm_epdc }, { "-info",
-				"displays general display informations", execute_info,
-				printHelp_info },
+		{ "-send_cmd", "sends a command of EPD controller", execute_send_cmd, printHelp_send_cmd }, 
+		{ "-write_reg", "writes to a register of EPD controller", execute_write_reg, printHelp_write_reg }, 
+		{ "-read_reg", "reads from a register of EPD controller", execute_read_reg, printHelp_read_reg }, 
+		{ "-pgm_epdc", "programs firmware to the EPD controller", execute_pgm_epdc, printHelp_pgm_epdc }, 
+		{ "-info", "displays general display informations", execute_info, printHelp_info },
 #endif
-		{ "-switch_hv", "switches hv on/off based on parameter",
-				execute_switch_hv, printHelp_switch_hv }, { "-switch_com",
-				"switches com on/off based on parameter", execute_switch_com,
-				printHelp_switch_com }, { "--version", "displays version info",
-				print_versionInfo, NULL }, { "--help",
-				"prints this help message", execute_help, NULL }, };
+		{ "-switch_hv", "switches hv on/off based on parameter", execute_switch_hv, printHelp_switch_hv }, 
+		{ "-switch_com", "switches com on/off based on parameter", execute_switch_com, printHelp_switch_com }, 
+		{ "--version", "displays version info", print_versionInfo, NULL }, 
+		{ "--help", "prints this help message", execute_help, NULL }, };
 
 /**
  * Main sequence
