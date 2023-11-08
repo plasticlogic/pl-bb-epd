@@ -143,6 +143,7 @@ function(add_debug_target target_name call_args)
 endfunction()
 
 add_debug_target(DB_no_args "")
+add_debug_target(DB_update_image "-update_image /boot/uboot/D054_T2.1/img/AllColours.png")
 add_debug_target(DB_start_epdc "-start_epdc 1 1")
 add_debug_target(DB_stop_epdc "-stop_epdc")
 add_debug_target(DB_fill "-fill GL15")
