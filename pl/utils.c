@@ -544,7 +544,7 @@ int read_rgb_png_to_iridis(const char* file_name, png_byte ** image_ptr, int * w
 	/* Read the entire image in one go */
 	png_read_image(png_ptr, row_pointers);
 
-	png_set_expand(png_ptr);
+	//png_set_expand(png_ptr);
 
 	png_read_end(png_ptr, info_ptr);
 
