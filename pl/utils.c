@@ -27,7 +27,7 @@
 //#include <pl/endian.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <linux/time.h>
+#include <time.h>
 #include <string.h>
 #include <pl/assert.h>
 #define LOG_TAG "utils"
