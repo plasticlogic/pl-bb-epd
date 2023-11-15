@@ -265,6 +265,15 @@ static int initialize_driver_board(hw_setup_t *p, const char *selection){
 		p->vddGPIO = RUDDOCK_5V_EN;
 		p->sInterfaceType = SPI_HRDY;
 	}
+	else if (!strcmp(selection, "FALCON_SPI_EXT_EPDC_POWEREXT" )){
+		p->it8951_pins = &g_it8951_falcon_pins;
+		p->s1d13524_pins = &g_s1d13524_falcon_p_pins;
+		p->s1d13541_pins = &g_s1d13541_falcon_pins;
+		p->board_gpios = &g_falcon_spi_ext_epdc_powerext_gpios;
+		p->gpio_count = ARRAY_SIZE(g_falcon_spi_ext_epdc_powerext_gpios);
+		p->vddGPIO = RUDDOCK_5V_EN;
+		p->sInterfaceType = SPI_HRDY;
+	}
 	else if (!strcmp(selection, "FALCON" )){
 		p->s1d13524_pins = &g_s1d135xx_pins;
 		p->s1d13541_pins = &g_s1d135xx_pins;

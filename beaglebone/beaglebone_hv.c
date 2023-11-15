@@ -213,8 +213,18 @@ static void close_vcom(pl_vcom_switch_t *p)
 	struct pl_gpio *gpio = p->hw_ref;
 	// PMic and VCom Switch enable
 	pl_gpio_set(gpio, FALCON_PMIC_POWER_COM, 1);
+	
 	// ACVcom Switch enable
-	pl_gpio_set(gpio, FALCON_ACVCOM_SWITCH_EN, 1);
+	// but only if DCVcom Switch is disabled!
+	if(pl_gpio_get(gpio, FALCON_DCVCOM_SWITCH_EN) == 0)
+	{
+		LOG("Use ACVCOM switch!");
+		pl_gpio_set(gpio, FALCON_ACVCOM_SWITCH_EN, 1);
+	}
+	else
+	{
+		LOG("Use DCVCOM switch!");
+	}
 }
 
 /**
