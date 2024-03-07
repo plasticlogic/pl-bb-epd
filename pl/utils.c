@@ -419,7 +419,7 @@ int read_rgbw_png(const char* file_name, rgbw_pixel_t ** image_ptr, int * width,
 	/* Read the entire image in one go */
 	png_read_image(png_ptr, row_pointers);
 
-	png_set_expand(png_ptr);
+	//png_set_expand(png_ptr);
 
 	png_read_end(png_ptr, info_ptr);
 
